@@ -27,6 +27,8 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(project(":vcs:api"))
+                implementation(project(":vcs:git"))
             }
         }
         val jvmTest by getting
