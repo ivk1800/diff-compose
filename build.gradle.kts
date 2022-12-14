@@ -1,6 +1,4 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("multiplatform")
@@ -27,6 +25,8 @@ kotlin {
         val jvmMain by getting {
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
                 implementation(compose.desktop.currentOs)
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))

@@ -1,12 +1,16 @@
 package ru.ivk1800.diff.feature.bookmarks.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
+import ru.ivk1800.arch.presentation.viewModel
+import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksViewModel
 
 @Composable
 fun BookmarksWindow() {
@@ -17,6 +21,8 @@ fun BookmarksWindow() {
         ),
         onCloseRequest = {},
     ) {
-        BookmarksView()
+        val viewModel = viewModel { BookmarksViewModel() }
+        val state by viewModel.state.collectAsState()
+        BookmarksView(state)
     }
 }

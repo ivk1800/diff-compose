@@ -26,10 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarkItem
 
 @Composable
 @Preview
-fun BookmarkItemView() =
+fun BookmarkItemView(item: BookmarkItem) =
     ContextMenuArea(
         items = {
             listOf(
@@ -38,13 +39,13 @@ fun BookmarkItemView() =
             )
         },
     ) {
-        BookmarkItem()
+        BookmarkItem(item)
     }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview
-fun BookmarkItem() =
+fun BookmarkItem(item: BookmarkItem) =
     Row(
         modifier = Modifier
             .onClick(
@@ -75,11 +76,11 @@ fun BookmarkItem() =
         Column {
             Text(
                 style = MaterialTheme.typography.titleSmall,
-                text = "Hello",
+                text = item.name,
             )
             Text(
                 style = MaterialTheme.typography.labelSmall,
-                text = "/Users/Downloads",
+                text = item.path,
             )
         }
     }
