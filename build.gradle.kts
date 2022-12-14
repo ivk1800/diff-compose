@@ -25,10 +25,13 @@ kotlin {
     }
     sourceSets {
         val jvmMain by getting {
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))
+                implementation(compose.material)
+                implementation(compose.material3)
             }
         }
         val jvmTest by getting

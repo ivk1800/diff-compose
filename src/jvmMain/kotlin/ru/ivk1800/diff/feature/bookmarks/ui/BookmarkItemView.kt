@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @Preview
-fun BookmarkItemView() {
+fun BookmarkItemView() =
     ContextMenuArea(
         items = {
             listOf(
@@ -40,7 +40,6 @@ fun BookmarkItemView() {
     ) {
         BookmarkItem()
     }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -49,7 +48,7 @@ fun BookmarkItem() =
     Row(
         modifier = Modifier
             .onClick(
-                matcher = PointerMatcher.mouse(PointerButton.Primary), // Right Mouse Button
+                matcher = PointerMatcher.mouse(PointerButton.Primary),
                 onDoubleClick = { },
                 onClick = { }
             )
@@ -67,7 +66,7 @@ fun BookmarkItem() =
             Text(
                 modifier = Modifier,
                 text = "git",
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.labelSmall,
                 textAlign = TextAlign.Center,
                 color = Color.White,
             )
@@ -75,11 +74,11 @@ fun BookmarkItem() =
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleSmall,
                 text = "Hello",
             )
             Text(
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.labelSmall,
                 text = "/Users/Downloads",
             )
         }
