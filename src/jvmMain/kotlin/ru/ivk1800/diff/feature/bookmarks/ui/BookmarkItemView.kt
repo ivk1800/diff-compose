@@ -30,12 +30,14 @@ import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarkItem
 
 @Composable
 @Preview
-fun BookmarkItemView(item: BookmarkItem) =
+fun BookmarkItemView(
+    item: BookmarkItem,
+    onDelete: () -> Unit,
+) =
     ContextMenuArea(
         items = {
             listOf(
-                ContextMenuItem("Action 1") { },
-                ContextMenuItem("Action 2") { },
+                ContextMenuItem(label = "Delete", onClick = onDelete),
             )
         },
     ) {
@@ -76,11 +78,11 @@ fun BookmarkItem(item: BookmarkItem) =
         Column {
             Text(
                 style = MaterialTheme.typography.titleSmall,
-                text = item.name,
+                text = item.title,
             )
             Text(
                 style = MaterialTheme.typography.labelSmall,
-                text = item.path,
+                text = item.subtitle,
             )
         }
     }
