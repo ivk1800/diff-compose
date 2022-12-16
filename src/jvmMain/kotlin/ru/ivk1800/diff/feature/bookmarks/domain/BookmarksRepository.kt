@@ -10,10 +10,15 @@ class BookmarksRepository(
             Bookmark(id, name, path)
         }
 
+    fun getById(id: Int): Bookmark? =
+        storage.getById(id)?.run {
+            Bookmark(id, name, path)
+        }
+
     fun delete(id: Int) = storage.delete(id)
 
-    suspend fun getBookmarks(): List<Bookmark> =
-        storage.getBookmarks().map { entity ->
+    suspend fun getAll(): List<Bookmark> =
+        storage.getAll().map { entity ->
             Bookmark(
                 id = entity.id,
                 name = entity.name,

@@ -12,10 +12,12 @@ class BookmarksInteractor(
         return bookmarksRepository.add(name, path)
     }
 
+    fun getBookmarkPath(id: Int): String? = bookmarksRepository.getById(id)?.path
+
     fun delete(id: Int) = bookmarksRepository.delete(id)
 
     suspend fun getBookmarks(): ImmutableList<BookmarkItem> =
-        bookmarksRepository.getBookmarks().map { bookmark ->
+        bookmarksRepository.getAll().map { bookmark ->
             BookmarkItem(
                 id = bookmark.id,
                 title = bookmark.name,

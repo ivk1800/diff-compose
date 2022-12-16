@@ -31,6 +31,13 @@ class BookmarksViewModel(
                 bookmarksInteractor.delete(value.id)
                 emitBookmarks()
             }
+
+            is BookmarksEvent.OnOpenRepository -> {
+                val repositoryPath = bookmarksInteractor.getBookmarkPath(value.id)
+                if (repositoryPath != null) {
+                    router.toRepository(repositoryPath)
+                }
+            }
         }
     }
 

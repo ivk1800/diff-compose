@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +33,7 @@ import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarkItem
 fun BookmarkItemView(
     item: BookmarkItem,
     onDelete: () -> Unit,
+    onClick: () -> Unit,
 ) =
     ContextMenuArea(
         items = {
@@ -41,24 +42,28 @@ fun BookmarkItemView(
             )
         },
     ) {
-        BookmarkItem(item)
+        BookmarkItem(item, onClick)
     }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview
-fun BookmarkItem(item: BookmarkItem) =
+fun BookmarkItem(
+    item: BookmarkItem,
+    onClick: () -> Unit,
+) =
     Row(
         modifier = Modifier
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Primary),
-                onDoubleClick = { },
+                onDoubleClick = onClick,
                 onClick = { }
             )
             .padding(4.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Spacer(modifier = Modifier.width(8.dp))
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -69,7 +74,7 @@ fun BookmarkItem(item: BookmarkItem) =
             Text(
                 modifier = Modifier,
                 text = "git",
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.caption,
                 textAlign = TextAlign.Center,
                 color = Color.White,
             )
@@ -77,11 +82,11 @@ fun BookmarkItem(item: BookmarkItem) =
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.subtitle1,
                 text = item.title,
             )
             Text(
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.caption,
                 text = item.subtitle,
             )
         }

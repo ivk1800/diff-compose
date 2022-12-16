@@ -31,7 +31,6 @@ kotlin {
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))
                 implementation(compose.material)
-                implementation(compose.material3)
             }
         }
         val jvmTest by getting

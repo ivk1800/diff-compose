@@ -2,15 +2,15 @@ package ru.ivk1800.diff.feature.bookmarks.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Divider
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -61,10 +61,11 @@ fun Body(
         val item = state.items[index]
         BookmarkItemView(
             item,
-            onDelete = { onEvent.invoke(BookmarksEvent.OnDeleteBookmark(item.id)) }
+            onDelete = { onEvent.invoke(BookmarksEvent.OnDeleteBookmark(item.id)) },
+            onClick = { onEvent.invoke(BookmarksEvent.OnOpenRepository(item.id)) }
         )
         Divider(
-            startIndent = (8 + 32).dp,
+            startIndent = (8 + 8 + 32).dp,
         )
     }
 }

@@ -15,6 +15,8 @@ class BookmarksStorage {
         return bookmark
     }
 
+    fun getById(id: Int): BookmarkEntity? = bookmarks.firstOrNull { it.id == id }
+
     fun delete(id: Int) {
         val bookmark = bookmarks.firstOrNull { it.id == id }
         if (bookmark != null) {
@@ -22,7 +24,7 @@ class BookmarksStorage {
         }
     }
 
-    suspend fun getBookmarks(): List<BookmarkEntity> {
+    suspend fun getAll(): List<BookmarkEntity> {
         return bookmarks
     }
 }

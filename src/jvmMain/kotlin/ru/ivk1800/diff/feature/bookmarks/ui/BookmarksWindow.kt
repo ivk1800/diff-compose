@@ -15,6 +15,7 @@ import ru.ivk1800.diff.feature.bookmarks.domain.BookmarksRepository
 import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksInteractor
 import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksRouter
 import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksViewModel
+import ru.ivk1800.presentation.window.LocalWindowsManager
 import ru.ivk1800.vcs.git.GitVcs
 import java.io.File
 import javax.swing.JFileChooser
@@ -29,6 +30,9 @@ fun BookmarksWindow() {
         ),
         onCloseRequest = {},
     ) {
+        // TODO temporary
+        val windowsManager = LocalWindowsManager.current
+
         val viewModel = viewModel {
             BookmarksViewModel(
                 router = object : BookmarksRouter {
@@ -44,6 +48,10 @@ fun BookmarksWindow() {
                             val file = fileChooser.selectedFile
                             callback.invoke(file)
                         }
+                    }
+
+                    override fun toRepository(path: String) {
+                        windowsManager.openRepositoryWindowIfAbsent(path)
                     }
                 },
                 vcs = GitVcs(),
