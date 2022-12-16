@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,13 +23,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItem
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun RepositoryView(items: ImmutableList<CommitItem>) {
@@ -43,6 +49,10 @@ fun RepositoryView(items: ImmutableList<CommitItem>) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CommitsTable(items: ImmutableList<CommitItem>) {
+    val windowInfo = LocalWindowInfo.current
+
+    var initialSelected by remember { mutableStateOf(-1) }
+    var selected by remember { mutableStateOf(IntRange(-1, -1)) }
     var hovered by remember { mutableStateOf(-1) }
 
     val colors = MaterialTheme.colors
@@ -52,7 +62,7 @@ private fun CommitsTable(items: ImmutableList<CommitItem>) {
         items(items.size) { index ->
             val item = items[index]
             val color by derivedStateOf {
-                if (hovered == index) {
+                if (hovered == index || selected.contains(index)) {
                     hoveredColor
                 } else {
                     Color.Transparent
@@ -64,6 +74,19 @@ private fun CommitsTable(items: ImmutableList<CommitItem>) {
                     .fillMaxWidth()
                     .drawBehind {
                         drawRect(color)
+                    }
+                    .clickable {
+                        if (windowInfo.keyboardModifiers.isShiftPressed && initialSelected != -1) {
+                            selected = IntRange(min(index, initialSelected), max(index, initialSelected))
+                        } else {
+                            if (initialSelected != index) {
+                                initialSelected = index
+                                selected = IntRange(index, index)
+                            } else {
+                                initialSelected = -1
+                                selected = IntRange(-1, -1)
+                            }
+                        }
                     }
                     .onPointerEvent(PointerEventType.Exit) {
                         if (hovered == index) {
