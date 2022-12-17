@@ -5,13 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -32,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
 import kotlin.math.max
 import kotlin.math.min
@@ -39,8 +44,11 @@ import kotlin.math.min
 @Composable
 fun RepositoryView(
     state: RepositoryViewState,
+    onEvent: (value: RepositoryViewEvent) -> Unit,
 ) {
-    Scaffold {
+    Scaffold(
+        topBar = { AppBar(onEvent) }
+    ) {
         Column {
             TopSections()
             CommitsTable(state)
@@ -49,27 +57,43 @@ fun RepositoryView(
 }
 
 @Composable
-private fun CommitsTable(state: RepositoryViewState) {
-        when (state) {
-            is RepositoryViewState.Content -> Commits(state.commits)
-            RepositoryViewState.Loading -> LazyColumn(
-                userScrollEnabled = false,
-            ) {
-                items(Int.MAX_VALUE) {
-                    CommitItemView(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        item = CommitItem(
-                            description = "...",
-                            commit = "...",
-                            author = "...",
-                            date = "...",
-                        ),
-                    )
-                }
+private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =
+    TopAppBar(
+        title = { },
+        actions = {
+            Button(
+                onClick = { onEvent.invoke(RepositoryViewEvent.OpenFinder) }
+            ) { Text("Show in Finder") }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { onEvent.invoke(RepositoryViewEvent.OpenTerminal) }
+            ) { Text("Terminal") }
+            Spacer(modifier = Modifier.width(4.dp))
+        },
+        backgroundColor = MaterialTheme.colors.surface
+    )
+
+@Composable
+private fun CommitsTable(state: RepositoryViewState) =
+    when (state) {
+        is RepositoryViewState.Content -> Commits(state.commits)
+        RepositoryViewState.Loading -> LazyColumn(
+            userScrollEnabled = false,
+        ) {
+            items(Int.MAX_VALUE) {
+                CommitItemView(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    item = CommitItem(
+                        description = "...",
+                        commit = "...",
+                        author = "...",
+                        date = "...",
+                    ),
+                )
             }
         }
-}
+    }
 
 
 @OptIn(ExperimentalComposeUiApi::class)
