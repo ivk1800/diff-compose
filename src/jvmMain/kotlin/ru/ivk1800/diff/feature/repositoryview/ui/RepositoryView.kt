@@ -32,22 +32,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
 import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun RepositoryView(items: ImmutableList<CommitItem>) {
+fun RepositoryView(
+    state: RepositoryViewState,
+) {
     Scaffold {
         Column {
             TopSections()
-            CommitsTable(items)
+            CommitsTable(state)
         }
     }
 }
 
+@Composable
+private fun CommitsTable(state: RepositoryViewState) {
+        when (state) {
+            is RepositoryViewState.Content -> Commits(state.commits)
+            RepositoryViewState.Loading -> LazyColumn(
+                userScrollEnabled = false,
+            ) {
+                items(Int.MAX_VALUE) {
+                    CommitItemView(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        item = CommitItem(
+                            description = "...",
+                            commit = "...",
+                            author = "...",
+                            date = "...",
+                        ),
+                    )
+                }
+            }
+        }
+}
+
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun CommitsTable(items: ImmutableList<CommitItem>) {
+private fun Commits(items: ImmutableList<CommitItem>) {
     val windowInfo = LocalWindowInfo.current
 
     var initialSelected by remember { mutableStateOf(-1) }
