@@ -24,15 +24,18 @@ class GitVcs : Vcs {
 
     override suspend fun getCommits(
         directory: File,
+        branchName: String,
         limit: Int,
         offset: Int,
     ): List<VcsCommit> = withContext(Dispatchers.IO) {
         val process = createProcess(
             directory,
-            "git reflog --pretty={$FIELDS}, -n $limit, --skip $offset",
+            "git reflog --pretty={$FIELDS}, -n $limit, --skip $offset $branchName",
         )
 
         val result = process.inputStream.reader().readText()
+        val error = process.errorStream.reader().readText()
+        println(error)
         parser.parseCommits("[$result]")
     }
 

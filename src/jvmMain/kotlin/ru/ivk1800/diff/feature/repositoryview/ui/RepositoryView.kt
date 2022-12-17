@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -135,12 +134,12 @@ private fun TopSections() =
             text = "Description",
         )
         SectionDivider()
-        val commonModifier = Modifier.weight(1F)
         SectionText(
-            modifier = commonModifier,
+            modifier = Modifier.weight(0.5F),
             text = "Commit",
         )
         SectionDivider()
+        val commonModifier = Modifier.weight(1F)
         SectionText(
             modifier = commonModifier,
             text = "Author",
@@ -172,13 +171,15 @@ private fun CommitItemView(
             .weight(3F),
         text = item.description,
     )
+    ColumnText(
+        modifier = Modifier
+            .padding(start = 4.dp)
+            .weight(0.5F),
+        text = item.commit,
+    )
     val commonModifier = Modifier
         .padding(start = 4.dp)
         .weight(1F)
-    ColumnText(
-        modifier = commonModifier,
-        text = item.commit,
-    )
     ColumnText(
         modifier = commonModifier,
         text = item.author,
