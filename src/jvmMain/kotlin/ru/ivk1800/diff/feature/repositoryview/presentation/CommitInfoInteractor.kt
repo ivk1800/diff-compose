@@ -13,39 +13,40 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CommitsInteractor(
+class CommitInfoInteractor(
     private val repoDirectory: File,
     private val commitsRepository: CommitsRepository,
-    private val commitItemMapper: CommitItemMapper,
 ) {
     // TODO: add main dispatcher
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
-    private val reloadEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val selectCommitEvent = MutableSharedFlow<String?>(extraBufferCapacity = 1)
 
-    private var commits = emptyList<Commit>()
-
-    private val _state = MutableStateFlow<CommitsTableState>(CommitsTableState.Loading)
-    val state: StateFlow<CommitsTableState>
+    private val _state = MutableStateFlow<CommitInfoState>(CommitInfoState.None)
+    val state: StateFlow<CommitInfoState>
         get() = _state
 
     init {
-        reloadEvent
-            // TODO: support throttle
-            .onStart { emit(Unit) }
-            .flatMapLatest {
+        selectCommitEvent
+            .flatMapLatest { hash ->
                 flow {
-                    emit(CommitsTableState.Loading)
-                    val newCommits = commitsRepository
-                            .getCommits(repoDirectory, branchName = "master", limit = 20, offset = 0)
-                    commits = newCommits
-                    val items = newCommits.map(commitItemMapper::mapToItem).toImmutableList()
-                    emit(CommitsTableState.Content(items))
+                    emit(CommitInfoState.None)
+                    if (hash != null) {
+                        val files = commitsRepository
+                            .getCommitFiles(repoDirectory, commitHash = hash)
+                        val items = files.map { file ->
+                            CommitFileItem(
+                                name = file.path,
+                                type = CommitFileItem.Type.Added,
+                            )
+                        }.toImmutableList()
+                        emit(CommitInfoState.Content(items))
+                    }
                 }
             }
             .onEach { state ->
@@ -53,10 +54,8 @@ class CommitsInteractor(
             }.launchIn(scope)
     }
 
-    fun getCommitHashByIndex(value: Int): String? = commits.getOrNull(value)?.hash
-
-    fun reload() {
-        reloadEvent.tryEmit(Unit)
+    fun onCommitSelected(hash: String?) {
+        selectCommitEvent.tryEmit(hash)
     }
 
     fun dispose() {

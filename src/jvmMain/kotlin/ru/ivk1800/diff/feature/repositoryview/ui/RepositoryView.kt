@@ -18,17 +18,16 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 
 @Composable
 fun RepositoryView(
@@ -40,26 +39,24 @@ fun RepositoryView(
     ) {
         Column {
             TopSections()
-            CommitsTable(state)
-            Divider()
-            CommitFilesListView(
-                modifier = Modifier.height(300.dp),
-                items = remember {
-                    persistentListOf(
-                        CommitFileItem(
-                            type = CommitFileItem.Type.Edited,
-                            name = "app/main/src/Test1.kt",
-                        ),
-                        CommitFileItem(
-                            type = CommitFileItem.Type.Moved,
-                            name = "app/main/src/Test2.kt",
-                        ),
-                        CommitFileItem(
-                            type = CommitFileItem.Type.Added,
-                            name = "app/main/src/Tes3.kt",
-                        ),
+            CommitsTable(
+                state = state.commitsTableState,
+                onCommitsSelected = { event ->
+                    onEvent.invoke(
+                        when (event) {
+                            is SelectEvent.Selected ->
+                                RepositoryViewEvent.OnCommitsSelected(event.range)
+
+                            SelectEvent.Unselect ->
+                                RepositoryViewEvent.OnCommitsUnselected
+                        }
                     )
-                }
+                },
+            )
+            Divider()
+            CommitInfoView(
+                modifier = Modifier.height(300.dp),
+                state = state.commitInfoState,
             )
         }
     }
@@ -83,10 +80,17 @@ private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =
     )
 
 @Composable
-private fun CommitsTable(state: RepositoryViewState) =
+private fun CommitsTable(
+    state: CommitsTableState,
+    onCommitsSelected: (event: SelectEvent) -> Unit
+) =
     when (state) {
-        is RepositoryViewState.Content -> Commits(state.commits)
-        RepositoryViewState.Loading -> LazyColumn(
+        is CommitsTableState.Content -> Commits(
+            items = state.commits,
+            onSelected = onCommitsSelected,
+        )
+
+        CommitsTableState.Loading -> LazyColumn(
             userScrollEnabled = false,
         ) {
             items(Int.MAX_VALUE) {
@@ -105,7 +109,10 @@ private fun CommitsTable(state: RepositoryViewState) =
     }
 
 @Composable
-private fun Commits(items: ImmutableList<CommitItem>) =
+private fun Commits(
+    items: ImmutableList<CommitItem>,
+    onSelected: (event: SelectEvent) -> Unit
+) =
     List(
         itemsCount = items.size,
         itemContent = { index ->
@@ -114,7 +121,8 @@ private fun Commits(items: ImmutableList<CommitItem>) =
                 modifier = Modifier,
                 item = item,
             )
-        }
+        },
+        onSelected = onSelected,
     )
 
 @Composable

@@ -6,4 +6,6 @@ interface Vcs {
     suspend fun isRepository(directory: File): Boolean
 
     suspend fun getCommits(directory: File, branchName: String, limit: Int, offset: Int): List<VcsCommit>
+
+    suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile>
 }

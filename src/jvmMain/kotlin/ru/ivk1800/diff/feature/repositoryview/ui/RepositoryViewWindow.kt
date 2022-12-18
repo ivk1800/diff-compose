@@ -15,6 +15,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import ru.ivk1800.arch.presentation.viewModel
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
@@ -35,7 +36,13 @@ fun RepositoryViewWindow(path: String, onCloseRequest: () -> Unit) {
                 commitsRepository = CommitsRepository(
                     vcs = GitVcs(),
                 ),
-                commitItemMapper = CommitItemMapper()
+                commitItemMapper = CommitItemMapper(),
+            ),
+            commitInfoInteractor = CommitInfoInteractor(
+                repoDirectory = File(path),
+                commitsRepository = CommitsRepository(
+                    vcs = GitVcs(),
+                ),
             ),
             router = object : RepositoryViewRouter {
                 override fun toTerminal(directory: File) {

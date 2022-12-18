@@ -29,6 +29,7 @@ fun List(
     modifier: Modifier = Modifier,
     itemsCount: Int,
     itemContent: @Composable LazyItemScope.(index: Int) -> Unit,
+    onSelected: (event: SelectEvent) -> Unit = { },
 ) {
     val windowInfo = LocalWindowInfo.current
 
@@ -60,13 +61,16 @@ fun List(
                     .clickable {
                         if (windowInfo.keyboardModifiers.isShiftPressed && initialSelected != -1) {
                             selected = IntRange(min(index, initialSelected), max(index, initialSelected))
+                            onSelected.invoke(SelectEvent.Selected(selected))
                         } else {
                             if (initialSelected != index) {
                                 initialSelected = index
                                 selected = IntRange(index, index)
+                                onSelected.invoke(SelectEvent.Selected(selected))
                             } else {
                                 initialSelected = -1
                                 selected = IntRange(-1, -1)
+                                onSelected.invoke(SelectEvent.Unselect)
                             }
                         }
                     }
@@ -83,4 +87,9 @@ fun List(
             }
         }
     }
+}
+
+sealed interface SelectEvent {
+    data class Selected(val range: IntRange): SelectEvent
+    object Unselect: SelectEvent
 }

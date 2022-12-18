@@ -64,11 +64,7 @@ private fun CommitFileItemView(
                 CommitFileItem.Type.Added -> Icons.Filled.Add
                 CommitFileItem.Type.Moved -> Icons.Filled.List
             },
-            contentDescription = when (item.type) {
-                CommitFileItem.Type.Edited -> "Edited"
-                CommitFileItem.Type.Added -> "Added"
-                CommitFileItem.Type.Moved -> "Moved"
-            },
+            contentDescription = "",
             tint = Color.Black,
         )
     }

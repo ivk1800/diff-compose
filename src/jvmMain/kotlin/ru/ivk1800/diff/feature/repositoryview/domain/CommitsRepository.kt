@@ -22,4 +22,7 @@ class CommitsRepository(
             )
         }
     }
+
+    suspend fun getCommitFiles(directory: File, commitHash: String): List<CommitFile> =
+        vcs.getCommitFiles(directory, commitHash).map { file -> CommitFile(path = file.fullPath) }
 }

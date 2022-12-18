@@ -3,6 +3,7 @@ package ru.ivk1800.vcs.git
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ru.ivk1800.vcs.api.VcsCommit
+import ru.ivk1800.vcs.api.VcsFile
 import java.lang.reflect.Type
 
 internal class VcsParser {
@@ -27,4 +28,11 @@ internal class VcsParser {
             )
         }
     }
+
+    fun parseFiles(raw: String): List<VcsFile> =
+        raw
+            .lines()
+            .drop(1)
+            .filter(CharSequence::isNotEmpty)
+            .map { VcsFile(fullPath = it) }
 }

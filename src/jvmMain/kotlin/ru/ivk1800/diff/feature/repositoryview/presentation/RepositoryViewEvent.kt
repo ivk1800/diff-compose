@@ -6,4 +6,8 @@ sealed interface RepositoryViewEvent {
     object OpenTerminal: RepositoryViewEvent
 
     object OpenFinder: RepositoryViewEvent
+
+    data class OnCommitsSelected(val range: IntRange): RepositoryViewEvent
+
+    object OnCommitsUnselected: RepositoryViewEvent
 }
