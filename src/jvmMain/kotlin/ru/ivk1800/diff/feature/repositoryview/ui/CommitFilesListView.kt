@@ -6,18 +6,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
+import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 
 @Composable
@@ -46,26 +43,29 @@ private fun CommitFileItemView(
     modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
     verticalAlignment = Alignment.CenterVertically,
 ) {
+    val commitFileTheme = LocalDiffTheme.current.commitFileTheme
     Box(
         modifier = Modifier.size(16.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(
                 when (item.type) {
-                    CommitFileItem.Type.Edited -> Color(0xFFf1940b)
-                    CommitFileItem.Type.Added -> Color(0xFF4fad08)
-                    CommitFileItem.Type.Moved -> Color(0xFF418df6)
+                    CommitFileItem.Type.Modified -> commitFileTheme.modifiedColor
+                    CommitFileItem.Type.Added -> commitFileTheme.addedColor
+                    CommitFileItem.Type.Renamed -> commitFileTheme.renamedColor
+                    CommitFileItem.Type.Deleted -> commitFileTheme.deletedColor
                 }
             ),
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            modifier = Modifier.size(12.dp).align(Alignment.Center),
-            imageVector = when (item.type) {
-                CommitFileItem.Type.Edited -> Icons.Filled.Edit
-                CommitFileItem.Type.Added -> Icons.Filled.Add
-                CommitFileItem.Type.Moved -> Icons.Filled.List
+        Text(
+            text = when (item.type) {
+                CommitFileItem.Type.Modified -> "M"
+                CommitFileItem.Type.Added -> "A"
+                CommitFileItem.Type.Renamed -> "R"
+                CommitFileItem.Type.Deleted -> "D"
             },
-            contentDescription = "",
-            tint = Color.Black,
+            style = MaterialTheme.typography.caption,
+            color = commitFileTheme.textColor,
         )
     }
     ListTextView(
