@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ fun RepositoryView(
         Column {
             TopSections()
             DraggableTwoPanes(
+                orientation = Orientation.Vertical,
                 percent = 50F,
             ) {
                 CommitsTable(
@@ -55,10 +57,16 @@ fun RepositoryView(
                         )
                     },
                 )
-                CommitInfoView(
-                    modifier = Modifier.fillMaxSize(),
-                    state = state.commitInfoState,
-                )
+                DraggableTwoPanes(
+                    orientation = Orientation.Horizontal,
+                    percent = 40F
+                ) {
+                    CommitInfoView(
+                        modifier = Modifier.fillMaxSize(),
+                        state = state.commitInfoState,
+                    )
+                    Box(modifier = Modifier.fillMaxSize())
+                }
             }
         }
     }
