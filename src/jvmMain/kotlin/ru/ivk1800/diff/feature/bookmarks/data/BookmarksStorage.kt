@@ -2,7 +2,7 @@ package ru.ivk1800.diff.feature.bookmarks.data
 
 class BookmarksStorage {
     private val bookmarks = mutableListOf<BookmarkEntity>(
-        BookmarkEntity(id = 1, name = "Test", path = "/Users/admin/test")
+        BookmarkEntity(id = 1, name = "Test", path = "/Users/ivan/repos/compose/diff-compose")
     )
 
     fun add(name: String, path: String): BookmarkEntity {

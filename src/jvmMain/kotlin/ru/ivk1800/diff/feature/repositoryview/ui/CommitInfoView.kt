@@ -1,5 +1,6 @@
 package ru.ivk1800.diff.feature.repositoryview.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
@@ -8,13 +9,14 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 fun CommitInfoView(
     modifier: Modifier = Modifier,
     state: CommitInfoState,
-) = when (state) {
-    is CommitInfoState.Content -> {
-        CommitFilesListView(
-            modifier = modifier,
-            items = state.items,
-        )
-    }
+) = Box(modifier = modifier) {
+    when (state) {
+        is CommitInfoState.Content -> {
+            CommitFilesListView(
+                items = state.items,
+            )
+        }
 
-    CommitInfoState.None -> Unit
+        CommitInfoState.None -> Unit
+    }
 }

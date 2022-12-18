@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
@@ -39,25 +37,29 @@ fun RepositoryView(
     ) {
         Column {
             TopSections()
-            CommitsTable(
-                state = state.commitsTableState,
-                onCommitsSelected = { event ->
-                    onEvent.invoke(
-                        when (event) {
-                            is SelectEvent.Selected ->
-                                RepositoryViewEvent.OnCommitsSelected(event.range)
+            DraggableTwoPanes(
+                percent = 50F,
+            ) {
+                CommitsTable(
+                    modifier = Modifier.fillMaxSize(),
+                    state = state.commitsTableState,
+                    onCommitsSelected = { event ->
+                        onEvent.invoke(
+                            when (event) {
+                                is SelectEvent.Selected ->
+                                    RepositoryViewEvent.OnCommitsSelected(event.range)
 
-                            SelectEvent.Unselect ->
-                                RepositoryViewEvent.OnCommitsUnselected
-                        }
-                    )
-                },
-            )
-            Divider()
-            CommitInfoView(
-                modifier = Modifier.height(300.dp),
-                state = state.commitInfoState,
-            )
+                                SelectEvent.Unselect ->
+                                    RepositoryViewEvent.OnCommitsUnselected
+                            }
+                        )
+                    },
+                )
+                CommitInfoView(
+                    modifier = Modifier.fillMaxSize(),
+                    state = state.commitInfoState,
+                )
+            }
         }
     }
 }
@@ -81,9 +83,10 @@ private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =
 
 @Composable
 private fun CommitsTable(
+    modifier: Modifier = Modifier,
     state: CommitsTableState,
     onCommitsSelected: (event: SelectEvent) -> Unit
-) =
+) = Box(modifier = modifier) {
     when (state) {
         is CommitsTableState.Content -> Commits(
             items = state.commits,
@@ -107,6 +110,7 @@ private fun CommitsTable(
             }
         }
     }
+}
 
 @Composable
 private fun Commits(

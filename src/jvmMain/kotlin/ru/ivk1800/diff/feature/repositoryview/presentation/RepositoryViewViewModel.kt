@@ -43,7 +43,10 @@ class RepositoryViewViewModel(
 
     fun onEvent(value: RepositoryViewEvent) {
         when (value) {
-            RepositoryViewEvent.OnReload -> commitsInteractor.reload()
+            RepositoryViewEvent.OnReload -> {
+                commitInfoInteractor.onCommitSelected(null)
+                commitsInteractor.reload()
+            }
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
             is RepositoryViewEvent.OnCommitsSelected -> {
