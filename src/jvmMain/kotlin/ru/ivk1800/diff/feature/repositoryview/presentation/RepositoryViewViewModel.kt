@@ -12,6 +12,7 @@ class RepositoryViewViewModel(
     private val repositoryDirectory: File,
     private val commitsInteractor: CommitsInteractor,
     private val commitInfoInteractor: CommitInfoInteractor,
+    private val diffInfoInteractor: DiffInfoInteractor,
     private val router: RepositoryViewRouter,
 ) : BaseViewModel() {
 
@@ -19,6 +20,7 @@ class RepositoryViewViewModel(
         RepositoryViewState(
             commitsTableState = CommitsTableState.Loading,
             commitInfoState = CommitInfoState.None,
+            diffInfoState = DiffInfoState.None,
         )
     )
     val state: StateFlow<RepositoryViewState>
@@ -39,14 +41,23 @@ class RepositoryViewViewModel(
             }
             .onEach { newState -> _state.value = newState }
             .launchIn(viewModelScope)
+
+        diffInfoInteractor.state
+            .map { newState ->
+                _state.value.copy(diffInfoState = newState)
+            }
+            .onEach { newState -> _state.value = newState }
+            .launchIn(viewModelScope)
     }
 
     fun onEvent(value: RepositoryViewEvent) {
         when (value) {
             RepositoryViewEvent.OnReload -> {
                 commitInfoInteractor.onCommitSelected(null)
+                diffInfoInteractor.onFileUnselected()
                 commitsInteractor.reload()
             }
+
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
             is RepositoryViewEvent.OnCommitsSelected -> {
@@ -58,7 +69,10 @@ class RepositoryViewViewModel(
                     }
                 )
             }
+
             RepositoryViewEvent.OnCommitsUnselected -> commitInfoInteractor.onCommitSelected(null)
+            is RepositoryViewEvent.OnFilesSelected -> diffInfoInteractor.onFileSelected()
+            RepositoryViewEvent.OnFilesUnselected -> diffInfoInteractor.onFileUnselected()
         }
     }
 
@@ -66,6 +80,7 @@ class RepositoryViewViewModel(
     override fun dispose() {
         commitsInteractor.dispose()
         commitInfoInteractor.dispose()
+        diffInfoInteractor.dispose()
         super.dispose()
     }
 }

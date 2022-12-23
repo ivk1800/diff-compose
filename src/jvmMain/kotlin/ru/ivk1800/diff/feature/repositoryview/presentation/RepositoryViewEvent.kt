@@ -1,13 +1,17 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
 sealed interface RepositoryViewEvent {
-    object OnReload: RepositoryViewEvent
+    object OnReload : RepositoryViewEvent
 
-    object OpenTerminal: RepositoryViewEvent
+    object OpenTerminal : RepositoryViewEvent
 
-    object OpenFinder: RepositoryViewEvent
+    object OpenFinder : RepositoryViewEvent
 
-    data class OnCommitsSelected(val range: IntRange): RepositoryViewEvent
+    data class OnCommitsSelected(val range: IntRange) : RepositoryViewEvent
 
-    object OnCommitsUnselected: RepositoryViewEvent
+    object OnCommitsUnselected : RepositoryViewEvent
+
+    data class OnFilesSelected(val range: IntRange) : RepositoryViewEvent
+
+    object OnFilesUnselected : RepositoryViewEvent
 }

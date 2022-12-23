@@ -64,8 +64,20 @@ fun RepositoryView(
                     CommitInfoView(
                         modifier = Modifier.fillMaxSize(),
                         state = state.commitInfoState,
+                        onFilesSelected = { event ->
+                            onEvent.invoke(
+                                when (event) {
+                                    is SelectEvent.Selected -> RepositoryViewEvent.OnFilesSelected(event.range)
+
+                                    SelectEvent.Unselect -> RepositoryViewEvent.OnFilesUnselected
+                                }
+                            )
+                        }
                     )
-                    Box(modifier = Modifier.fillMaxSize())
+                    DiffInfoView(
+                        modifier = Modifier.fillMaxSize(),
+                        state = state.diffInfoState,
+                    )
                 }
             }
         }

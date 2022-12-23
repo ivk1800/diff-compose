@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -55,7 +55,8 @@ fun List(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .drawBehind {
+                    .drawWithContent {
+                        drawContent()
                         drawRect(color)
                     }
                     .clickable {

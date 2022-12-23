@@ -21,6 +21,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 fun CommitFilesListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<CommitFileItem>,
+    onSelected: (event: SelectEvent) -> Unit,
 ) {
     List(
         modifier,
@@ -32,6 +33,7 @@ fun CommitFilesListView(
                 item = item,
             )
         },
+        onSelected = onSelected,
     )
 }
 

@@ -9,11 +9,13 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 fun CommitInfoView(
     modifier: Modifier = Modifier,
     state: CommitInfoState,
+    onFilesSelected: (event: SelectEvent) -> Unit
 ) = Box(modifier = modifier) {
     when (state) {
         is CommitInfoState.Content -> {
             CommitFilesListView(
                 items = state.items,
+                onSelected = onFilesSelected,
             )
         }
 

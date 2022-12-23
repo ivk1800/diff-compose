@@ -18,6 +18,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
@@ -44,6 +45,7 @@ fun RepositoryViewWindow(path: String, onCloseRequest: () -> Unit) {
                     vcs = GitVcs(),
                 ),
             ),
+            diffInfoInteractor = DiffInfoInteractor(),
             router = object : RepositoryViewRouter {
                 override fun toTerminal(directory: File) {
                     ProcessBuilder(*"open -a Terminal ${directory.path}".split(" ").toTypedArray())

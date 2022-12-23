@@ -13,7 +13,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 @Immutable
-data class DiffThemeData(val commitFileTheme: CommitFileThemeData)
+data class DiffThemeData(
+    val commitFileTheme: CommitFileThemeData,
+    val diffLinesTheme: DiffLinesThemeData,
+)
 
 @Stable
 class CommitFileThemeData(
@@ -53,6 +56,26 @@ class CommitFileThemeData(
     )
 }
 
+@Stable
+class DiffLinesThemeData(
+    addedColor: Color,
+    removedColor: Color,
+) {
+    var addedColor by mutableStateOf(addedColor)
+        internal set
+
+    var removedColor by mutableStateOf(removedColor)
+        internal set
+
+    fun copy(
+        addedColor: Color = this.addedColor,
+        removedColor: Color = this.removedColor,
+    ) = DiffLinesThemeData(
+        addedColor,
+        removedColor,
+    )
+}
+
 fun lightCommitFileTheme() =
     CommitFileThemeData(
         modifiedColor = Color(0xFFf1940b),
@@ -71,6 +94,17 @@ fun darkCommitFileTheme() =
         textColor = Color.Black,
     )
 
+fun lightDiffLinesTheme() =
+    DiffLinesThemeData(
+        addedColor = Color(0xFF033B42),
+        removedColor = Color(0xFF502127),
+    )
+
+fun darkDiffLinesTheme() =
+    DiffLinesThemeData(
+        addedColor = Color(0xFF033B42),
+        removedColor = Color(0xFF502127),
+    )
 
 val LocalDiffTheme = staticCompositionLocalOf<DiffThemeData> { throw IllegalStateException("DiffTheme ot provided.") }
 
@@ -79,7 +113,8 @@ fun DiffTheme(
     content: @Composable () -> Unit,
 ) {
     val diffTheme = DiffThemeData(
-        commitFileTheme = darkCommitFileTheme()
+        commitFileTheme = darkCommitFileTheme(),
+        diffLinesTheme = darkDiffLinesTheme(),
     )
     CompositionLocalProvider(LocalDiffTheme provides diffTheme) {
         MaterialTheme(
