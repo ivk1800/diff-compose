@@ -30,6 +30,7 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))
+                implementation(project(":selected-list"))
                 implementation(compose.material)
             }
         }

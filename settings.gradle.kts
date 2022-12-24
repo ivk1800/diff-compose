@@ -15,4 +15,5 @@ pluginManagement {
 rootProject.name = "diff"
 include("vcs:api")
 include("vcs:git")
+include("selected-list")
 
