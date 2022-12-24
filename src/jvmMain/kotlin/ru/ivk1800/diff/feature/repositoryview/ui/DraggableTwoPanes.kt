@@ -19,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
@@ -26,6 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import java.awt.Cursor
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -93,7 +96,8 @@ fun DraggableTwoPanes(
                     Orientation.Vertical -> dividerOffset.copy(y = it.y.roundToInt())
                     Orientation.Horizontal -> dividerOffset.copy(x = it.x.roundToInt())
                 }
-            },
+            }
+            .dividerCursor(orientation),
         orientation = orientation,
     )
 }
@@ -117,6 +121,18 @@ private fun DraggableDivider(
             .background(color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
     )
 }
+
+private fun Modifier.dividerCursor(orientation: Orientation): Modifier =
+    pointerHoverIcon(
+        PointerIcon(
+            Cursor(
+                when (orientation) {
+                    Orientation.Vertical -> Cursor.S_RESIZE_CURSOR
+                    Orientation.Horizontal -> Cursor.E_RESIZE_CURSOR
+                }
+            )
+        )
+    )
 
 @Composable
 private fun Containers(
