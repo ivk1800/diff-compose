@@ -77,12 +77,29 @@ class GitVcs : Vcs {
             command,
         )
 
-        val result = process.inputStream.reader().readText()
-        val error = process.errorStream.reader().readText()
-        println(error)
-        println(result)
+        return runProcess(process,
+            onError = { error ->
+                VcsException.ProcessException(error)
+            }, onResult = { result ->
+                diffParser.parse(result)
+            }
+        )
+    }
 
-        return diffParser.parse(result)
+    private inline fun <T> runProcess(
+        process: Process,
+        onResult: (result: String) -> T,
+        onError: (error: String) -> Throwable,
+    ): T = if (process.exitValue() != 0) {
+        val error = process.errorStream.reader().readText()
+        throw onError.invoke(error)
+    } else {
+        val result = process.inputStream.reader().readText()
+        if (result.isEmpty()) {
+            throw onError.invoke("result of process is empty")
+        } else {
+            onResult.invoke(result)
+        }
     }
 
     private fun createProcess(directory: File, command: String): Process =

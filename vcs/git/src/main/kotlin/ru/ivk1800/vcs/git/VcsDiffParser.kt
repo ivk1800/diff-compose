@@ -6,7 +6,13 @@ import ru.ivk1800.vcs.api.VcsHunkLine
 
 internal class VcsDiffParser {
 
-    fun parse(raw: String): VcsDiff {
+    @Throws(VcsException.ParseException::class)
+    fun parse(raw: String): VcsDiff =
+        runCatching { parseInternal(raw) }.getOrElse { error ->
+            throw VcsException.ParseException(message = "An error occurred while parsing the diff", cause = error)
+        }
+
+    private fun parseInternal(raw: String): VcsDiff {
         val lines: List<String> = raw.lines()
 
         val hunks = mutableListOf<VcsHunk>()

@@ -7,6 +7,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
@@ -57,6 +58,13 @@ class DiffInfoInteractor(
                     }
 
                 }
+                    .catch { error ->
+                        emit(
+                            DiffInfoState.Error(
+                                message = "$error",
+                            )
+                        )
+                    }
             }
             .onEach { state ->
                 _state.value = state

@@ -30,5 +30,7 @@ sealed interface CommitInfoState {
 sealed interface DiffInfoState {
     object None : DiffInfoState
 
+    data class Error(val message: String): DiffInfoState
+
     data class Content(val items: ImmutableList<DiffInfoItem>): DiffInfoState
 }
