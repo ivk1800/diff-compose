@@ -17,6 +17,7 @@ import ru.ivk1800.arch.presentation.viewModel
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
@@ -46,6 +47,7 @@ fun RepositoryViewWindow(path: String, onCloseRequest: () -> Unit) {
                 commitsRepository = CommitsRepository(
                     vcs = GitVcs(),
                 ),
+                commitInfoMapper = CommitInfoMapper(),
             ),
             diffInfoInteractor = DiffInfoInteractor(
                 repoDirectory = File(path),

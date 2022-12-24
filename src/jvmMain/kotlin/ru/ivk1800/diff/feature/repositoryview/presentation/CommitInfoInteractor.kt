@@ -1,6 +1,5 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -12,17 +11,15 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommitInfoInteractor(
     private val repoDirectory: File,
     private val commitsRepository: CommitsRepository,
+    private val commitInfoMapper: CommitInfoMapper,
 ) {
     // TODO: add main dispatcher
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
@@ -50,13 +47,12 @@ class CommitInfoInteractor(
                         val newFiles = commitsRepository
                             .getCommitFiles(repoDirectory, commitHash = hash)
                         files = newFiles
-                        val items = newFiles.map { file ->
-                            CommitFileItem(
-                                name = file.path,
-                                type = CommitFileItem.Type.Added,
+                        emit(
+                            CommitInfoState.Content(
+                                files = commitInfoMapper.mapToFiles(newFiles),
+                                description = commitInfoMapper.mapToDescription(),
                             )
-                        }.toImmutableList()
-                        emit(CommitInfoState.Content(items))
+                        )
                     }
                 }
             }
