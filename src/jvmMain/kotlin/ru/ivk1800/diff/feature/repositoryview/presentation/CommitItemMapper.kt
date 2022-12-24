@@ -12,7 +12,7 @@ class CommitItemMapper {
     fun mapToItem(commit: Commit): CommitItem {
         return CommitItem(
             description = commit.message.trim().lines().first(),
-            commit = commit.abbreviatedHash,
+            commit = commit.hash.abbreviated,
             author = "${commit.authorName} <${commit.authorEmail}>",
             date = commitDateFormat.format(ZonedDateTime.ofInstant(commit.authorDate, ZoneId.systemDefault())),
         )

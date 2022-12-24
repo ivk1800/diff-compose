@@ -25,7 +25,7 @@ class CommitInfoMapper {
     fun mapToDescription(commit: Commit): CommitDescription {
         return CommitDescription(
             message = commit.message,
-            commit = "${commit.hash} [${commit.abbreviatedHash}]",
+            commit = "${commit.hash.value} [${commit.hash.abbreviated}]",
             parents = commit.parents.joinToString(),
             author = "${commit.authorName} <${commit.authorEmail}>",
             date = commitDateFormat.format(ZonedDateTime.ofInstant(commit.authorDate, ZoneId.systemDefault())),

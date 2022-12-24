@@ -53,7 +53,7 @@ class CommitsInteractor(
             }.launchIn(scope)
     }
 
-    fun getCommitHashByIndex(value: Int): String? = commits.getOrNull(value)?.hash
+    fun getCommitHashByIndex(value: Int): String? = commits.getOrNull(value)?.hash?.value
 
     fun reload() {
         reloadEvent.tryEmit(Unit)

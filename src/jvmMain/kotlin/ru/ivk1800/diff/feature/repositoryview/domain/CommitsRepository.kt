@@ -19,9 +19,8 @@ class CommitsRepository(
 
     private fun VcsCommit.toCommit(): Commit =
         Commit(
-            hash = hash,
+            hash = CommitHash(value = hash, abbreviated = abbreviatedHash),
             parents = parents,
-            abbreviatedHash = abbreviatedHash,
             authorName = authorName,
             authorEmail = authorEmail,
             authorDate = Instant.ofEpochSecond(authorDate.toLong()),
