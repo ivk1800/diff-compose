@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 sealed interface DiffInfoItem {
     data class Line(val text: String, val type: Type) : DiffInfoItem {
         enum class Type {
-            None,
+            NotChanged,
             Added,
             Removed,
         }

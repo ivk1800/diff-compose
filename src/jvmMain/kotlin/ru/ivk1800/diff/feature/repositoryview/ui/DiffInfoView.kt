@@ -42,7 +42,7 @@ fun DiffListView(
                             .fillParentMaxWidth()
                             .background(
                                 color = when (item.type) {
-                                    DiffInfoItem.Line.Type.None -> Color.Transparent
+                                    DiffInfoItem.Line.Type.NotChanged -> Color.Transparent
                                     DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedColor
                                     DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedColor
                                 }
@@ -55,7 +55,7 @@ fun DiffListView(
                         ) {
                             ListTextView(
                                 text = when (item.type) {
-                                    DiffInfoItem.Line.Type.None -> ""
+                                    DiffInfoItem.Line.Type.NotChanged -> ""
                                     DiffInfoItem.Line.Type.Added -> "+"
                                     DiffInfoItem.Line.Type.Removed -> "-"
                                 },

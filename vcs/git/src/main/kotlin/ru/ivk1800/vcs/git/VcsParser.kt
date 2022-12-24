@@ -14,19 +14,12 @@ internal class VcsParser {
         val rawCommits: List<RawCommit> =
             gson.fromJson<List<RawCommit?>>(raw, commitsListType).filterIsInstance<RawCommit>()
 
-        return rawCommits.map {
-            VcsCommit(
-                hash = it.hash,
-                abbreviatedHash = it.abbreviatedHash,
-                authorName = it.authorName,
-                authorEmail = it.authorEmail,
-                authorDate = it.authorDate.toInt(),
-                commiterName = it.commiterName,
-                commiterEmail = it.commiterEmail,
-                commiterDate = it.commiterDate.toInt(),
-                message = it.message,
-            )
-        }
+        return rawCommits.map { it.toVcsCommit() }
+    }
+
+    fun parseCommit(raw: String): VcsCommit {
+        val rawCommit: RawCommit = gson.fromJson(raw, RawCommit::class.java)
+        return rawCommit.toVcsCommit()
     }
 
     fun parseFiles(raw: String): List<VcsFile> =
@@ -35,4 +28,18 @@ internal class VcsParser {
             .drop(1)
             .filter(CharSequence::isNotEmpty)
             .map { VcsFile(fullPath = it) }
+
+    private fun RawCommit.toVcsCommit(): VcsCommit =
+        VcsCommit(
+            hash = hash,
+            parents = parents.split(" "),
+            abbreviatedHash = abbreviatedHash,
+            authorName = authorName,
+            authorEmail = authorEmail,
+            authorDate = authorDate.toInt(),
+            commiterName = commiterName,
+            commiterEmail = commiterEmail,
+            commiterDate = commiterDate.toInt(),
+            message = message,
+        )
 }

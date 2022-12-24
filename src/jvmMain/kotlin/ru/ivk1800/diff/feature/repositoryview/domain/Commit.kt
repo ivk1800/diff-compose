@@ -4,6 +4,7 @@ import java.time.Instant
 
 data class Commit(
     val hash: String,
+    val parents: List<String>,
     val abbreviatedHash: String,
     val authorName: String,
     val authorEmail: String,

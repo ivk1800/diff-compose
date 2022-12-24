@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import ru.ivk1800.diff.feature.repositoryview.domain.Commit
+import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import java.io.File
@@ -25,11 +27,19 @@ class CommitInfoInteractor(
     // TODO: add main dispatcher
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
-    private val selectCommitEvent = MutableSharedFlow<String?>(extraBufferCapacity = 1)
+    private var files = emptyList<CommitFile>()
+
+    private val selectCommitEvent = MutableSharedFlow<String?>(
+        replay = 1,
+        extraBufferCapacity = 1,
+    )
 
     private val _state = MutableStateFlow<CommitInfoState>(CommitInfoState.None)
     val state: StateFlow<CommitInfoState>
         get() = _state
+
+    val selectedCommitHash: String?
+        get() = selectCommitEvent.replayCache.firstOrNull()
 
     init {
         selectCommitEvent
@@ -37,9 +47,10 @@ class CommitInfoInteractor(
                 flow {
                     emit(CommitInfoState.None)
                     if (hash != null) {
-                        val files = commitsRepository
+                        val newFiles = commitsRepository
                             .getCommitFiles(repoDirectory, commitHash = hash)
-                        val items = files.map { file ->
+                        files = newFiles
+                        val items = newFiles.map { file ->
                             CommitFileItem(
                                 name = file.path,
                                 type = CommitFileItem.Type.Added,
@@ -53,6 +64,8 @@ class CommitInfoInteractor(
                 _state.value = state
             }.launchIn(scope)
     }
+
+    fun getFilePathByIndex(value: Int): String? = files.getOrNull(value)?.path
 
     fun onCommitSelected(hash: String?) {
         selectCommitEvent.tryEmit(hash)

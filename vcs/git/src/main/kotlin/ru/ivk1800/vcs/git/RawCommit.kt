@@ -2,6 +2,7 @@ package ru.ivk1800.vcs.git
 
 internal data class RawCommit(
     val hash: String,
+    val parents: String,
     val abbreviatedHash: String,
     val authorName: String,
     val authorEmail: String,

@@ -1,6 +1,5 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -12,14 +11,21 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DiffInfoInteractor {
+class DiffInfoInteractor(
+    private val repoDirectory: File,
+    private val diffRepository: DiffRepository,
+    private val commitsRepository: CommitsRepository,
+    private val diffInfoItemMapper: DiffInfoItemMapper,
+) {
     // TODO: add main dispatcher
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
-    private val selectCommitEvent = MutableSharedFlow<Unit?>(extraBufferCapacity = 1)
+    private val selectCommitEvent = MutableSharedFlow<SelectEvent?>(extraBufferCapacity = 1)
 
     private val _state = MutableStateFlow<DiffInfoState>(DiffInfoState.None)
     val state: StateFlow<DiffInfoState>
@@ -27,28 +33,23 @@ class DiffInfoInteractor {
 
     init {
         selectCommitEvent
-            .flatMapLatest { hash ->
+            .flatMapLatest { event ->
                 flow {
-                    if (hash != null) {
+                    if (event != null) {
+                        val commit = requireNotNull(
+                            commitsRepository.getCommit(repoDirectory, event.commitHash)
+                        )
+
+                        val diff = diffRepository.getDiff(
+                            repoDirectory,
+                            oldCommitHash = requireNotNull(commit.parents.firstOrNull()),
+                            newCommitHash = event.commitHash,
+                            filePath = event.path,
+                        )
+
                         emit(
                             DiffInfoState.Content(
-                                items = persistentListOf(
-                                    DiffInfoItem.HunkHeader(
-                                        text = "Hunk: Lines 19-26",
-                                    ),
-                                    DiffInfoItem.Line(
-                                        text = "test1",
-                                        type = DiffInfoItem.Line.Type.None,
-                                    ),
-                                    DiffInfoItem.Line(
-                                        text = "test2",
-                                        type = DiffInfoItem.Line.Type.Added,
-                                    ),
-                                    DiffInfoItem.Line(
-                                        text = "test3",
-                                        type = DiffInfoItem.Line.Type.Removed,
-                                    ),
-                                )
+                                items = diffInfoItemMapper.mapToItems(diff)
                             )
                         )
                     } else {
@@ -62,8 +63,8 @@ class DiffInfoInteractor {
             }.launchIn(scope)
     }
 
-    fun onFileSelected() {
-        selectCommitEvent.tryEmit(Unit)
+    fun onFileSelected(commitHash: String, path: String) {
+        selectCommitEvent.tryEmit(SelectEvent(commitHash = commitHash, path = path))
     }
 
     fun onFileUnselected() {
@@ -73,4 +74,6 @@ class DiffInfoInteractor {
     fun dispose() {
         scope.cancel()
     }
+
+    private data class SelectEvent(val commitHash: String, val path: String)
 }

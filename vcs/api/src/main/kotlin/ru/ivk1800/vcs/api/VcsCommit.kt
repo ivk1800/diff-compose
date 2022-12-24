@@ -2,6 +2,7 @@ package ru.ivk1800.vcs.api
 
 data class VcsCommit(
     val hash: String,
+    val parents: List<String>,
     val abbreviatedHash: String,
     val authorName: String,
     val authorEmail: String,
