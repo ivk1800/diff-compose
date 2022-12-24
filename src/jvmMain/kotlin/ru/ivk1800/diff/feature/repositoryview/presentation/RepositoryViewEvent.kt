@@ -1,5 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
+
 sealed interface RepositoryViewEvent {
     object OnReload : RepositoryViewEvent
 
@@ -7,7 +9,7 @@ sealed interface RepositoryViewEvent {
 
     object OpenFinder : RepositoryViewEvent
 
-    data class OnCommitsSelected(val range: IntRange) : RepositoryViewEvent
+    data class OnCommitsSelected(val items: Set<CommitId>) : RepositoryViewEvent
 
     object OnCommitsUnselected : RepositoryViewEvent
 

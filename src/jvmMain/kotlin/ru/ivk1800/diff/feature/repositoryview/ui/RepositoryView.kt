@@ -23,10 +23,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 
 @Composable
 fun RepositoryView(
@@ -45,17 +48,7 @@ fun RepositoryView(
                 CommitsTable(
                     modifier = Modifier.fillMaxSize(),
                     state = state.commitsTableState,
-                    onCommitsSelected = { event ->
-                        onEvent.invoke(
-                            when (event) {
-                                is SelectEvent.Selected ->
-                                    RepositoryViewEvent.OnCommitsSelected(event.range)
-
-                                SelectEvent.Unselect ->
-                                    RepositoryViewEvent.OnCommitsUnselected
-                            }
-                        )
-                    },
+                    onCommitsSelected = { items -> onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(items)) },
                 )
                 DraggableTwoPanes(
                     orientation = Orientation.Horizontal,
@@ -105,7 +98,7 @@ private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =
 private fun CommitsTable(
     modifier: Modifier = Modifier,
     state: CommitsTableState,
-    onCommitsSelected: (event: SelectEvent) -> Unit
+    onCommitsSelected: (items: Set<CommitId>) -> Unit,
 ) = Box(modifier = modifier) {
     when (state) {
         is CommitsTableState.Content -> Commits(
@@ -121,6 +114,7 @@ private fun CommitsTable(
                     modifier = Modifier
                         .fillMaxWidth(),
                     item = CommitItem(
+                        id = CommitId(""),
                         description = "...",
                         commit = "...",
                         author = "...",
@@ -135,9 +129,15 @@ private fun CommitsTable(
 @Composable
 private fun Commits(
     items: ImmutableList<CommitItem>,
-    onSelected: (event: SelectEvent) -> Unit
+    onSelected: (items: Set<CommitId>) -> Unit,
 ) =
-    List(
+    SelectedList<CommitId>(
+        // TODO: Use rememberUpdatedState for callbacks
+        state = rememberSelectedListState(
+            onSelected = onSelected::invoke,
+            calculateIndex = { id -> items.indexOfFirst { it.id == id } },
+            calculateId = { index -> items[index].id },
+        ),
         itemsCount = items.size,
         itemContent = { index ->
             val item = items[index]
@@ -146,7 +146,6 @@ private fun Commits(
                 item = item,
             )
         },
-        onSelected = onSelected,
     )
 
 @Composable

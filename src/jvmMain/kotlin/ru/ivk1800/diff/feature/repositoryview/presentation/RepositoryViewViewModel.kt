@@ -62,8 +62,8 @@ class RepositoryViewViewModel(
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
             is RepositoryViewEvent.OnCommitsSelected -> {
                 commitInfoInteractor.onCommitSelected(
-                    if (value.range.first == value.range.last) {
-                        commitsInteractor.getCommitHashByIndex(value.range.first)
+                    if (value.items.size == 1) {
+                        value.items.first().hash
                     } else {
                         null
                     }
