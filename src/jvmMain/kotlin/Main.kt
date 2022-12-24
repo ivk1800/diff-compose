@@ -19,7 +19,7 @@ fun main() = application {
 
             windows.value.forEach { window ->
                 when (window) {
-                    WindowsManager.Window.Bookmarks -> BookmarksWindow()
+                    WindowsManager.Window.Bookmarks -> BookmarksWindow(::exitApplication)
                     is WindowsManager.Window.Repository -> RepositoryViewWindow(
                         path = window.path,
                         onCloseRequest = { windowsManager.closeRepositoryWindow(window.path) }

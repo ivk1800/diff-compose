@@ -22,13 +22,13 @@ import javax.swing.JFileChooser
 import javax.swing.filechooser.FileSystemView
 
 @Composable
-fun BookmarksWindow() {
+fun BookmarksWindow(onCloseRequest: () -> Unit) {
     Window(
         state = rememberWindowState(
             position = WindowPosition(Alignment.Center),
             size = DpSize(width = 480.dp, height = 640.dp)
         ),
-        onCloseRequest = {},
+        onCloseRequest = onCloseRequest,
     ) {
         // TODO temporary
         val windowsManager = LocalWindowsManager.current

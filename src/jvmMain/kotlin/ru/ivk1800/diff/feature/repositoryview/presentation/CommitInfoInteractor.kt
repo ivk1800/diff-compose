@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import java.io.File
@@ -25,6 +26,7 @@ class CommitInfoInteractor(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
     private var files = emptyList<CommitFile>()
+    private var commit: Commit? = null
 
     private val selectCommitEvent = MutableSharedFlow<String?>(
         replay = 1,
@@ -47,10 +49,14 @@ class CommitInfoInteractor(
                         val newFiles = commitsRepository
                             .getCommitFiles(repoDirectory, commitHash = hash)
                         files = newFiles
+
+                        val newCommit = requireNotNull(commitsRepository.getCommit(repoDirectory, hash))
+                        commit = newCommit
+
                         emit(
                             CommitInfoState.Content(
                                 files = commitInfoMapper.mapToFiles(newFiles),
-                                description = commitInfoMapper.mapToDescription(),
+                                description = commitInfoMapper.mapToDescription(newCommit),
                             )
                         )
                     }

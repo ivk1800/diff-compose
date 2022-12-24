@@ -45,7 +45,7 @@ class GitVcs : Vcs {
     override suspend fun getCommit(directory: File, hash: String): VcsCommit? {
         val process = createProcess(
             directory,
-            "git log -1 --format={$FIELDS} 22ae08f",
+            "git log -1 --format={$FIELDS} $hash",
         )
         val result = process.inputStream.reader().readText()
         val error = process.errorStream.reader().readText()
