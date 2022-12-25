@@ -83,6 +83,7 @@ class RepositoryViewViewModel(
                     diffInfoInteractor.onFileUnselected()
                 }
             RepositoryViewEvent.OnFilesUnselected -> diffInfoInteractor.onFileUnselected()
+            RepositoryViewEvent.OnLoadMoreCommits -> commitsInteractor.loadMore()
         }
     }
 

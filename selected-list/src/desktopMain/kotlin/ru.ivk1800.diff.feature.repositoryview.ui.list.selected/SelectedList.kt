@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -27,11 +29,13 @@ import kotlin.math.min
 fun <Id> SelectedList(
     modifier: Modifier = Modifier,
     state: SelectedListState<Id>,
+    lazyListState: LazyListState = rememberLazyListState(),
     itemsCount: Int,
     itemContent: @Composable (index: Int) -> Unit,
 ) = SelectedListInternal<Id>(
     modifier = modifier,
     state = state,
+    lazyListState = lazyListState,
     itemsCount = itemsCount,
     itemContent = itemContent,
 )
@@ -41,6 +45,7 @@ fun <Id> SelectedList(
 private fun <Id> SelectedListInternal(
     modifier: Modifier,
     state: SelectedListState<Id>,
+    lazyListState: LazyListState,
     itemsCount: Int,
     itemContent: (@Composable (index: Int) -> Unit),
 ) {
@@ -51,6 +56,7 @@ private fun <Id> SelectedListInternal(
 
     LazyColumn(
         modifier = modifier,
+        state = lazyListState,
     ) {
         items(itemsCount) { index ->
             val color by derivedStateOf {

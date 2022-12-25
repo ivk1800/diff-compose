@@ -16,4 +16,6 @@ sealed interface RepositoryViewEvent {
     data class OnFilesSelected(val range: IntRange) : RepositoryViewEvent
 
     object OnFilesUnselected : RepositoryViewEvent
+
+    object OnLoadMoreCommits : RepositoryViewEvent
 }
