@@ -10,16 +10,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import ru.ivk1800.arch.presentation.viewModel
-import ru.ivk1800.diff.feature.bookmarks.data.BookmarksStorage
-import ru.ivk1800.diff.feature.bookmarks.domain.BookmarksRepository
-import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksInteractor
-import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksRouter
-import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksViewModel
-import ru.ivk1800.presentation.window.LocalWindowsManager
-import ru.ivk1800.vcs.git.GitVcs
-import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.filechooser.FileSystemView
+import ru.ivk1800.diff.feature.bookmarks.di.compose.LocalBookmarksWindowScope
 
 @Composable
 fun BookmarksWindow(onCloseRequest: () -> Unit) {
@@ -30,38 +21,9 @@ fun BookmarksWindow(onCloseRequest: () -> Unit) {
         ),
         onCloseRequest = onCloseRequest,
     ) {
-        // TODO temporary
-        val windowsManager = LocalWindowsManager.current
+        val bookmarksWindowScope = LocalBookmarksWindowScope.current
 
-        val viewModel = viewModel {
-            BookmarksViewModel(
-                router = object : BookmarksRouter {
-                    override fun toChooseRepositoryFolder(callback: (value: File) -> Unit) {
-                        val fileChooser = JFileChooser(FileSystemView.getFileSystemView()).apply {
-                            currentDirectory = File(System.getProperty("user.dir"))
-                            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                            isAcceptAllFileFilterUsed = true
-                            selectedFile = null
-                            currentDirectory = null
-                        }
-                        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            val file = fileChooser.selectedFile
-                            callback.invoke(file)
-                        }
-                    }
-
-                    override fun toRepository(path: String) {
-                        windowsManager.openRepositoryWindowIfAbsent(path)
-                    }
-                },
-                vcs = GitVcs(),
-                bookmarksInteractor = BookmarksInteractor(
-                    bookmarksRepository = BookmarksRepository(
-                        storage = BookmarksStorage(),
-                    ),
-                )
-            )
-        }
+        val viewModel = viewModel { bookmarksWindowScope.bookmarksViewModel }
         val state by viewModel.state.collectAsState()
         BookmarksView(
             state,
