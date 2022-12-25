@@ -65,6 +65,11 @@ fun DiffListView(
                             ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        val textColor = when (item.type) {
+                            DiffInfoItem.Line.Type.NotChanged -> Color.Unspecified
+                            DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedTextColor
+                            DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedTextColor
+                        }
                         Box(
                             modifier = Modifier.width(24.dp),
                             contentAlignment = Alignment.Center,
@@ -75,10 +80,12 @@ fun DiffListView(
                                     DiffInfoItem.Line.Type.Added -> "+"
                                     DiffInfoItem.Line.Type.Removed -> "-"
                                 },
+                                color = textColor,
                             )
                         }
                         ListTextView(
                             text = item.text,
+                            color = textColor
                         )
                     }
 

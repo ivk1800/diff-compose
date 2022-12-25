@@ -62,20 +62,32 @@ class CommitFileThemeData(
 @Stable
 class DiffLinesThemeData(
     addedColor: Color,
+    addedTextColor: Color,
     removedColor: Color,
+    removedTextColor: Color,
 ) {
     var addedColor by mutableStateOf(addedColor)
+        internal set
+
+    var addedTextColor by mutableStateOf(addedTextColor)
         internal set
 
     var removedColor by mutableStateOf(removedColor)
         internal set
 
+    var removedTextColor by mutableStateOf(removedTextColor)
+        internal set
+
     fun copy(
         addedColor: Color = this.addedColor,
+        addedTextColor: Color = this.addedTextColor,
         removedColor: Color = this.removedColor,
+        removedTextColor: Color = this.removedTextColor,
     ) = DiffLinesThemeData(
         addedColor,
+        addedTextColor,
         removedColor,
+        removedTextColor,
     )
 }
 
@@ -99,14 +111,18 @@ fun darkCommitFileTheme() =
 
 fun lightDiffLinesTheme() =
     DiffLinesThemeData(
-        addedColor = Color(0xFF033B42),
-        removedColor = Color(0xFF502127),
+        addedColor = Color(0xFF42e25a).copy(alpha = 0.5F),
+        addedTextColor = Color(0xFF5cac1b),
+        removedColor = Color(0xFFe8876f).copy(alpha = 0.5F),
+        removedTextColor = Color(0xFFe8876f),
     )
 
 fun darkDiffLinesTheme() =
     DiffLinesThemeData(
-        addedColor = Color(0xFF033B42),
-        removedColor = Color(0xFF502127),
+        addedColor = Color(0xFF42e25a).copy(alpha = 0.5F),
+        addedTextColor = Color(0xFF42e25a),
+        removedColor = Color(0xFFe8716b).copy(alpha = 0.5F),
+        removedTextColor = Color(0xFFe8876f),
     )
 
 val LocalDiffTheme = staticCompositionLocalOf<DiffThemeData> { throw IllegalStateException("DiffTheme ot provided.") }
