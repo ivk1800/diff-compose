@@ -6,6 +6,7 @@ import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
+import ru.ivk1800.vcs.git.parser.GitLogParser
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
@@ -14,6 +15,8 @@ import kotlin.io.path.exists
 class GitVcs : Vcs {
     private val parser = VcsParser()
     private val diffParser = VcsDiffParser()
+    private val separatorBuilder = SeparatorBuilder()
+    private val gitLogParser = GitLogParser(separatorBuilder)
 
     override suspend fun isRepository(directory: File): Boolean =
         withContext(Dispatchers.IO) {
@@ -31,15 +34,30 @@ class GitVcs : Vcs {
         limit: Int,
         offset: Int,
     ): List<VcsCommit> = withContext(Dispatchers.IO) {
+        val pretty = buildString {
+            append(separatorBuilder.startRecordSeparator())
+            append("%n")
+            addOption(GitLogOption.Hash)
+            addOption(GitLogOption.Parents)
+            addOption(GitLogOption.AbbreviatedHash)
+            addOption(GitLogOption.RawBody)
+            addOption(GitLogOption.AuthorName)
+            addOption(GitLogOption.AuthorEmail)
+            addOption(GitLogOption.AuthorDate)
+            addOption(GitLogOption.CommiterName)
+            addOption(GitLogOption.CommiterEmail)
+            addOption(GitLogOption.CommiterDate)
+            append(separatorBuilder.endRecordSeparator())
+        }
+
         val process = createProcess(
             directory,
-            "git reflog --pretty={$FIELDS}, -n $limit, --skip $offset $branchName",
+            "git log --pretty=format:$pretty -n $limit, --skip $offset $branchName",
         )
 
         val result = process.inputStream.reader().readText()
         val error = process.errorStream.reader().readText()
-        println(error)
-        parser.parseCommits("[$result]")
+        gitLogParser.parseLog(result)
     }
 
     override suspend fun getCommit(directory: File, hash: String): VcsCommit? {
@@ -107,6 +125,12 @@ class GitVcs : Vcs {
             .directory(directory)
             .start()
             .apply { waitFor(10, TimeUnit.SECONDS) }
+
+    private fun StringBuilder.addOption(option: GitLogOption) {
+        append("${separatorBuilder.buildStartForOption(option)}%n")
+        append("%${option.value}%n")
+        append("${separatorBuilder.buildEndForOption(option)}%n")
+    }
 
     private companion object {
         val FIELDS = listOf(
