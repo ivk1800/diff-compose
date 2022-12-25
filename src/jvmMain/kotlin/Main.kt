@@ -6,7 +6,6 @@ import androidx.compose.ui.window.application
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.di.ApplicationScope
 import ru.ivk1800.diff.di.compose.LocalApplicationScope
-import ru.ivk1800.diff.feature.repositoryview.ui.RepositoryViewWindow
 import ru.ivk1800.diff.window.WindowsManager
 
 fun main() = runApplication()
@@ -33,10 +32,7 @@ private fun runDiffApplication() {
         windows.value.forEach { window ->
             when (window) {
                 WindowsManager.Window.Bookmarks -> applicationScope.bookmarksWindowFactory.create()
-                is WindowsManager.Window.Repository -> RepositoryViewWindow(
-                    path = window.path,
-                    onCloseRequest = { windowsManager.closeRepositoryWindow(window.path) }
-                )
+                is WindowsManager.Window.Repository -> applicationScope.repositoryViewWindowFactory.create(window.id)
             }
         }
     }

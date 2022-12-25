@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import ru.ivk1800.diff.feature.repositoryview.RepositoryId
 import ru.ivk1800.diff.presentation.BaseViewModel
 import ru.ivk1800.vcs.api.Vcs
 
@@ -35,7 +36,7 @@ class BookmarksViewModel(
             is BookmarksEvent.OnOpenRepository -> {
                 val repositoryPath = bookmarksInteractor.getBookmarkPath(value.id)
                 if (repositoryPath != null) {
-                    router.toRepository(repositoryPath)
+                    router.toRepository(RepositoryId(repositoryPath))
                 }
             }
         }

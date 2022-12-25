@@ -3,7 +3,10 @@ package ru.ivk1800.diff.di
 import ru.ivk1800.diff.application.ApplicationThemeProvider
 import ru.ivk1800.diff.feature.bookmarks.BookmarksWindowDependencies
 import ru.ivk1800.diff.feature.bookmarks.BookmarksWindowFactory
+import ru.ivk1800.diff.feature.repositoryview.RepositoryViewDependencies
+import ru.ivk1800.diff.feature.repositoryview.RepositoryViewWindowFactory
 import ru.ivk1800.diff.navigation.BookmarksRouterImpl
+import ru.ivk1800.diff.navigation.RepositoryViewRouterImpl
 import ru.ivk1800.diff.window.WindowsManager
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.git.GitVcs
@@ -21,6 +24,15 @@ class ApplicationScope {
                 router = BookmarksRouterImpl(windowsManager),
                 vcs = vcs,
             ),
+        )
+    }
+
+    val repositoryViewWindowFactory: RepositoryViewWindowFactory by lazy {
+        RepositoryViewWindowFactory(
+            dependencies = RepositoryViewDependencies(
+                router = RepositoryViewRouterImpl(windowsManager),
+                vcs = vcs,
+            )
         )
     }
 

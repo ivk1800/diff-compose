@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.navigation
 
 import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksRouter
+import ru.ivk1800.diff.feature.repositoryview.RepositoryId
 import ru.ivk1800.diff.window.WindowsManager
 import java.io.File
 import javax.swing.JFileChooser
@@ -23,7 +24,7 @@ class BookmarksRouterImpl(
         }
     }
 
-    override fun toRepository(path: String) {
-        windowsManager.openRepositoryWindowIfAbsent(path)
+    override fun toRepository(id: RepositoryId) {
+        windowsManager.openRepositoryWindowIfAbsent(id)
     }
 }
