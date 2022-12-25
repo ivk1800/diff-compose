@@ -1,9 +1,10 @@
-package ru.ivk1800.di
+package ru.ivk1800.diff.di
 
+import ru.ivk1800.diff.application.ApplicationThemeProvider
 import ru.ivk1800.diff.feature.bookmarks.BookmarksWindowDependencies
 import ru.ivk1800.diff.feature.bookmarks.BookmarksWindowFactory
-import ru.ivk1800.navigation.BookmarksRouterImpl
-import ru.ivk1800.presentation.window.WindowsManager
+import ru.ivk1800.diff.navigation.BookmarksRouterImpl
+import ru.ivk1800.diff.window.WindowsManager
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.git.GitVcs
 
@@ -21,5 +22,9 @@ class ApplicationScope {
                 vcs = vcs,
             ),
         )
+    }
+
+    val applicationThemeProvider: ApplicationThemeProvider by lazy {
+        ApplicationThemeProvider()
     }
 }

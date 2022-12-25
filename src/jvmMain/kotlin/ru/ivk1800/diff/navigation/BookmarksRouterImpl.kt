@@ -1,7 +1,7 @@
-package ru.ivk1800.navigation
+package ru.ivk1800.diff.navigation
 
 import ru.ivk1800.diff.feature.bookmarks.presentation.BookmarksRouter
-import ru.ivk1800.presentation.window.WindowsManager
+import ru.ivk1800.diff.window.WindowsManager
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileSystemView

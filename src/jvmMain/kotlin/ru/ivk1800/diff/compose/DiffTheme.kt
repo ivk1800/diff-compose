@@ -2,15 +2,18 @@ package ru.ivk1800.diff.compose
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import ru.ivk1800.diff.application.ApplicationTheme
 
 @Immutable
 data class DiffThemeData(
@@ -110,15 +113,28 @@ val LocalDiffTheme = staticCompositionLocalOf<DiffThemeData> { throw IllegalStat
 
 @Composable
 fun DiffTheme(
+    theme: ApplicationTheme,
     content: @Composable () -> Unit,
 ) {
-    val diffTheme = DiffThemeData(
-        commitFileTheme = darkCommitFileTheme(),
-        diffLinesTheme = darkDiffLinesTheme(),
-    )
+    val diffTheme = remember(theme) {
+        when (theme) {
+            ApplicationTheme.Light -> DiffThemeData(
+                commitFileTheme = lightCommitFileTheme(),
+                diffLinesTheme = lightDiffLinesTheme(),
+            )
+
+            ApplicationTheme.Dark -> DiffThemeData(
+                commitFileTheme = darkCommitFileTheme(),
+                diffLinesTheme = darkDiffLinesTheme(),
+            )
+        }
+    }
     CompositionLocalProvider(LocalDiffTheme provides diffTheme) {
         MaterialTheme(
-            colors = darkColors(),
+            colors = when (theme) {
+                ApplicationTheme.Light -> lightColors()
+                ApplicationTheme.Dark -> darkColors()
+            },
             content = content,
         )
     }

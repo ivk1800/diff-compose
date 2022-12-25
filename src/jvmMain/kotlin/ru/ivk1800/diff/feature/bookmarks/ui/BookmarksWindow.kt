@@ -9,8 +9,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import ru.ivk1800.arch.presentation.viewModel
 import ru.ivk1800.diff.feature.bookmarks.di.compose.LocalBookmarksWindowScope
+import ru.ivk1800.diff.presentation.viewModel
 
 @Composable
 fun BookmarksWindow(onCloseRequest: () -> Unit) {

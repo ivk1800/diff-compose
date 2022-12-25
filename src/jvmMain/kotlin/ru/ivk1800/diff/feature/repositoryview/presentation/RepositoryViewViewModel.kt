@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import ru.ivk1800.arch.presentation.BaseViewModel
+import ru.ivk1800.diff.presentation.BaseViewModel
 import java.io.File
 
 class RepositoryViewViewModel(

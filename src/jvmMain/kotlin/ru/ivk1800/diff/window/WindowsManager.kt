@@ -1,4 +1,4 @@
-package ru.ivk1800.presentation.window
+package ru.ivk1800.diff.window
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf

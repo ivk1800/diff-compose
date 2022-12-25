@@ -3,11 +3,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
-import ru.ivk1800.di.ApplicationScope
-import ru.ivk1800.di.compose.LocalApplicationScope
 import ru.ivk1800.diff.compose.DiffTheme
+import ru.ivk1800.diff.di.ApplicationScope
+import ru.ivk1800.diff.di.compose.LocalApplicationScope
 import ru.ivk1800.diff.feature.repositoryview.ui.RepositoryViewWindow
-import ru.ivk1800.presentation.window.WindowsManager
+import ru.ivk1800.diff.window.WindowsManager
 
 fun main() = runApplication()
 
@@ -21,8 +21,12 @@ private fun runApplication() = application {
 
 @Composable
 private fun runDiffApplication() {
-    DiffTheme {
-        val applicationScope = LocalApplicationScope.current
+    val applicationScope = LocalApplicationScope.current
+    val themeState = applicationScope.applicationThemeProvider.theme.collectAsState()
+
+    DiffTheme(
+        theme = themeState.value
+    ) {
         val windowsManager = applicationScope.windowsManager
         val windows = windowsManager.state.collectAsState()
 

@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import ru.ivk1800.arch.presentation.viewModel
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
@@ -25,6 +24,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
+import ru.ivk1800.diff.presentation.viewModel
 import ru.ivk1800.vcs.git.GitVcs
 import java.io.File
 import java.util.concurrent.TimeUnit

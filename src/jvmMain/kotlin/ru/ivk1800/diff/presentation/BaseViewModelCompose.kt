@@ -1,4 +1,4 @@
-package ru.ivk1800.arch.presentation
+package ru.ivk1800.diff.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

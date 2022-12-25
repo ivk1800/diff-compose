@@ -1,4 +1,4 @@
-package ru.ivk1800.arch.presentation
+package ru.ivk1800.diff.presentation
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
