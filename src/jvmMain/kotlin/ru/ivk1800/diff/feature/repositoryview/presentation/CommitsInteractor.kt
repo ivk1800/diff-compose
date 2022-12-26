@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,7 +35,7 @@ class CommitsInteractor(
     private var isAllLoaded = false
 
     private var commits = emptyList<Commit>()
-    private var commitItems: PersistentList<CommitItem> = persistentListOf<CommitItem>()
+    private var commitItems: PersistentList<CommitTableItem> = persistentListOf()
 
     private val _state = MutableStateFlow<CommitsTableState>(CommitsTableState.Loading)
     val state: StateFlow<CommitsTableState>
@@ -79,7 +79,7 @@ class CommitsInteractor(
             val newCommits = commitsRepository
                 .getCommits(repoDirectory, branchName = "master", limit = 20, offset = 0)
             commits = newCommits
-            val items = newCommits.map(commitItemMapper::mapToItem)
+            val items = listOf(CommitTableItem.UncommittedChanges) + newCommits.map(commitItemMapper::mapToItem)
             commitItems = items.toPersistentList()
             emit(CommitsTableState.Content(commitItems))
         }

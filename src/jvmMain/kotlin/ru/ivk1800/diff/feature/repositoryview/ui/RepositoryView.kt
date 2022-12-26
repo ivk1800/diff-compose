@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 
@@ -59,7 +60,10 @@ fun RepositoryView(
                 CommitsTable(
                     modifier = Modifier.fillMaxSize(),
                     state = state.commitsTableState,
-                    onCommitsSelected = { items -> onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(items)) },
+                    onItemsSelected = { items ->
+                        val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().map { it.id }.toSet()
+                        onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
+                    },
                     onLoadMore = { onEvent.invoke(RepositoryViewEvent.OnLoadMoreCommits) }
                 )
                 DraggableTwoPanes(
@@ -110,13 +114,13 @@ private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =
 private fun CommitsTable(
     modifier: Modifier = Modifier,
     state: CommitsTableState,
-    onCommitsSelected: (items: Set<CommitId>) -> Unit,
+    onItemsSelected: (items: Set<CommitTableItem.Id>) -> Unit,
     onLoadMore: () -> Unit,
 ) = Box(modifier = modifier) {
     when (state) {
         is CommitsTableState.Content -> Commits(
             items = state.commits,
-            onSelected = onCommitsSelected,
+            onSelected = onItemsSelected,
             onLoadMore = onLoadMore,
         )
 
@@ -127,7 +131,7 @@ private fun CommitsTable(
                 CommitItemView(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    item = CommitItem(
+                    item = CommitTableItem.Commit(
                         id = CommitId(""),
                         description = "...",
                         commit = "...",
@@ -142,8 +146,8 @@ private fun CommitsTable(
 
 @Composable
 private fun Commits(
-    items: ImmutableList<CommitItem>,
-    onSelected: (items: Set<CommitId>) -> Unit,
+    items: ImmutableList<CommitTableItem>,
+    onSelected: (items: Set<CommitTableItem.Id>) -> Unit,
     onLoadMore: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
@@ -164,19 +168,37 @@ private fun Commits(
 
     val itemContent = remember<@Composable (index: Int) -> Unit> {
         { index ->
-            val item = actualItems[index]
-            CommitItemView(
-                modifier = Modifier,
-                item = item,
-            )
+            when (val item = actualItems[index]) {
+                is CommitTableItem.Commit -> CommitItemView(
+                    modifier = Modifier,
+                    item = item,
+                )
+
+                CommitTableItem.UncommittedChanges -> UncommittedChangesItemView()
+            }
         }
     }
-    SelectedList<CommitId>(
+    SelectedList<CommitTableItem.Id>(
         // TODO: Use rememberUpdatedState for callbacks
         state = rememberSelectedListState(
             onSelected = onSelected::invoke,
-            calculateIndex = { id -> actualItems.indexOfFirst { it.id == id } },
-            calculateId = { index -> actualItems[index].id },
+            calculateIndex = { itemId ->
+                when (itemId) {
+                    is CommitTableItem.Id.Commit -> actualItems
+                        .filterIsInstance<CommitTableItem.Commit>()
+                        .indexOfFirst { it.id == itemId.id }
+
+                    CommitTableItem.Id.UncommittedChanges -> actualItems.indexOfFirst {
+                        it is CommitTableItem.UncommittedChanges
+                    }
+                }
+            },
+            calculateId = { index ->
+                when (val item = actualItems[index]) {
+                    is CommitTableItem.Commit -> CommitTableItem.Id.Commit(item.id)
+                    CommitTableItem.UncommittedChanges -> CommitTableItem.Id.UncommittedChanges
+                }
+            },
         ),
         lazyListState = lazyListState,
         itemsCount = items.size,
@@ -229,15 +251,24 @@ private fun SectionDivider() =
     )
 
 @Composable
+private fun UncommittedChangesItemView() {
+    ListTextView(
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        text = "Uncommitted changes",
+        fontWeight = FontWeight.Bold,
+    )
+}
+
+@Composable
 private fun CommitItemView(
     modifier: Modifier = Modifier,
-    item: CommitItem,
+    item: CommitTableItem.Commit,
 ) = Row(
     modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp)
 ) {
     ListTextView(
         modifier = Modifier
-            .padding(start = 4.dp)
             .weight(3F),
         text = item.description,
     )
