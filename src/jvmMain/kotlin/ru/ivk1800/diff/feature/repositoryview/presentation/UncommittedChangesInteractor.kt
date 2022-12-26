@@ -12,7 +12,7 @@ class UncommittedChangesInteractor {
     val state: StateFlow<UncommittedChangesState>
         get() = _state
 
-    fun activate() {
+    fun check() {
         _state.value = UncommittedChangesState.Content(
             files = persistentListOf(
                 CommitFileItem(
@@ -21,10 +21,6 @@ class UncommittedChangesInteractor {
                 ),
             )
         )
-    }
-
-    fun deactivate() {
-        _state.value = UncommittedChangesState.None
     }
 
     fun dispose() {

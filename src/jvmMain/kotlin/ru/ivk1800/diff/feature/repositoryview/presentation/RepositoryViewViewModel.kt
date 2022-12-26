@@ -15,6 +15,7 @@ class RepositoryViewViewModel(
     private val commitInfoInteractor: CommitInfoInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
+    private val tableCommitsStateTransformer: TableCommitsStateTransformer,
     private val router: RepositoryViewRouter,
 ) : BaseViewModel() {
 
@@ -29,6 +30,7 @@ class RepositoryViewViewModel(
         get() = _state
 
     init {
+        uncommittedChangesInteractor.check()
         commitInfoInteractor
             .state
             .combine(uncommittedChangesInteractor.state) { commitInfo, uncommittedChanges ->
@@ -45,7 +47,11 @@ class RepositoryViewViewModel(
             .onEach { newState -> _state.value = newState }
             .launchIn(viewModelScope)
 
-        commitsInteractor.state
+        tableCommitsStateTransformer.transform(
+            scope = viewModelScope,
+            commitsTableStateFlow = commitsInteractor.state,
+            uncommittedChangesStateFlow = uncommittedChangesInteractor.state,
+        )
             .map { newState ->
                 _state.value.copy(commitsTableState = newState)
             }
@@ -63,16 +69,15 @@ class RepositoryViewViewModel(
     fun onEvent(value: RepositoryViewEvent) {
         when (value) {
             RepositoryViewEvent.OnReload -> {
-                uncommittedChangesInteractor.deactivate()
                 commitInfoInteractor.onCommitSelected(null)
                 diffInfoInteractor.onFileUnselected()
                 commitsInteractor.reload()
+                uncommittedChangesInteractor.check()
             }
 
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
             is RepositoryViewEvent.OnCommitsSelected -> {
-                uncommittedChangesInteractor.deactivate()
                 commitInfoInteractor.onCommitSelected(
                     if (value.items.size == 1) {
                         value.items.first().hash
@@ -99,7 +104,6 @@ class RepositoryViewViewModel(
             RepositoryViewEvent.OnLoadMoreCommits -> commitsInteractor.loadMore()
             RepositoryViewEvent.OnUncommittedChangesSelected -> {
                 commitInfoInteractor.onCommitSelected(null)
-                uncommittedChangesInteractor.activate()
             }
         }
     }

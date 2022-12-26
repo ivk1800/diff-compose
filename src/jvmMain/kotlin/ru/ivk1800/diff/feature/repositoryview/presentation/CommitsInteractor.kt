@@ -79,7 +79,7 @@ class CommitsInteractor(
             val newCommits = commitsRepository
                 .getCommits(repoDirectory, branchName = "master", limit = 20, offset = 0)
             commits = newCommits
-            val items = listOf(CommitTableItem.UncommittedChanges) + newCommits.map(commitItemMapper::mapToItem)
+            val items = newCommits.map(commitItemMapper::mapToItem)
             commitItems = items.toPersistentList()
             emit(CommitsTableState.Content(commitItems))
         }
