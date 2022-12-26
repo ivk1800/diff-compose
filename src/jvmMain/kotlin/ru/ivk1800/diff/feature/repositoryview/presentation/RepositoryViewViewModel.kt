@@ -2,6 +2,7 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -13,26 +14,35 @@ class RepositoryViewViewModel(
     private val commitsInteractor: CommitsInteractor,
     private val commitInfoInteractor: CommitInfoInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
+    private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val router: RepositoryViewRouter,
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(
         RepositoryViewState(
             commitsTableState = CommitsTableState.Loading,
-            commitInfoState = CommitInfoState.None,
             diffInfoState = DiffInfoState.None,
+            activeState = ActiveState.None,
         )
     )
     val state: StateFlow<RepositoryViewState>
         get() = _state
 
     init {
-        commitInfoInteractor.state
-            .map { newState ->
-                _state.value.copy(commitInfoState = newState)
-            }.onEach { newState ->
-                _state.value = newState
+        commitInfoInteractor
+            .state
+            .combine(uncommittedChangesInteractor.state) { commitInfo, uncommittedChanges ->
+                _state.value.copy(
+                    activeState = if (commitInfo is CommitInfoState.Content) {
+                        ActiveState.Commit(commitInfo)
+                    } else if (uncommittedChanges is UncommittedChangesState.Content) {
+                        ActiveState.UncommittedChanges(uncommittedChanges)
+                    } else {
+                        ActiveState.None
+                    },
+                )
             }
+            .onEach { newState -> _state.value = newState }
             .launchIn(viewModelScope)
 
         commitsInteractor.state
@@ -53,6 +63,7 @@ class RepositoryViewViewModel(
     fun onEvent(value: RepositoryViewEvent) {
         when (value) {
             RepositoryViewEvent.OnReload -> {
+                uncommittedChangesInteractor.deactivate()
                 commitInfoInteractor.onCommitSelected(null)
                 diffInfoInteractor.onFileUnselected()
                 commitsInteractor.reload()
@@ -61,6 +72,7 @@ class RepositoryViewViewModel(
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
             is RepositoryViewEvent.OnCommitsSelected -> {
+                uncommittedChangesInteractor.deactivate()
                 commitInfoInteractor.onCommitSelected(
                     if (value.items.size == 1) {
                         value.items.first().hash
@@ -82,14 +94,19 @@ class RepositoryViewViewModel(
                 } else {
                     diffInfoInteractor.onFileUnselected()
                 }
+
             RepositoryViewEvent.OnFilesUnselected -> diffInfoInteractor.onFileUnselected()
             RepositoryViewEvent.OnLoadMoreCommits -> commitsInteractor.loadMore()
+            RepositoryViewEvent.OnUncommittedChangesSelected -> {
+                commitInfoInteractor.onCommitSelected(null)
+                uncommittedChangesInteractor.activate()
+            }
         }
     }
 
-
     override fun dispose() {
         commitsInteractor.dispose()
+        uncommittedChangesInteractor.dispose()
         commitInfoInteractor.dispose()
         diffInfoInteractor.dispose()
         super.dispose()

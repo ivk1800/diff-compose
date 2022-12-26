@@ -18,4 +18,6 @@ sealed interface RepositoryViewEvent {
     object OnFilesUnselected : RepositoryViewEvent
 
     object OnLoadMoreCommits : RepositoryViewEvent
+
+    object OnUncommittedChangesSelected: RepositoryViewEvent
 }

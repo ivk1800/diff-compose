@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.feature.repositoryview.presentation.ActiveState
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
@@ -61,37 +62,73 @@ fun RepositoryView(
                     modifier = Modifier.fillMaxSize(),
                     state = state.commitsTableState,
                     onItemsSelected = { items ->
-                        val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().map { it.id }.toSet()
-                        onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
+                        if (items.size == 1 && items.first() is CommitTableItem.Id.UncommittedChanges) {
+                            onEvent.invoke(RepositoryViewEvent.OnUncommittedChangesSelected)
+                        } else {
+                            val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().map { it.id }.toSet()
+                            onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
+                        }
                     },
                     onLoadMore = { onEvent.invoke(RepositoryViewEvent.OnLoadMoreCommits) }
                 )
-                DraggableTwoPanes(
-                    orientation = Orientation.Horizontal,
-                    percent = 40F
-                ) {
-                    CommitInfoView(
-                        modifier = Modifier.fillMaxSize(),
-                        state = state.commitInfoState,
-                        onFilesSelected = { event ->
-                            onEvent.invoke(
-                                when (event) {
-                                    is SelectEvent.Selected -> RepositoryViewEvent.OnFilesSelected(event.range)
-
-                                    SelectEvent.Unselect -> RepositoryViewEvent.OnFilesUnselected
-                                }
-                            )
-                        }
-                    )
-                    DiffInfoView(
-                        modifier = Modifier.fillMaxSize(),
-                        state = state.diffInfoState,
-                    )
-                }
+                BottomHorizontalPanes(state, onEvent)
             }
         }
     }
 }
+
+@Composable
+private fun BottomHorizontalPanes(
+    state: RepositoryViewState,
+    onEvent: (value: RepositoryViewEvent) -> Unit,
+) =
+    DraggableTwoPanes(
+        orientation = Orientation.Horizontal,
+        percent = 40F
+    ) {
+        when (state.activeState) {
+            is ActiveState.Commit -> CommitInfoPage(state.activeState, onEvent)
+
+            is ActiveState.UncommittedChanges -> UncommittedChangesInfoPane(state.activeState, onEvent)
+
+            ActiveState.None -> Box(
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        DiffInfoView(
+            modifier = Modifier.fillMaxSize(),
+            state = state.diffInfoState,
+        )
+    }
+
+@Composable
+private fun UncommittedChangesInfoPane(
+    activeState: ActiveState.UncommittedChanges,
+    onEvent: (value: RepositoryViewEvent) -> Unit,
+) =
+    UncommittedChangesInfoView(
+        modifier = Modifier.fillMaxSize(),
+        state = activeState.state,
+    )
+
+@Composable
+private fun CommitInfoPage(
+    activeState: ActiveState.Commit,
+    onEvent: (value: RepositoryViewEvent) -> Unit
+) =
+    CommitInfoView(
+        modifier = Modifier.fillMaxSize(),
+        state = activeState.state,
+        onFilesSelected = { event ->
+            onEvent.invoke(
+                when (event) {
+                    is SelectEvent.Selected -> RepositoryViewEvent.OnFilesSelected(event.range)
+
+                    SelectEvent.Unselect -> RepositoryViewEvent.OnFilesUnselected
+                }
+            )
+        }
+    )
 
 @Composable
 private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =

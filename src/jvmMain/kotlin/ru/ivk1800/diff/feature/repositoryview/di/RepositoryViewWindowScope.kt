@@ -12,6 +12,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
+import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
 import java.io.File
 
 class RepositoryViewWindowScope(
@@ -60,12 +61,17 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val uncommittedChangesInteractor by lazy {
+        UncommittedChangesInteractor()
+    }
+
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
             repositoryDirectory = repoPath,
             commitsInteractor = commitsInteractor,
             commitInfoInteractor = commitInfoInteractor,
             diffInfoInteractor = diffInfoInteractor,
+            uncommittedChangesInteractor = uncommittedChangesInteractor,
             router = dependencies.router,
         )
     }
