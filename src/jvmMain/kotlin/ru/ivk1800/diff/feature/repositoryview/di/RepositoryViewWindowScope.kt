@@ -46,11 +46,15 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val commitInfoMapper by lazy {
+        CommitInfoMapper()
+    }
+
     private val commitInfoInteractor by lazy {
         CommitInfoInteractor(
             repoDirectory = repoPath,
             commitsRepository = commitsRepository,
-            commitInfoMapper = CommitInfoMapper(),
+            commitInfoMapper = commitInfoMapper,
         )
     }
 
@@ -63,7 +67,11 @@ class RepositoryViewWindowScope(
     }
 
     private val uncommittedChangesInteractor by lazy {
-        UncommittedChangesInteractor()
+        UncommittedChangesInteractor(
+            repoDirectory = repoPath,
+            diffRepository = diffRepository,
+            commitInfoMapper = commitInfoMapper,
+        )
     }
 
     private val tableCommitsStateTransformer by lazy {

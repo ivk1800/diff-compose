@@ -45,7 +45,8 @@ sealed interface UncommittedChangesState {
     object None : UncommittedChangesState
 
     data class Content(
-        val files: ImmutableList<CommitFileItem>,
+        val staged: ImmutableList<CommitFileItem>,
+        val notStaged: ImmutableList<CommitFileItem>,
     ) : UncommittedChangesState
 }
 

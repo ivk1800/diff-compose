@@ -101,6 +101,11 @@ internal class VcsDiffParser {
             addHunk()
         }
 
-        return VcsDiff(hunks)
+        val filePath = lines[0].substringAfter("diff --git a/")
+
+        return VcsDiff(
+            filePath = filePath,
+            hunks,
+        )
     }
 }

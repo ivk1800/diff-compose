@@ -20,6 +20,7 @@ class DiffRepository(
 
     private fun toDiff(diff: VcsDiff): Diff {
         return Diff(
+            filePath = diff.filePath,
             hunks = diff.hunks.map { hunk ->
                 Diff.Hunk(
                     lines = hunk.lines.map { line ->

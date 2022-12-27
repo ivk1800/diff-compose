@@ -105,7 +105,7 @@ class GitVcs : Vcs {
     }
 
     override suspend fun getNotStagedDiff(directory: File): List<VcsDiff> =
-        runProcess(createProcess(directory, "git diff HEAD"),
+        runProcess(createProcess(directory, "git diff"),
             onError = { error ->
                 VcsException.ProcessException(error)
             }, onResult = { result ->
