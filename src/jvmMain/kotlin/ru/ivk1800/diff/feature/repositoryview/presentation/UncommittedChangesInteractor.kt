@@ -38,15 +38,15 @@ class UncommittedChangesInteractor(
         checkEvent
             .flatMapLatest {
                 val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
-                val notStagedDiff: List<Diff> = diffRepository.getNotStagedDiff(repoDirectory)
+                val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
 
-                if (stagedDiff.isEmpty() && notStagedDiff.isEmpty()) {
+                if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
                     flowOf(UncommittedChangesState.None)
                 } else {
                     flowOf(
                         UncommittedChangesState.Content(
                             staged = commitInfoMapper.mapDiffToFiles(stagedDiff),
-                            notStaged = commitInfoMapper.mapDiffToFiles(notStagedDiff),
+                            unstaged = commitInfoMapper.mapDiffToFiles(unstagedDiff),
                         )
                     )
                 }

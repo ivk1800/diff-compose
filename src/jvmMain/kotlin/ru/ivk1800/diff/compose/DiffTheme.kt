@@ -19,7 +19,16 @@ import ru.ivk1800.diff.application.ApplicationTheme
 data class DiffThemeData(
     val commitFileTheme: CommitFileThemeData,
     val diffLinesTheme: DiffLinesThemeData,
+    val colors: DiffColors,
 )
+
+@Stable
+class DiffColors(
+    header1Color: Color,
+) {
+    var header1Color by mutableStateOf(header1Color)
+        internal set
+}
 
 @Stable
 class CommitFileThemeData(
@@ -125,6 +134,16 @@ fun darkDiffLinesTheme() =
         removedTextColor = Color(0xFFe8876f),
     )
 
+fun lightDiffColors() =
+    DiffColors(
+        header1Color = Color.DarkGray.copy(alpha = 0.2F),
+    )
+
+fun darkDiffColors() =
+    DiffColors(
+        header1Color = Color.DarkGray.copy(alpha = 0.2F),
+    )
+
 val LocalDiffTheme = staticCompositionLocalOf<DiffThemeData> { throw IllegalStateException("DiffTheme ot provided.") }
 
 @Composable
@@ -137,11 +156,13 @@ fun DiffTheme(
             ApplicationTheme.Light -> DiffThemeData(
                 commitFileTheme = lightCommitFileTheme(),
                 diffLinesTheme = lightDiffLinesTheme(),
+                colors = lightDiffColors(),
             )
 
             ApplicationTheme.Dark -> DiffThemeData(
                 commitFileTheme = darkCommitFileTheme(),
                 diffLinesTheme = darkDiffLinesTheme(),
+                colors = darkDiffColors(),
             )
         }
     }

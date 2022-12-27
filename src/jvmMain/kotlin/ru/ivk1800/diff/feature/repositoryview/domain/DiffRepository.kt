@@ -13,8 +13,8 @@ class DiffRepository(
         return toDiff(diff)
     }
 
-    suspend fun getNotStagedDiff(directory: File): List<Diff> =
-        vcs.getNotStagedDiff(directory).map(::toDiff)
+    suspend fun getUnstagedDiff(directory: File): List<Diff> =
+        vcs.getUnStagedDiff(directory).map(::toDiff)
 
     suspend fun getStagedDiff(directory: File): List<Diff> = vcs.getStagedDiff(directory).map(::toDiff)
 

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -22,9 +24,11 @@ fun CommitFilesListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<CommitFileItem>,
     onSelected: (event: SelectEvent) -> Unit,
+    state: LazyListState = rememberLazyListState(),
 ) {
     List(
         modifier,
+        state = state,
         itemsCount = items.size,
         itemContent = { index ->
             val item = items[index]

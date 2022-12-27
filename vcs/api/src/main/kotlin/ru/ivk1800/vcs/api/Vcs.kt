@@ -13,7 +13,7 @@ interface Vcs {
 
     suspend fun getDiff(directory: File, oldCommitHash: String, newCommitHash: String, filePath: String): VcsDiff
 
-    suspend fun getNotStagedDiff(directory: File): List<VcsDiff>
+    suspend fun getUnStagedDiff(directory: File): List<VcsDiff>
 
     suspend fun getStagedDiff(directory: File): List<VcsDiff>
 }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -30,6 +32,7 @@ fun List(
     itemsCount: Int,
     itemContent: @Composable LazyItemScope.(index: Int) -> Unit,
     onSelected: (event: SelectEvent) -> Unit = { },
+    state: LazyListState = rememberLazyListState(),
 ) {
     val windowInfo = LocalWindowInfo.current
 
@@ -41,6 +44,7 @@ fun List(
     val hoveredColor by remember { mutableStateOf(colors.onSurface.copy(alpha = 0.3f)) }
 
     LazyColumn(
+        state = state,
         modifier = modifier,
     ) {
         items(itemsCount) { index ->
