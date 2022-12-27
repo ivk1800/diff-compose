@@ -20,4 +20,8 @@ interface Vcs {
     suspend fun removeAllFromStaged(directory: File)
 
     suspend fun addAllToStaged(directory: File)
+
+    suspend fun removeFileFromStaged(directory: File, filePath: String)
+
+    suspend fun addFileToStaged(directory: File, filePath: String)
 }

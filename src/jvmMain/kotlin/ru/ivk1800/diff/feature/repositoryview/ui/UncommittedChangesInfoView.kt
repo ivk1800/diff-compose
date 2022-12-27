@@ -2,6 +2,7 @@ package ru.ivk1800.diff.feature.repositoryview.ui
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesState
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.ui.compose.onKeyDownEvent
 
@@ -38,21 +40,25 @@ import ru.ivk1800.diff.ui.compose.onKeyDownEvent
 fun UncommittedChangesInfoView(
     modifier: Modifier = Modifier,
     state: UncommittedChangesState,
-    onEvent: (value: RepositoryViewEvent) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-
+    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+) =
     DraggableTwoPanes(
         modifier = modifier
-            .onKeyDownEvent(key = Key.Spacebar) {
-                println("press")
-            },
+            .focusable(),
         orientation = Orientation.Vertical,
         percent = 50F,
     ) {
+        val focusManager = LocalFocusManager.current
         when (state) {
             is UncommittedChangesState.Content -> {
                 FilesPane(
+                    modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
+                        onEvent.invoke(
+                            RepositoryViewEvent.UncommittedChanges.OnRemoveFileFromStaged(
+                                id = CommitFileId(""),
+                            )
+                        )
+                    },
                     title = "Staged files",
                     files = state.staged.files,
                     vcsProcess = !state.staged.vcsProcess,
@@ -62,6 +68,13 @@ fun UncommittedChangesInfoView(
                     }
                 )
                 FilesPane(
+                    modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
+                        onEvent.invoke(
+                            RepositoryViewEvent.UncommittedChanges.OnAddFileToStaged(
+                                id = CommitFileId(""),
+                            )
+                        )
+                    },
                     title = "Unstaged files",
                     files = state.unstaged.files,
                     vcsProcess = state.unstaged.vcsProcess,
@@ -75,7 +88,6 @@ fun UncommittedChangesInfoView(
             UncommittedChangesState.None -> Box(modifier)
         }
     }
-}
 
 @Composable
 private fun FilesPane(

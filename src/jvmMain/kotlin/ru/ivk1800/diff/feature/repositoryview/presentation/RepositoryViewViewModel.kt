@@ -113,6 +113,12 @@ class RepositoryViewViewModel(
 
                     RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged ->
                         uncommittedChangesInteractor.removeAllFromStaged()
+
+                    is RepositoryViewEvent.UncommittedChanges.OnAddFileToStaged ->
+                        uncommittedChangesInteractor.addFileToStaged(value.id)
+
+                    is RepositoryViewEvent.UncommittedChanges.OnRemoveFileFromStaged ->
+                        uncommittedChangesInteractor.removeFileFromStaged(value.id)
                 }
         }
     }

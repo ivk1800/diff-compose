@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -59,6 +60,15 @@ class UncommittedChangesInteractor(
                         diffRepository.removeAllFromStaged(repoDirectory)
                         emit(checkInternal())
                     }
+
+                    is Event.AddFileToStaged -> flow {
+                        diffRepository.addFileToStaged(repoDirectory, event.id.path)
+                        emit(checkInternal())
+                    }
+                    is Event.RemoveFileFromStaged -> flow {
+                        diffRepository.removeFileFromStaged(repoDirectory, event.id.path)
+                        emit(checkInternal())
+                    }
                 }
             }
             .catch {
@@ -87,6 +97,18 @@ class UncommittedChangesInteractor(
     fun removeAllFromStaged() {
         scope.launch {
             checkEvent.emit(Event.RemoveAllFromStaged)
+        }
+    }
+
+    fun addFileToStaged(id: CommitFileId) {
+        scope.launch {
+            checkEvent.emit(Event.AddFileToStaged(id))
+        }
+    }
+
+    fun removeFileFromStaged(id: CommitFileId) {
+        scope.launch {
+            checkEvent.emit(Event.RemoveFileFromStaged(id))
         }
     }
 
@@ -146,9 +168,15 @@ class UncommittedChangesInteractor(
         }
     }
 
-    private enum class Event {
-        Check,
-        AddAllToStaged,
-        RemoveAllFromStaged
+    private sealed interface Event {
+        object Check : Event
+
+        object AddAllToStaged : Event
+
+        object RemoveAllFromStaged : Event
+
+        data class AddFileToStaged(val id: CommitFileId) : Event
+
+        data class RemoveFileFromStaged(val id: CommitFileId) : Event
     }
 }

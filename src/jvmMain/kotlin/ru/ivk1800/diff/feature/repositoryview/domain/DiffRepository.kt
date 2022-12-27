@@ -22,6 +22,10 @@ class DiffRepository(
 
     suspend fun addAllToStaged(directory: File) = vcs.addAllToStaged(directory)
 
+    suspend fun removeFileFromStaged(directory: File, filePath: String) = vcs.removeFileFromStaged(directory, filePath)
+
+    suspend fun addFileToStaged(directory: File, filePath: String) = vcs.addFileToStaged(directory, filePath)
+
     private fun toDiff(diff: VcsDiff): Diff {
         return Diff(
             filePath = diff.filePath,

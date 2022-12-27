@@ -104,7 +104,7 @@ private fun BottomHorizontalPanes(
 @Composable
 private fun UncommittedChangesInfoPane(
     activeState: ActiveState.UncommittedChanges,
-    onEvent: (value: RepositoryViewEvent) -> Unit,
+    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
 ) =
     UncommittedChangesInfoView(
         modifier = Modifier.fillMaxSize(),
