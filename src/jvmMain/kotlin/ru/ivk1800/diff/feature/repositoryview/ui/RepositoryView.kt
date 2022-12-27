@@ -109,6 +109,7 @@ private fun UncommittedChangesInfoPane(
     UncommittedChangesInfoView(
         modifier = Modifier.fillMaxSize(),
         state = activeState.state,
+        onEvent = onEvent,
     )
 
 @Composable

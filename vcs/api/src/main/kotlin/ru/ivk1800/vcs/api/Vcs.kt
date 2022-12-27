@@ -16,4 +16,8 @@ interface Vcs {
     suspend fun getUnStagedDiff(directory: File): List<VcsDiff>
 
     suspend fun getStagedDiff(directory: File): List<VcsDiff>
+
+    suspend fun removeAllFromStaged(directory: File)
+
+    suspend fun addAllToStaged(directory: File)
 }

@@ -18,6 +18,10 @@ class DiffRepository(
 
     suspend fun getStagedDiff(directory: File): List<Diff> = vcs.getStagedDiff(directory).map(::toDiff)
 
+    suspend fun removeAllFromStaged(directory: File) = vcs.removeAllFromStaged(directory)
+
+    suspend fun addAllToStaged(directory: File) = vcs.addAllToStaged(directory)
+
     private fun toDiff(diff: VcsDiff): Diff {
         return Diff(
             filePath = diff.filePath,

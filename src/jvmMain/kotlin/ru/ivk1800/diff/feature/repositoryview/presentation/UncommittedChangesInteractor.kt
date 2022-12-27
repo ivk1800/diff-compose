@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -26,7 +27,7 @@ class UncommittedChangesInteractor(
     // TODO: add main dispatcher
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
-    private val checkEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val checkEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
 
     private val _state = MutableStateFlow<UncommittedChangesState>(
         UncommittedChangesState.None,
@@ -36,19 +37,28 @@ class UncommittedChangesInteractor(
 
     init {
         checkEvent
-            .flatMapLatest {
-                val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
-                val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
-
-                if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
-                    flowOf(UncommittedChangesState.None)
-                } else {
-                    flowOf(
-                        UncommittedChangesState.Content(
-                            staged = commitInfoMapper.mapDiffToFiles(stagedDiff),
-                            unstaged = commitInfoMapper.mapDiffToFiles(unstagedDiff),
+            .flatMapLatest { event ->
+                when (event) {
+                    Event.Check -> flowOf(checkInternal())
+                    Event.AddAllToStaged -> flow {
+                        _state.value = _state.value.tryCopyWithVcsProcess(
+                            stagedVcsProcess = false,
+                            unstagedVcsProcess = true,
                         )
-                    )
+
+                        diffRepository.addAllToStaged(repoDirectory)
+                        emit(checkInternal())
+                    }
+
+                    Event.RemoveAllFromStaged -> flow {
+                        _state.value = _state.value.tryCopyWithVcsProcess(
+                            stagedVcsProcess = true,
+                            unstagedVcsProcess = false,
+                        )
+
+                        diffRepository.removeAllFromStaged(repoDirectory)
+                        emit(checkInternal())
+                    }
                 }
             }
             .catch {
@@ -56,18 +66,89 @@ class UncommittedChangesInteractor(
                 emit(UncommittedChangesState.None)
             }
             .onEach { newState ->
+                val stateValue = state.value
+                if (stateValue is UncommittedChangesState.Content) {
+                    _state.value = stateValue.copyWithVcsProcess(
+                        stagedVcsProcess = false,
+                        unstagedVcsProcess = false,
+                    )
+                }
                 _state.value = newState
             }
             .launchIn(scope)
     }
 
+    fun addAllToStaged() {
+        scope.launch {
+            checkEvent.emit(Event.AddAllToStaged)
+        }
+    }
+
+    fun removeAllFromStaged() {
+        scope.launch {
+            checkEvent.emit(Event.RemoveAllFromStaged)
+        }
+    }
+
     fun check() {
         scope.launch {
-            checkEvent.emit(Unit)
+            checkEvent.emit(Event.Check)
         }
     }
 
     fun dispose() {
         scope.cancel()
+    }
+
+    private fun UncommittedChangesState.tryCopyWithVcsProcess(
+        stagedVcsProcess: Boolean,
+        unstagedVcsProcess: Boolean,
+    ): UncommittedChangesState =
+        if (this is UncommittedChangesState.Content) {
+            copyWithVcsProcess(
+                stagedVcsProcess = stagedVcsProcess,
+                unstagedVcsProcess = unstagedVcsProcess,
+            )
+        } else {
+            this
+        }
+
+    private fun UncommittedChangesState.Content.copyWithVcsProcess(
+        stagedVcsProcess: Boolean,
+        unstagedVcsProcess: Boolean,
+    ): UncommittedChangesState.Content =
+        copy(
+            unstaged = unstaged.copy(
+                vcsProcess = unstagedVcsProcess,
+            ),
+            staged = staged.copy(
+                vcsProcess = stagedVcsProcess,
+            )
+        )
+
+    private suspend fun checkInternal(): UncommittedChangesState {
+        val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
+        val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
+
+        return if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
+            UncommittedChangesState.None
+        } else {
+            UncommittedChangesState.Content(
+                staged = UncommittedChangesState.Content.Staged(
+                    vcsProcess = false,
+                    files = commitInfoMapper.mapDiffToFiles(stagedDiff),
+                ),
+                unstaged = UncommittedChangesState.Content.Unstaged(
+                    vcsProcess = false,
+                    files = commitInfoMapper.mapDiffToFiles(unstagedDiff),
+                ),
+            )
+        }
+    }
+
+    private enum class Event {
+        Check,
+        AddAllToStaged,
+        RemoveAllFromStaged
     }
 }

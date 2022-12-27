@@ -105,6 +105,15 @@ class RepositoryViewViewModel(
             RepositoryViewEvent.OnUncommittedChangesSelected -> {
                 commitInfoInteractor.onCommitSelected(null)
             }
+
+            is RepositoryViewEvent.UncommittedChanges ->
+                when (value) {
+                    RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged ->
+                        uncommittedChangesInteractor.addAllToStaged()
+
+                    RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged ->
+                        uncommittedChangesInteractor.removeAllFromStaged()
+                }
         }
     }
 

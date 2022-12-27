@@ -20,4 +20,10 @@ sealed interface RepositoryViewEvent {
     object OnLoadMoreCommits : RepositoryViewEvent
 
     object OnUncommittedChangesSelected: RepositoryViewEvent
+
+    sealed interface UncommittedChanges : RepositoryViewEvent {
+        object OnRemoveAllFromStaged : UncommittedChanges
+
+        object OnAddAllToStaged : UncommittedChanges
+    }
 }

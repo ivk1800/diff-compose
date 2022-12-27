@@ -122,6 +122,25 @@ class GitVcs : Vcs {
             }
         )
 
+    override suspend fun removeAllFromStaged(directory: File) =
+        runProcess(
+            createProcess(directory, "git reset HEAD"),
+            onError = { error ->
+                VcsException.ProcessException(error)
+            },
+            onResult = { },
+        )
+
+    override suspend fun addAllToStaged(directory: File) {
+        runProcess(
+            createProcess(directory, "git add -A"),
+            onError = { error ->
+                VcsException.ProcessException(error)
+            },
+            onResult = { },
+        )
+    }
+
     private inline fun <T> runProcess(
         process: Process,
         onResult: (result: String) -> T,
