@@ -35,10 +35,13 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DraggableTwoPanes(
+    modifier: Modifier = Modifier,
     orientation: Orientation,
     percent: Float,
     content: @Composable () -> Unit,
-) = BoxWithConstraints {
+) = BoxWithConstraints(
+    modifier = modifier,
+) {
     require(percent in 0F..100F)
     val dividerSize = 8.dp
     val dividerSizePx = with(LocalDensity.current) { dividerSize.toPx() }
