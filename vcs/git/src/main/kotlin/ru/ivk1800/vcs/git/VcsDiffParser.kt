@@ -7,10 +7,41 @@ import ru.ivk1800.vcs.api.VcsHunkLine
 internal class VcsDiffParser {
 
     @Throws(VcsException.ParseException::class)
-    fun parse(raw: String): VcsDiff =
-        runCatching { parseInternal(raw) }.getOrElse { error ->
+    fun parseSingle(raw: String): VcsDiff {
+        return runCatching { parseInternal(raw) }.getOrElse { error ->
             throw VcsException.ParseException(message = "An error occurred while parsing the diff", cause = error)
         }
+    }
+
+    @Throws(VcsException.ParseException::class)
+    fun parseMultiple(raw: String): List<VcsDiff> {
+        if (raw.isEmpty()) {
+            return emptyList()
+        }
+        return runCatching { parseMultipleInternal(raw) }.getOrElse { error ->
+            throw VcsException.ParseException(message = "An error occurred while parsing the diff", cause = error)
+        }
+    }
+
+    @Throws(VcsException.ParseException::class)
+    private fun parseMultipleInternal(raw: String): List<VcsDiff> {
+        val diffs = mutableListOf<String>()
+
+        val currentDiff = mutableListOf<String>()
+
+        raw.lines().forEach { line ->
+            if (line.startsWith("diff --git ") && currentDiff.isNotEmpty()) {
+                diffs.add(currentDiff.joinToString("\n"))
+                currentDiff.clear()
+            }
+            currentDiff.add(line)
+        }
+        diffs.add(currentDiff.joinToString("\n"))
+        currentDiff.clear()
+
+        check(diffs.joinToString("\n") == raw)
+        return diffs.map(::parseSingle)
+    }
 
     private fun parseInternal(raw: String): VcsDiff {
         val lines: List<String> = raw.lines()

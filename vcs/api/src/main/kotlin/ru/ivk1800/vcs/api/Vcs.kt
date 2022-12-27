@@ -12,4 +12,8 @@ interface Vcs {
     suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile>
 
     suspend fun getDiff(directory: File, oldCommitHash: String, newCommitHash: String, filePath: String): VcsDiff
+
+    suspend fun getNotStagedDiff(directory: File): List<VcsDiff>
+
+    suspend fun getStagedDiff(directory: File): List<VcsDiff>
 }

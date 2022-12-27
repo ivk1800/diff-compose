@@ -99,10 +99,28 @@ class GitVcs : Vcs {
             onError = { error ->
                 VcsException.ProcessException(error)
             }, onResult = { result ->
-                diffParser.parse(result)
+                diffParser.parseSingle(result)
             }
         )
     }
+
+    override suspend fun getNotStagedDiff(directory: File): List<VcsDiff> =
+        runProcess(createProcess(directory, "git diff HEAD"),
+            onError = { error ->
+                VcsException.ProcessException(error)
+            }, onResult = { result ->
+                diffParser.parseMultiple(result)
+            }
+        )
+
+    override suspend fun getStagedDiff(directory: File): List<VcsDiff> =
+        runProcess(createProcess(directory, "git diff --cached"),
+            onError = { error ->
+                VcsException.ProcessException(error)
+            }, onResult = { result ->
+                diffParser.parseMultiple(result)
+            }
+        )
 
     private inline fun <T> runProcess(
         process: Process,
@@ -113,11 +131,11 @@ class GitVcs : Vcs {
         throw onError.invoke(error)
     } else {
         val result = process.inputStream.reader().readText()
-        if (result.isEmpty()) {
-            throw onError.invoke("result of process is empty")
-        } else {
+//        if (result.isEmpty()) {
+//            throw onError.invoke("result of process is empty")
+//        } else {
             onResult.invoke(result)
-        }
+//        }
     }
 
     private fun createProcess(directory: File, command: String): Process =
