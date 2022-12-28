@@ -65,15 +65,16 @@ class UncommittedChangesInteractor(
                         diffRepository.addFileToStaged(repoDirectory, event.id.path)
                         emit(checkInternal())
                     }
+
                     is Event.RemoveFileFromStaged -> flow {
                         diffRepository.removeFileFromStaged(repoDirectory, event.id.path)
                         emit(checkInternal())
                     }
                 }
-            }
-            .catch {
-                // TODO handle errors
-                emit(UncommittedChangesState.None)
+                    .catch {
+                        // TODO handle errors
+                        emit(UncommittedChangesState.None)
+                    }
             }
             .onEach { newState ->
                 val stateValue = state.value

@@ -20,6 +20,8 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 import ru.ivk1800.diff.ui.compose.onKeyDownEvent
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -122,11 +125,18 @@ private fun FilesPane(
             )
         }
         Box(modifier = Modifier.fillMaxSize()) {
+            val currentFiles by rememberUpdatedState(files)
             val lazyListState = rememberLazyListState()
             CommitFilesListView(
-                state = lazyListState,
+                lazyListState = lazyListState,
+                state = rememberSelectedListState(
+                    onSelected = {
+                        println(it)
+                    },
+                    calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
+                    calculateId = { index -> currentFiles[index].id },
+                ),
                 items = files,
-                onSelected = { },
             )
 
             VerticalScrollbar(

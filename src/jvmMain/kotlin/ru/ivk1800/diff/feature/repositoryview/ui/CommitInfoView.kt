@@ -12,16 +12,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescription
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 
 @Composable
 fun CommitInfoView(
     modifier: Modifier = Modifier,
     state: CommitInfoState,
-    onFilesSelected: (event: SelectEvent) -> Unit
+    onFilesSelected: (items: Set<CommitFileId>) -> Unit,
 ) = Box(modifier = modifier) {
     when (state) {
         is CommitInfoState.Content -> {
@@ -29,10 +33,15 @@ fun CommitInfoView(
                 orientation = Orientation.Vertical,
                 percent = 50F,
             ) {
+                val currentFiles by rememberUpdatedState(state.files)
                 CommitFilesListView(
                     modifier = Modifier.fillMaxSize(),
                     items = state.files,
-                    onSelected = onFilesSelected,
+                    state = rememberSelectedListState<CommitFileId>(
+                        onSelected = onFilesSelected::invoke,
+                        calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
+                        calculateId = { index -> currentFiles[index].id },
+                    )
                 )
                 DescriptionPane(state.description)
             }

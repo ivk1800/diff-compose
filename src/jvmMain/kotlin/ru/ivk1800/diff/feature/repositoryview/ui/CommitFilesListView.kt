@@ -17,19 +17,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.compose.LocalDiffTheme
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedListState
 
 @Composable
 fun CommitFilesListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<CommitFileItem>,
-    onSelected: (event: SelectEvent) -> Unit,
-    state: LazyListState = rememberLazyListState(),
+    lazyListState: LazyListState = rememberLazyListState(),
+    state: SelectedListState<CommitFileId>
 ) {
-    List(
+    SelectedList<CommitFileId>(
         modifier,
-        state = state,
+        lazyListState = lazyListState,
         itemsCount = items.size,
+        state = state,
         itemContent = { index ->
             val item = items[index]
             CommitFileItemView(
@@ -37,7 +41,6 @@ fun CommitFilesListView(
                 item = item,
             )
         },
-        onSelected = onSelected,
     )
 }
 

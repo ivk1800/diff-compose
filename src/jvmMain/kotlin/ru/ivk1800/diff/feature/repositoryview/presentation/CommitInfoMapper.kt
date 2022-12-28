@@ -6,6 +6,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescription
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -18,6 +19,7 @@ class CommitInfoMapper {
     fun mapDiffToFiles(files: List<Diff>): ImmutableList<CommitFileItem> =
         files.map { file ->
             CommitFileItem(
+                id = CommitFileId(file.filePath),
                 name = file.filePath,
                 type = CommitFileItem.Type.Added,
             )
@@ -26,6 +28,7 @@ class CommitInfoMapper {
     fun mapToFiles(files: List<CommitFile>): ImmutableList<CommitFileItem> =
         files.map { file ->
             CommitFileItem(
+                id = CommitFileId(file.path),
                 name = file.path,
                 type = CommitFileItem.Type.Added,
             )

@@ -121,13 +121,7 @@ private fun CommitInfoPage(
         modifier = Modifier.fillMaxSize(),
         state = activeState.state,
         onFilesSelected = { event ->
-            onEvent.invoke(
-                when (event) {
-                    is SelectEvent.Selected -> RepositoryViewEvent.OnFilesSelected(event.range)
-
-                    SelectEvent.Unselect -> RepositoryViewEvent.OnFilesUnselected
-                }
-            )
+            onEvent.invoke(RepositoryViewEvent.OnFilesSelected(event))
         }
     )
 
