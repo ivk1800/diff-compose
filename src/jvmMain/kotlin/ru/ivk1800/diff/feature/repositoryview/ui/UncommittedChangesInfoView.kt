@@ -20,8 +20,12 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -54,11 +58,13 @@ fun UncommittedChangesInfoView(
         val focusManager = LocalFocusManager.current
         when (state) {
             is UncommittedChangesState.Content -> {
+                val stagedFilesPaneState = rememberFilesPaneState<CommitFileId>()
+                val unstagedFilesPaneState = rememberFilesPaneState<CommitFileId>()
                 FilesPane(
                     modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
                         onEvent.invoke(
-                            RepositoryViewEvent.UncommittedChanges.OnRemoveFileFromStaged(
-                                id = CommitFileId(""),
+                            RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(
+                                ids = stagedFilesPaneState.selected,
                             )
                         )
                     },
@@ -68,13 +74,14 @@ fun UncommittedChangesInfoView(
                     onStageActionClick = {
                         focusManager.clearFocus()
                         onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged)
-                    }
+                    },
+                    state = stagedFilesPaneState,
                 )
                 FilesPane(
                     modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
                         onEvent.invoke(
-                            RepositoryViewEvent.UncommittedChanges.OnAddFileToStaged(
-                                id = CommitFileId(""),
+                            RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(
+                                ids = unstagedFilesPaneState.selected,
                             )
                         )
                     },
@@ -84,7 +91,8 @@ fun UncommittedChangesInfoView(
                     onStageActionClick = {
                         focusManager.clearFocus()
                         onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged)
-                    }
+                    },
+                    state = unstagedFilesPaneState,
                 )
             }
 
@@ -99,6 +107,7 @@ private fun FilesPane(
     vcsProcess: Boolean,
     files: ImmutableList<CommitFileItem>,
     onStageActionClick: () -> Unit,
+    state: FilesPaneState<CommitFileId>,
 ) =
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -126,12 +135,14 @@ private fun FilesPane(
         }
         Box(modifier = Modifier.fillMaxSize()) {
             val currentFiles by rememberUpdatedState(files)
+            val currentState by rememberUpdatedState(state)
             val lazyListState = rememberLazyListState()
+
             CommitFilesListView(
                 lazyListState = lazyListState,
                 state = rememberSelectedListState(
-                    onSelected = {
-                        println(it)
+                    onSelected = { selected ->
+                        currentState.selected = selected
                     },
                     calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
                     calculateId = { index -> currentFiles[index].id },
@@ -142,8 +153,16 @@ private fun FilesPane(
             VerticalScrollbar(
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 adapter = rememberScrollbarAdapter(
-                    scrollState = lazyListState
+                    scrollState = lazyListState,
                 )
             )
         }
     }
+
+@Stable
+class FilesPaneState<Id> {
+    var selected by mutableStateOf(emptySet<Id>())
+}
+
+@Composable
+fun <Id> rememberFilesPaneState(): FilesPaneState<Id> = remember { FilesPaneState() }

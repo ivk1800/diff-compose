@@ -61,17 +61,20 @@ class UncommittedChangesInteractor(
                         emit(checkInternal())
                     }
 
-                    is Event.AddFileToStaged -> flow {
-                        diffRepository.addFileToStaged(repoDirectory, event.id.path)
+                    is Event.AddFilesToStaged -> flow {
+                        diffRepository.addFilesToStaged(repoDirectory, event.ids.map { it.path })
                         emit(checkInternal())
                     }
 
-                    is Event.RemoveFileFromStaged -> flow {
-                        diffRepository.removeFileFromStaged(repoDirectory, event.id.path)
+                    is Event.RemoveFilesFromStaged -> flow {
+                        diffRepository.removeFilesFromStaged(repoDirectory, event.ids.map { it.path })
                         emit(checkInternal())
                     }
                 }
                     .catch {
+                        val message = it
+                        println(message)
+                        println(message)
                         // TODO handle errors
                         emit(UncommittedChangesState.None)
                     }
@@ -101,15 +104,15 @@ class UncommittedChangesInteractor(
         }
     }
 
-    fun addFileToStaged(id: CommitFileId) {
+    fun addFilesToStaged(ids: Set<CommitFileId>) {
         scope.launch {
-            checkEvent.emit(Event.AddFileToStaged(id))
+            checkEvent.emit(Event.AddFilesToStaged(ids))
         }
     }
 
-    fun removeFileFromStaged(id: CommitFileId) {
+    fun removeFilesFromStaged(ids: Set<CommitFileId>) {
         scope.launch {
-            checkEvent.emit(Event.RemoveFileFromStaged(id))
+            checkEvent.emit(Event.RemoveFilesFromStaged(ids))
         }
     }
 
@@ -176,8 +179,8 @@ class UncommittedChangesInteractor(
 
         object RemoveAllFromStaged : Event
 
-        data class AddFileToStaged(val id: CommitFileId) : Event
+        data class AddFilesToStaged(val ids: Set<CommitFileId>) : Event
 
-        data class RemoveFileFromStaged(val id: CommitFileId) : Event
+        data class RemoveFilesFromStaged(val ids: Set<CommitFileId>) : Event
     }
 }

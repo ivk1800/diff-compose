@@ -140,18 +140,18 @@ class GitVcs : Vcs {
             onResult = { },
         )
 
-    override suspend fun removeFileFromStaged(directory: File, filePath: String) =
+    override suspend fun removeFilesFromStaged(directory: File, filePaths: List<String>) =
         runProcess(
-            createProcess(directory, "git reset HEAD $filePath"),
+            createProcess(directory, "git reset HEAD ${filePaths.joinToString(" ")}"),
             onError = { error ->
                 VcsException.ProcessException(error)
             },
             onResult = { },
         )
 
-    override suspend fun addFileToStaged(directory: File, filePath: String) =
+    override suspend fun addFilesToStaged(directory: File, filePaths: List<String>) =
         runProcess(
-            createProcess(directory, "git add $filePath"),
+            createProcess(directory, "git add ${filePaths.joinToString(" ")}"),
             onError = { error ->
                 VcsException.ProcessException(error)
             },

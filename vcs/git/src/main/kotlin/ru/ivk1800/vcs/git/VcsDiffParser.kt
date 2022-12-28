@@ -60,6 +60,8 @@ internal class VcsDiffParser {
             currentHunkLines.clear()
         }
 
+        var filePath: String? = null
+
         lines.forEach { line ->
             if (line.startsWith("@@")) {
                 if (!isHunk) {
@@ -67,6 +69,8 @@ internal class VcsDiffParser {
                 } else {
                     addHunk()
                 }
+            } else if (line.startsWith("--- a/")) {
+                filePath = line.substringAfter("--- a/")
             } else {
                 if (isHunk) {
                     if (line.isEmpty()) {
@@ -101,10 +105,8 @@ internal class VcsDiffParser {
             addHunk()
         }
 
-        val filePath = lines[0].substringAfter("diff --git a/")
-
         return VcsDiff(
-            filePath = filePath,
+            filePath = requireNotNull(filePath),
             hunks,
         )
     }
