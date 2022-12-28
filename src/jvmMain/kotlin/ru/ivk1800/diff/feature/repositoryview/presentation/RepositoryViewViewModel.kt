@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.presentation.BaseViewModel
+import ru.ivk1800.diff.presentation.DialogRouter
 import java.io.File
 
 class RepositoryViewViewModel(
@@ -17,6 +18,7 @@ class RepositoryViewViewModel(
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val tableCommitsStateTransformer: TableCommitsStateTransformer,
     private val router: RepositoryViewRouter,
+    private val dialogRouter: DialogRouter,
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(
@@ -63,6 +65,26 @@ class RepositoryViewViewModel(
                 _state.value.copy(diffInfoState = newState)
             }
             .onEach { newState -> _state.value = newState }
+            .launchIn(viewModelScope)
+
+        uncommittedChangesInteractor.errors
+            .onEach { error ->
+                fun getMessage(e: Throwable): String {
+                    val cause = e.cause
+                    return if (cause == null) {
+                        e.message.orEmpty()
+                    } else {
+                        listOf(e.message.orEmpty(), getMessage(cause)).joinToString("\n")
+                    }
+                }
+
+                dialogRouter.show(
+                    DialogRouter.Dialog(
+                        title = "Error",
+                        text = getMessage(error),
+                    ),
+                )
+            }
             .launchIn(viewModelScope)
     }
 

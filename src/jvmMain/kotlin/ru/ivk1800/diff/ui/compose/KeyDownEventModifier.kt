@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -22,6 +23,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 fun Modifier.onKeyDownEvent(key: Key, onDown: () -> Unit): Modifier =
+    onKeyDownEvent(
+        eventTest = { event ->
+            event.key == key
+        },
+        onDown = onDown,
+    )
+
+fun Modifier.onKeyDownEvent(eventTest: (key: KeyEvent) -> Boolean, onDown: () -> Unit) =
     composed {
         val actualOnDown by rememberUpdatedState(onDown)
 
@@ -44,7 +53,7 @@ fun Modifier.onKeyDownEvent(key: Key, onDown: () -> Unit): Modifier =
         }
 
         onKeyEvent {
-            if (it.key == key) {
+            if (eventTest.invoke(it)) {
                 scope.launch { keyEventChannel.send(it.type) }
                 true
             } else {

@@ -48,7 +48,7 @@ import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedL
 fun RepositoryView(
     state: RepositoryViewState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
-) {
+) =
     Scaffold(
         topBar = { AppBar(onEvent) }
     ) {
@@ -75,7 +75,6 @@ fun RepositoryView(
             }
         }
     }
-}
 
 @Composable
 private fun BottomHorizontalPanes(

@@ -1,7 +1,6 @@
 package ru.ivk1800.diff.window
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +39,3 @@ class WindowsManager {
         data class Repository(val id: RepositoryId) : Window
     }
 }
-
-val LocalWindowsManager =
-    staticCompositionLocalOf<WindowsManager> { throw IllegalStateException("WindowsManager not provided") }

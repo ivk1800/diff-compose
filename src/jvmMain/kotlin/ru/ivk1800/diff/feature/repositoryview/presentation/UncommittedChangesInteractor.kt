@@ -4,13 +4,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -29,6 +29,7 @@ class UncommittedChangesInteractor(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
     private val checkEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
+    private val errorsFlow = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
 
     private val _state = MutableStateFlow<UncommittedChangesState>(
         UncommittedChangesState.None,
@@ -36,11 +37,17 @@ class UncommittedChangesInteractor(
     val state: StateFlow<UncommittedChangesState>
         get() = _state
 
+    val errors: Flow<Throwable>
+        get() = errorsFlow
+
     init {
         checkEvent
             .flatMapLatest { event ->
                 when (event) {
-                    Event.Check -> flowOf(checkInternal())
+                    Event.Check -> flow {
+                        emit(checkInternal())
+                    }
+
                     Event.AddAllToStaged -> flow {
                         _state.value = _state.value.tryCopyWithVcsProcess(
                             stagedVcsProcess = false,
@@ -72,11 +79,9 @@ class UncommittedChangesInteractor(
                     }
                 }
                     .catch {
-                        val message = it
-                        println(message)
-                        println(message)
-                        // TODO handle errors
                         emit(UncommittedChangesState.None)
+                        it.printStackTrace()
+                        errorsFlow.emit(it)
                     }
             }
             .onEach { newState ->

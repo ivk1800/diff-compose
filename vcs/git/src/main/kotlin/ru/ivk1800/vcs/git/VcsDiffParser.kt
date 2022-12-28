@@ -40,7 +40,7 @@ internal class VcsDiffParser {
         currentDiff.clear()
 
         check(diffs.joinToString("\n") == raw)
-        return diffs.map(::parseSingle)
+        return diffs.map(::parseInternal)
     }
 
     private fun parseInternal(raw: String): VcsDiff {
@@ -106,7 +106,9 @@ internal class VcsDiffParser {
         }
 
         return VcsDiff(
-            filePath = requireNotNull(filePath),
+            filePath = requireNotNull(filePath) {
+                "Unable parse filePath"
+            },
             hunks,
         )
     }

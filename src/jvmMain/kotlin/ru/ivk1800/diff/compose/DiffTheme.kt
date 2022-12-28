@@ -25,8 +25,12 @@ data class DiffThemeData(
 @Stable
 class DiffColors(
     header1Color: Color,
+    dialogBarrierColor: Color,
 ) {
     var header1Color by mutableStateOf(header1Color)
+        internal set
+
+    var dialogBarrierColor by mutableStateOf(dialogBarrierColor)
         internal set
 }
 
@@ -137,11 +141,13 @@ fun darkDiffLinesTheme() =
 fun lightDiffColors() =
     DiffColors(
         header1Color = Color.DarkGray.copy(alpha = 0.2F),
+        dialogBarrierColor = Color.Black.copy(alpha = 0.4F),
     )
 
 fun darkDiffColors() =
     DiffColors(
         header1Color = Color.DarkGray.copy(alpha = 0.2F),
+        dialogBarrierColor = Color.Black.copy(alpha = 0.4F),
     )
 
 val LocalDiffTheme = staticCompositionLocalOf<DiffThemeData> { throw IllegalStateException("DiffTheme ot provided.") }

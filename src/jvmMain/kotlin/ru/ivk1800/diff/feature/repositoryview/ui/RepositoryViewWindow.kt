@@ -16,6 +16,7 @@ import androidx.compose.ui.window.rememberWindowState
 import ru.ivk1800.diff.feature.repositoryview.di.compose.LocalRepositoryViewWindowScope
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.presentation.viewModel
+import ru.ivk1800.diff.ui.compose.DiffAlertDialog
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -42,5 +43,16 @@ fun RepositoryViewWindow() {
 
         val state by viewModel.state.collectAsState()
         RepositoryView(state, onEvent = viewModel::onEvent)
+
+        val currentDialog by scope.dialogManager.currentDialog.collectAsState()
+
+        val dialog = currentDialog
+        if (dialog != null)
+            DiffAlertDialog(
+                dialog,
+                onConfirmClick = {
+                    scope.dialogManager.close()
+                },
+            )
     }
 }
