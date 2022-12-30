@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
@@ -18,6 +19,8 @@ import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
+import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 
 @Composable
 fun DiffInfoView(
@@ -47,58 +50,69 @@ fun DiffListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<DiffInfoItem>,
 ) {
-    List(
+    SelectedList<Int>(
         modifier,
         itemsCount = items.size,
+        state = rememberSelectedListState(
+            calculateIndex = { itemId -> itemId },
+            calculateId = { index -> index },
+        ),
         itemContent = { index ->
             when (val item = items[index]) {
-                is DiffInfoItem.Line ->
-                    Row(
-                        modifier = Modifier
-                            .fillParentMaxWidth()
-                            .background(
-                                color = when (item.type) {
-                                    DiffInfoItem.Line.Type.NotChanged -> Color.Transparent
-                                    DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedColor
-                                    DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedColor
-                                }
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        val textColor = when (item.type) {
-                            DiffInfoItem.Line.Type.NotChanged -> Color.Unspecified
-                            DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedTextColor
-                            DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedTextColor
-                        }
-                        Box(
-                            modifier = Modifier.width(24.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            ListTextView(
-                                text = when (item.type) {
-                                    DiffInfoItem.Line.Type.NotChanged -> ""
-                                    DiffInfoItem.Line.Type.Added -> "+"
-                                    DiffInfoItem.Line.Type.Removed -> "-"
-                                },
-                                color = textColor,
-                            )
-                        }
-                        ListTextView(
-                            text = item.text,
-                            color = textColor
-                        )
-                    }
+                is DiffInfoItem.Line -> Line(item)
 
-                is DiffInfoItem.HunkHeader -> Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ListTextView(
-                        modifier = Modifier.padding(8.dp),
-                        text = item.text,
-                    )
-                }
+                is DiffInfoItem.HunkHeader -> HunkHeader(item)
             }
         },
     )
 }
+
+@Composable
+private fun HunkHeader(item: DiffInfoItem.HunkHeader) =
+    Row(
+        modifier = Modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ListTextView(
+            modifier = Modifier.padding(8.dp),
+            text = item.text,
+        )
+    }
+
+@Composable
+private fun Line(item: DiffInfoItem.Line) =
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = when (item.type) {
+                    DiffInfoItem.Line.Type.NotChanged -> Color.Transparent
+                    DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedColor
+                    DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedColor
+                }
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val textColor = when (item.type) {
+            DiffInfoItem.Line.Type.NotChanged -> Color.Unspecified
+            DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedTextColor
+            DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedTextColor
+        }
+        Box(
+            modifier = Modifier.width(24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            ListTextView(
+                text = when (item.type) {
+                    DiffInfoItem.Line.Type.NotChanged -> ""
+                    DiffInfoItem.Line.Type.Added -> "+"
+                    DiffInfoItem.Line.Type.Removed -> "-"
+                },
+                color = textColor,
+            )
+        }
+        ListTextView(
+            text = item.text,
+            color = textColor
+        )
+    }
