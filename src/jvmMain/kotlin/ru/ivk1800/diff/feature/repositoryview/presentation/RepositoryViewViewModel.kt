@@ -16,6 +16,7 @@ class RepositoryViewViewModel(
     private val commitInfoInteractor: CommitInfoInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
+    private val selectionCoordinator: SelectionCoordinator,
     private val tableCommitsStateTransformer: TableCommitsStateTransformer,
     private val router: RepositoryViewRouter,
     private val dialogRouter: DialogRouter,
@@ -86,12 +87,28 @@ class RepositoryViewViewModel(
                 )
             }
             .launchIn(viewModelScope)
+
+        selectionCoordinator
+            .state
+            .onEach { state ->
+                commitsInteractor.selectCommits(state.selectedCommits)
+                commitInfoInteractor.selectCommit(state.commitInfo)
+                if (state.commitDiff != null) {
+                    diffInfoInteractor.onFileSelected(
+                        commitHash = state.commitDiff.id.hash,
+                        path = state.commitDiff.path,
+                    )
+                } else {
+                    diffInfoInteractor.onFileUnselected()
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onEvent(value: RepositoryViewEvent) {
         when (value) {
             RepositoryViewEvent.OnReload -> {
-                commitInfoInteractor.onCommitSelected(null)
+                commitInfoInteractor.selectCommit(null)
                 diffInfoInteractor.onFileUnselected()
                 commitsInteractor.reload()
                 uncommittedChangesInteractor.check()
@@ -100,16 +117,10 @@ class RepositoryViewViewModel(
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
             is RepositoryViewEvent.OnCommitsSelected -> {
-                commitInfoInteractor.onCommitSelected(
-                    if (value.items.size == 1) {
-                        value.items.first().hash
-                    } else {
-                        null
-                    }
-                )
+                selectionCoordinator.selectCommits(value.items)
             }
 
-            RepositoryViewEvent.OnCommitsUnselected -> commitInfoInteractor.onCommitSelected(null)
+            RepositoryViewEvent.OnCommitsUnselected -> commitInfoInteractor.selectCommit(null)
             is RepositoryViewEvent.OnFilesSelected ->
                 if (value.items.size == 1) {
                     diffInfoInteractor.onFileSelected(
@@ -122,7 +133,7 @@ class RepositoryViewViewModel(
 
             RepositoryViewEvent.OnLoadMoreCommits -> commitsInteractor.loadMore()
             RepositoryViewEvent.OnUncommittedChangesSelected -> {
-                commitInfoInteractor.onCommitSelected(null)
+                commitInfoInteractor.selectCommit(null)
             }
 
             is RepositoryViewEvent.UncommittedChanges ->

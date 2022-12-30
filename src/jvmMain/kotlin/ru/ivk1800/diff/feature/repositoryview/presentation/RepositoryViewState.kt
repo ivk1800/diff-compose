@@ -2,6 +2,7 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescription
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
@@ -18,7 +19,10 @@ data class RepositoryViewState(
 sealed interface CommitsTableState {
     object Loading : CommitsTableState
 
-    data class Content(val commits: ImmutableList<CommitTableItem>) : CommitsTableState
+    data class Content(
+        val selected: ImmutableSet<CommitTableItem.Id>,
+        val commits: ImmutableList<CommitTableItem>,
+    ) : CommitsTableState
 }
 
 @Immutable

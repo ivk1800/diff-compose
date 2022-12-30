@@ -4,16 +4,18 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentSetOf
 
 @Stable
 class SelectedListState<Id>(
-    onSelected: (items: Set<Id>) -> Unit,
+    onSelected: ((items: ImmutableSet<Id>) -> Unit)?,
     onInteractable: (item: Id) -> Boolean,
-    onTestSelected: (items: Set<Id>) -> Boolean,
+    onTestSelected: (items: ImmutableSet<Id>) -> Boolean,
     calculateId: (index: Int) -> Id,
     calculateIndex: (id: Id) -> Int,
 ) {
-    internal var selected by mutableStateOf(emptySet<Id>())
+    internal var selected by mutableStateOf<ImmutableSet<Id>>(persistentSetOf())
     internal var initialSelectedIndex by mutableStateOf(-1)
 
     internal val onSelected by mutableStateOf(onSelected)
@@ -26,7 +28,7 @@ class SelectedListState<Id>(
 
     private val calculateIndex by mutableStateOf(calculateIndex)
 
-    fun select(value: Set<Id>) {
+    fun select(value: ImmutableSet<Id>) {
         selected = value
         initialSelectedIndex = if (value.isEmpty()) {
             -1

@@ -1,7 +1,8 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import kotlinx.collections.immutable.ImmutableSet
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 
 sealed interface RepositoryViewEvent {
     object OnReload : RepositoryViewEvent
@@ -10,7 +11,7 @@ sealed interface RepositoryViewEvent {
 
     object OpenFinder : RepositoryViewEvent
 
-    data class OnCommitsSelected(val items: Set<CommitId>) : RepositoryViewEvent
+    data class OnCommitsSelected(val items: ImmutableSet<CommitTableItem.Id.Commit>) : RepositoryViewEvent
 
     object OnCommitsUnselected : RepositoryViewEvent
 

@@ -19,10 +19,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -30,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -65,7 +64,7 @@ fun RepositoryView(
                         if (items.size == 1 && items.first() is CommitTableItem.Id.UncommittedChanges) {
                             onEvent.invoke(RepositoryViewEvent.OnUncommittedChangesSelected)
                         } else {
-                            val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().map { it.id }.toSet()
+                            val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().toImmutableSet()
                             onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
                         }
                     },
@@ -150,7 +149,7 @@ private fun CommitsTable(
 ) = Box(modifier = modifier) {
     when (state) {
         is CommitsTableState.Content -> Commits(
-            items = state.commits,
+            state = state,
             onSelected = onItemsSelected,
             onLoadMore = onLoadMore,
         )
@@ -177,29 +176,30 @@ private fun CommitsTable(
 
 @Composable
 private fun Commits(
-    items: ImmutableList<CommitTableItem>,
+    state: CommitsTableState.Content,
     onSelected: (items: Set<CommitTableItem.Id>) -> Unit,
     onLoadMore: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    val actualOnLoadMore = rememberUpdatedState(onLoadMore)
-    val actualItems by rememberUpdatedState(items)
+    val currentOnLoadMore by rememberUpdatedState(onLoadMore)
+    val currentOnSelected by rememberUpdatedState(onSelected)
+    val currentSelected by rememberUpdatedState(state.selected)
+    val currentCommits by rememberUpdatedState(state.commits)
 
-    SideEffect {
+    LaunchedEffect(key1 = null) {
         snapshotFlow { lazyListState.layoutInfo }
             .map { layoutInfo -> layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1 }
             .distinctUntilChanged()
             .onEach { isEnd ->
                 if (isEnd) {
-                    actualOnLoadMore.value.invoke()
+                    currentOnLoadMore.invoke()
                 }
-            }.launchIn(scope)
+            }.launchIn(this)
     }
 
     val itemContent = remember<@Composable (index: Int) -> Unit> {
         { index ->
-            when (val item = actualItems[index]) {
+            when (val item = currentCommits[index]) {
                 is CommitTableItem.Commit -> CommitItemView(
                     modifier = Modifier,
                     item = item,
@@ -209,30 +209,40 @@ private fun Commits(
             }
         }
     }
-    SelectedList<CommitTableItem.Id>(
-        // TODO: Use rememberUpdatedState for callbacks
-        state = rememberSelectedListState(
-            onSelected = onSelected::invoke,
-            calculateIndex = { itemId ->
-                when (itemId) {
-                    is CommitTableItem.Id.Commit -> actualItems
-                        .filterIsInstance<CommitTableItem.Commit>()
-                        .indexOfFirst { it.id == itemId.id }
+    val selectableListState = rememberSelectedListState(
+        calculateIndex = { itemId ->
+            when (itemId) {
+                is CommitTableItem.Id.Commit -> currentCommits
+                    .filterIsInstance<CommitTableItem.Commit>()
+                    .indexOfFirst { it.id == itemId.id }
 
-                    CommitTableItem.Id.UncommittedChanges -> actualItems.indexOfFirst {
-                        it is CommitTableItem.UncommittedChanges
-                    }
+                CommitTableItem.Id.UncommittedChanges -> currentCommits.indexOfFirst {
+                    it is CommitTableItem.UncommittedChanges
                 }
-            },
-            calculateId = { index ->
-                when (val item = actualItems[index]) {
-                    is CommitTableItem.Commit -> CommitTableItem.Id.Commit(item.id)
-                    CommitTableItem.UncommittedChanges -> CommitTableItem.Id.UncommittedChanges
-                }
-            },
-        ),
+            }
+        },
+        calculateId = { index ->
+            when (val item = currentCommits[index]) {
+                is CommitTableItem.Commit -> CommitTableItem.Id.Commit(item.id)
+                CommitTableItem.UncommittedChanges -> CommitTableItem.Id.UncommittedChanges
+            }
+        },
+        onSelect = { selectedItems ->
+            currentOnSelected.invoke(selectedItems)
+            false
+        }
+    )
+
+    LaunchedEffect(key1 = selectableListState) {
+        snapshotFlow { currentSelected }
+            .onEach(selectableListState::select)
+            .launchIn(this)
+    }
+
+    SelectedList<CommitTableItem.Id>(
+        state = selectableListState,
         lazyListState = lazyListState,
-        itemsCount = items.size,
+        itemsCount = state.commits.size,
         itemContent = itemContent,
     )
 }

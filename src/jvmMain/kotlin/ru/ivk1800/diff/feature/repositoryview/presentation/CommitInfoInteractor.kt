@@ -7,6 +7,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -28,7 +30,7 @@ class CommitInfoInteractor(
     private var files = emptyList<CommitFile>()
     private var commit: Commit? = null
 
-    private val selectCommitEvent = MutableSharedFlow<String?>(
+    private val selectCommitEvent = MutableSharedFlow<CommitId?>(
         replay = 1,
         extraBufferCapacity = 1,
     )
@@ -38,11 +40,13 @@ class CommitInfoInteractor(
         get() = _state
 
     val selectedCommitHash: String?
-        get() = selectCommitEvent.replayCache.firstOrNull()
+        get() = selectCommitEvent.replayCache.firstOrNull()?.hash
 
     init {
         selectCommitEvent
-            .flatMapLatest { hash ->
+            .distinctUntilChanged()
+            .flatMapLatest { id ->
+                val hash = id?.hash
                 flow {
                     emit(CommitInfoState.None)
                     if (hash != null) {
@@ -69,8 +73,8 @@ class CommitInfoInteractor(
 
     fun getFilePathByIndex(value: Int): String? = files.getOrNull(value)?.path
 
-    fun onCommitSelected(hash: String?) {
-        selectCommitEvent.tryEmit(hash)
+    fun selectCommit(id: CommitId?) {
+        selectCommitEvent.tryEmit(id)
     }
 
     fun dispose() {

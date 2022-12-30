@@ -1,15 +1,20 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -37,6 +42,8 @@ class CommitsInteractor(
     private var commits = emptyList<Commit>()
     private var commitItems: PersistentList<CommitTableItem> = persistentListOf()
 
+    private val selectedCommits = MutableStateFlow<ImmutableSet<CommitTableItem.Id.Commit>>(persistentSetOf())
+
     private val _state = MutableStateFlow<CommitsTableState>(CommitsTableState.Loading)
     val state: StateFlow<CommitsTableState>
         get() = _state
@@ -60,10 +67,24 @@ class CommitsInteractor(
                 isLoading = true
             }
             .flatMapLatest { event ->
-                when (event) {
+                val commitsFlow = when (event) {
                     Event.Reload -> getInitialCommits()
                     Event.LoadMore -> getNextCommits()
                 }
+
+                commitsFlow.combine<ImmutableList<CommitTableItem>, ImmutableSet<CommitTableItem.Id.Commit>, CommitsTableState>(
+                    selectedCommits
+                ) { commits, selected ->
+                    CommitsTableState.Content(
+                        selected = selected,
+                        commits = commits,
+                    )
+                }
+                    .onStart {
+                        if (event == Event.Reload) {
+                            emit(CommitsTableState.Loading)
+                        }
+                    }
             }
             .onEach {
                 isLoading = false
@@ -73,18 +94,17 @@ class CommitsInteractor(
             }.launchIn(scope)
     }
 
-    private fun getInitialCommits() =
+    private fun getInitialCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
-            emit(CommitsTableState.Loading)
             val newCommits = commitsRepository
                 .getCommits(repoDirectory, branchName = "master", limit = 20, offset = 0)
             commits = newCommits
             val items = newCommits.map(commitItemMapper::mapToItem)
             commitItems = items.toPersistentList()
-            emit(CommitsTableState.Content(commitItems))
+            emit(commitItems)
         }
 
-    private fun getNextCommits() =
+    private fun getNextCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
             val newCommits = commitsRepository
                 .getCommits(repoDirectory, branchName = "master", limit = 10, offset = commits.size)
@@ -94,10 +114,14 @@ class CommitsInteractor(
             commits += newCommits
             val items = newCommits.map(commitItemMapper::mapToItem)
             commitItems = commitItems.addAll(items)
-            emit(CommitsTableState.Content(commitItems))
+            emit(commitItems)
         }
 
     fun getCommitHashByIndex(value: Int): String? = commits.getOrNull(value)?.hash?.value
+
+    fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
+        selectedCommits.value = commits
+    }
 
     fun reload() {
         eventsFlow.tryEmit(Event.Reload)
