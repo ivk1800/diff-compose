@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 @Stable
 class SelectedListState<Id>(
     onSelected: (items: Set<Id>) -> Unit,
+    onInteractable: (item: Id) -> Boolean,
+    onTestSelected: (items: Set<Id>) -> Boolean,
     calculateId: (index: Int) -> Id,
     calculateIndex: (id: Id) -> Int,
 ) {
@@ -15,6 +17,10 @@ class SelectedListState<Id>(
     internal var initialSelectedIndex by mutableStateOf(-1)
 
     internal val onSelected by mutableStateOf(onSelected)
+
+    internal val onSelect by mutableStateOf(onTestSelected)
+
+    internal val onInteractable by mutableStateOf(onInteractable)
 
     internal val calculateId by mutableStateOf(calculateId)
 
