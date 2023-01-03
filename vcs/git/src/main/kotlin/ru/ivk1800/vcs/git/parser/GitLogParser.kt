@@ -27,10 +27,11 @@ internal class GitLogParser(
             commiterName = raw.between(GitLogOption.CommiterName),
             commiterEmail = raw.between(GitLogOption.CommiterEmail),
             commiterDate = raw.between(GitLogOption.CommiterDate).toInt(),
-            message = raw.between(GitLogOption.RawBody)
+            message = raw.between(GitLogOption.RawBody),
+            refNames = raw.between(GitLogOption.RefName).takeIf { it.isNotEmpty() }?.split(", ").orEmpty(),
         )
 
     private fun String.between(option: GitLogOption): String =
-        substringAfter("${separatorBuilder.buildStartForOption(option)}\n")
-            .substringBefore("\n${separatorBuilder.buildEndForOption(option)}")
+        substringAfter("${separatorBuilder.buildStartForOption(option)}\n", missingDelimiterValue = "")
+            .substringBefore("\n${separatorBuilder.buildEndForOption(option)}", missingDelimiterValue = "")
 }

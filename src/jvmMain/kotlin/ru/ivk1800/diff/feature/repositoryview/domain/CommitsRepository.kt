@@ -28,6 +28,7 @@ class CommitsRepository(
             commiterEmail = commiterEmail,
             commiterDate = Instant.ofEpochSecond(commiterDate.toLong()),
             message = message,
+            refNames = refNames.map(::RefName),
         )
 
 }

@@ -47,6 +47,7 @@ class GitVcs : Vcs {
             addOption(GitLogOption.CommiterName)
             addOption(GitLogOption.CommiterEmail)
             addOption(GitLogOption.CommiterDate)
+            addOption(GitLogOption.RefName)
             append(separatorBuilder.endRecordSeparator())
         }
 

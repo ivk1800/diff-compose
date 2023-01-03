@@ -11,4 +11,5 @@ internal enum class GitLogOption(val value: String) {
     CommiterName("cn"),
     CommiterEmail("ce"),
     CommiterDate("ct"),
+    RefName("D"),
 }

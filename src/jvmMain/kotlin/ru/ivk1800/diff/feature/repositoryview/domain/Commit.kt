@@ -12,4 +12,5 @@ data class Commit(
     val commiterEmail: String,
     val commiterDate: Instant,
     val message: String,
+    val refNames: List<RefName>,
 )

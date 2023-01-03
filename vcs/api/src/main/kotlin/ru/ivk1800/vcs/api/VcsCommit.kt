@@ -11,4 +11,5 @@ data class VcsCommit(
     val commiterEmail: String,
     val commiterDate: Int,
     val message: String,
+    val refNames: List<String>,
 )

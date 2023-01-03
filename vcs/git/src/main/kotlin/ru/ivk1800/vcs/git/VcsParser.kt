@@ -41,5 +41,6 @@ internal class VcsParser {
             commiterEmail = commiterEmail,
             commiterDate = commiterDate.toInt(),
             message = message,
+            refNames = emptyList(),
         )
 }
