@@ -29,5 +29,9 @@ sealed interface RepositoryViewEvent {
         data class OnRemoveFilesFromStaged(val ids: Set<CommitFileId>) : UncommittedChanges
 
         data class OnAddFilesToStaged(val ids: Set<CommitFileId>) : UncommittedChanges
+
+        data class OnStatedFilesSelected(val items: Set<CommitFileId>) : UncommittedChanges
+
+        data class OnUnstatedFilesSelected(val items: Set<CommitFileId>) : UncommittedChanges
     }
 }

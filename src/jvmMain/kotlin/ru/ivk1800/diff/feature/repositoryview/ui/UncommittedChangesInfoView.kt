@@ -20,12 +20,14 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,6 +36,9 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesState
@@ -60,6 +65,25 @@ fun UncommittedChangesInfoView(
             is UncommittedChangesState.Content -> {
                 val stagedFilesPaneState = rememberFilesPaneState<CommitFileId>()
                 val unstagedFilesPaneState = rememberFilesPaneState<CommitFileId>()
+
+                val currentOnEvent by rememberUpdatedState(onEvent)
+
+                LaunchedEffect(key1 = null) {
+                    snapshotFlow { stagedFilesPaneState.selected }
+                        .drop(1)
+                        .onEach { files ->
+                            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
+                        }
+                        .launchIn(this)
+
+                    snapshotFlow { unstagedFilesPaneState.selected }
+                        .drop(1)
+                        .onEach { files ->
+                            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
+                        }
+                        .launchIn(this)
+                }
+
                 FilesPane(
                     modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
                         onEvent.invoke(
