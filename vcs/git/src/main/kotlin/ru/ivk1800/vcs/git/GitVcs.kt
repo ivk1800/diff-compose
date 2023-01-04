@@ -7,6 +7,7 @@ import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.git.parser.GitLogParser
+import ru.ivk1800.vcs.git.parser.VcsDiffParser
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path

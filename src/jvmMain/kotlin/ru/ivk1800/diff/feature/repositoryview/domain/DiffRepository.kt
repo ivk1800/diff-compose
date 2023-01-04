@@ -34,7 +34,12 @@ class DiffRepository(
 
     private fun toDiff(diff: VcsDiff): Diff {
         return Diff(
-            filePath = diff.filePath,
+            filePath = when (diff) {
+                is VcsDiff.Added -> diff.fileName
+                is VcsDiff.Deleted -> diff.fileName
+                is VcsDiff.Modified -> diff.fileName
+                is VcsDiff.Moved -> diff.renameTo
+            },
             hunks = diff.hunks.map { hunk ->
                 Diff.Hunk(
                     lines = hunk.lines.map { line ->
