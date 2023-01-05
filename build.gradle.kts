@@ -34,7 +34,12 @@ kotlin {
                 implementation(compose.material)
             }
         }
-        val jvmTest by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation("junit:junit:4.13.2")
+                implementation("io.mockk:mockk:1.13.3")
+            }
+        }
     }
 }
 

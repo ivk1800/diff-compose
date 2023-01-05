@@ -17,6 +17,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 class CommitsTableInteractor(
     private val commitsInteractor: CommitsInteractor,
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
+    private val diffInfoInteractor: DiffInfoInteractor,
 ) {
 
     // TODO: add main dispatcher
@@ -64,11 +65,13 @@ class CommitsTableInteractor(
     fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
         uncommittedChangesSelected.value = false
         commitsInteractor.selectCommits(commits)
+        diffInfoInteractor.onFileUnselected()
     }
 
     fun selectUncommittedChanges() {
         uncommittedChangesSelected.value = true
         commitsInteractor.selectCommits(persistentSetOf())
+        diffInfoInteractor.onFileUnselected()
     }
 
     fun reload() = commitsInteractor.reload()

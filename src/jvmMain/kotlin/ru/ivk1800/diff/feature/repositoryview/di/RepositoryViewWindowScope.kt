@@ -82,7 +82,7 @@ class RepositoryViewWindowScope(
     }
 
     private val commitsTableInteractor by lazy {
-        CommitsTableInteractor(commitsInteractor, uncommittedChangesInteractor)
+        CommitsTableInteractor(commitsInteractor, uncommittedChangesInteractor, diffInfoInteractor)
     }
 
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
