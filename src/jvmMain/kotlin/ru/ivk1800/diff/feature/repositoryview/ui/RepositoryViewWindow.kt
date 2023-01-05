@@ -15,14 +15,19 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import ru.ivk1800.diff.feature.repositoryview.di.compose.LocalRepositoryViewWindowScope
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
-import ru.ivk1800.diff.presentation.viewModel
 import ru.ivk1800.diff.ui.compose.DiffAlertDialog
+import ru.ivk1800.diff.ui.compose.rememberWindowKeyEventDelegate
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RepositoryViewWindow() {
     val scope = LocalRepositoryViewWindowScope.current
-    val viewModel = viewModel { scope.repositoryViewViewModel }
+    val viewModel = scope.repositoryViewViewModel
+
+    val keyEventDelegate = rememberWindowKeyEventDelegate(
+        test = { event -> event.isMetaPressed && event.key == Key.R },
+        onDown = { viewModel.onEvent(RepositoryViewEvent.OnReload) },
+    )
 
     Window(
         title = scope.id.path,
@@ -31,14 +36,7 @@ fun RepositoryViewWindow() {
             size = DpSize(width = 1280.dp, height = 720.dp)
         ),
         onCloseRequest = { scope.router.close(scope.id) },
-        onKeyEvent = { event ->
-            if (event.isMetaPressed && event.key == Key.R) {
-                viewModel.onEvent(RepositoryViewEvent.OnReload)
-                true
-            } else {
-                false
-            }
-        }
+        onKeyEvent = keyEventDelegate::onKeyEvent,
     ) {
 
         val state by viewModel.state.collectAsState()
