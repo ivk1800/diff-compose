@@ -59,6 +59,8 @@ class DiffRepository(
             },
             hunks = diff.hunks.map { hunk ->
                 Diff.Hunk(
+                    firstRange = hunk.firstRange,
+                    secondRange = hunk.secondRange,
                     lines = hunk.lines.map { line ->
                         Diff.Hunk.Line(
                             text = line.text,

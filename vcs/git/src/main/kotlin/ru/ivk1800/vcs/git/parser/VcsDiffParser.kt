@@ -57,6 +57,8 @@ internal class VcsDiffParser {
 
         val hunks = result.hunks.map { hunk ->
             VcsHunk(
+                firstRange = hunk.firstRange,
+                secondRange = hunk.secondRange,
                 lines = hunk.lines.map { line ->
                     VcsHunkLine(
                         text = line.value,
@@ -134,14 +136,37 @@ internal class VcsDiffParser {
     }
 
     private fun parseHunkHeader(line: String, result: RawResult) {
+        require(line.isNotEmpty()) { "Unable to parse hunk header, line is empty" }
+
         // @@ -7,6 +7,7 @@ import ru.ivk1800.vcs.api.VcsCommit
         val lineAfterHeader = line.substringAfter(" @@")
+
+        // TODO: improve parsing
+        val r = line.substringAfter("@@ -").substringBefore(" @@").split(" +")
+        val aRaw = r[0].split(",")
+        val bRaw = r[1].split(",")
+
+        val aRange = IntRange(
+            requireNotNull(aRaw[0].toIntOrNull()) {
+                "Unable to parse range of first file"
+            },
+            requireNotNull(aRaw[1].toIntOrNull()) {
+                "Unable to parse range of first file"
+            },
+        )
+        val bRange = IntRange(
+            requireNotNull(bRaw[0].toIntOrNull()) {
+                "Unable to parse range of second file"
+            },
+            requireNotNull(bRaw[1].toIntOrNull()) {
+                "Unable to parse range of second file"
+            },
+        )
+        result.setHunkInfo(aRange, bRange)
 
         if (lineAfterHeader.isNotEmpty()) {
             parseHunkLine(lineAfterHeader, result)
         }
-
-        require(line.isNotEmpty()) { "Unable to parse hunk header, line is empty" }
     }
 
     private fun parseHunkLine(line: String, result: RawResult) {
@@ -266,6 +291,11 @@ internal class VcsDiffParser {
             currentHunk.lines.add(line)
         }
 
+        fun setHunkInfo(firstRange: IntRange, secondRange: IntRange) {
+            currentHunk.firstRange = firstRange
+            currentHunk.secondRange = secondRange
+        }
+
         fun submitHunk() {
             if (currentHunk.lines.isNotEmpty()) {
                 hunks.add(currentHunk)
@@ -274,6 +304,8 @@ internal class VcsDiffParser {
         }
 
         class RawHunk(
+            var firstRange: IntRange = IntRange.EMPTY,
+            var secondRange: IntRange = IntRange.EMPTY,
             val lines: MutableList<Line> = mutableListOf(),
         ) {
             class Line(
