@@ -69,8 +69,6 @@ class GitVcs : Vcs {
         )
         val result = process.inputStream.reader().readText()
         val error = process.errorStream.reader().readText()
-        println(error)
-        println(result)
 
         return parser.parseCommit(result)
     }

@@ -1,12 +1,11 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.presentation.BaseViewModel
 import ru.ivk1800.diff.presentation.DialogRouter
 import java.io.File
@@ -20,13 +19,14 @@ class RepositoryViewViewModel(
     private val commitsTableInteractor: CommitsTableInteractor,
     private val router: RepositoryViewRouter,
     private val dialogRouter: DialogRouter,
+    private val filesInfoInteractor: FilesInfoInteractor,
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(
         RepositoryViewState(
             commitsTableState = CommitsTableState.Loading,
             diffInfoState = DiffInfoState.None,
-            activeState = ActiveState.None,
+            filesInfoState = FilesInfoState.None,
         )
     )
     val state: StateFlow<RepositoryViewState>
@@ -34,38 +34,7 @@ class RepositoryViewViewModel(
 
     init {
         uncommittedChangesInteractor.check()
-        combine(
-            commitInfoInteractor.state,
-            uncommittedChangesInteractor.state,
-            commitsTableInteractor.state,
-        ) { commitInfo, uncommittedChanges, commitsTable ->
-            _state.value.copy(
-                activeState = if (commitInfo is CommitInfoState.Content) {
-                    ActiveState.Commit(commitInfo)
-                } else if (uncommittedChanges is UncommittedChangesState.Content &&
-                    commitsTable is CommitsTableState.Content &&
-                    commitsTable.selected.contains(CommitTableItem.Id.UncommittedChanges)
-                ) {
-                    ActiveState.UncommittedChanges(uncommittedChanges)
-                } else {
-                    ActiveState.None
-                },
-            )
-        }
-            .onEach { newState -> _state.value = newState }
-            .launchIn(viewModelScope)
-
-        commitsTableInteractor.state
-            .map { newState ->
-                _state.value.copy(commitsTableState = newState)
-            }
-            .onEach { newState -> _state.value = newState }
-            .launchIn(viewModelScope)
-
-        diffInfoInteractor.state
-            .map { newState ->
-                _state.value.copy(diffInfoState = newState)
-            }
+        getStateFlow()
             .onEach { newState -> _state.value = newState }
             .launchIn(viewModelScope)
 
@@ -141,4 +110,17 @@ class RepositoryViewViewModel(
                 }
         }
     }
+
+    private fun getStateFlow(): Flow<RepositoryViewState> =
+        combine(
+            filesInfoInteractor.state,
+            commitsTableInteractor.state,
+            diffInfoInteractor.state,
+        ) { activeState, commitsTableState, diffInfoState ->
+            RepositoryViewState(
+                commitsTableState = commitsTableState,
+                diffInfoState = diffInfoState,
+                filesInfoState = activeState,
+            )
+        }
 }

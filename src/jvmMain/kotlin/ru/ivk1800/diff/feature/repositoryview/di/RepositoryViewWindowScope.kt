@@ -11,6 +11,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
+import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
@@ -85,11 +86,16 @@ class RepositoryViewWindowScope(
         CommitsTableInteractor(commitsInteractor, uncommittedChangesInteractor, diffInfoInteractor)
     }
 
+    private val filesInfoInteractor by lazy {
+        FilesInfoInteractor(commitInfoInteractor, uncommittedChangesInteractor, commitsTableInteractor)
+    }
+
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
             repositoryDirectory = repoPath,
             commitInfoInteractor = commitInfoInteractor,
             diffInfoInteractor = diffInfoInteractor,
+            filesInfoInteractor = filesInfoInteractor,
             uncommittedChangesInteractor = uncommittedChangesInteractor,
             selectionCoordinator = SelectionCoordinator(
                 commitsTableInteractor,
@@ -113,5 +119,6 @@ class RepositoryViewWindowScope(
         commitInfoInteractor.dispose()
         diffInfoInteractor.dispose()
         commitsTableInteractor.dispose()
+        filesInfoInteractor.dispose()
     }
 }

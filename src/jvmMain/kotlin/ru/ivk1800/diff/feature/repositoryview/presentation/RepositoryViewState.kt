@@ -12,7 +12,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 data class RepositoryViewState(
     val commitsTableState: CommitsTableState,
     val diffInfoState: DiffInfoState,
-    val activeState: ActiveState,
+    val filesInfoState: FilesInfoState,
 )
 
 @Immutable
@@ -67,14 +67,14 @@ sealed interface UncommittedChangesState {
 }
 
 @Immutable
-sealed interface ActiveState {
-    object None : ActiveState
+sealed interface FilesInfoState {
+    object None : FilesInfoState
 
     data class Commit(
         val state: CommitInfoState.Content,
-    ) : ActiveState
+    ) : FilesInfoState
 
     data class UncommittedChanges(
         val state: UncommittedChangesState.Content,
-    ) : ActiveState
+    ) : FilesInfoState
 }

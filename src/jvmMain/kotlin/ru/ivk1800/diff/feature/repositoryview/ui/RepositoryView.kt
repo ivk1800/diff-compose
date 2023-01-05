@@ -34,8 +34,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import ru.ivk1800.diff.feature.repositoryview.presentation.ActiveState
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
+import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
@@ -84,12 +84,12 @@ private fun BottomHorizontalPanes(
         orientation = Orientation.Horizontal,
         percent = 40F
     ) {
-        when (state.activeState) {
-            is ActiveState.Commit -> CommitInfoPage(state.activeState, onEvent)
+        when (state.filesInfoState) {
+            is FilesInfoState.Commit -> CommitInfoPage(state.filesInfoState, onEvent)
 
-            is ActiveState.UncommittedChanges -> UncommittedChangesInfoPane(state.activeState, onEvent)
+            is FilesInfoState.UncommittedChanges -> UncommittedChangesInfoPane(state.filesInfoState, onEvent)
 
-            ActiveState.None -> Box(
+            FilesInfoState.None -> Box(
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -101,23 +101,23 @@ private fun BottomHorizontalPanes(
 
 @Composable
 private fun UncommittedChangesInfoPane(
-    activeState: ActiveState.UncommittedChanges,
+    filesInfoState: FilesInfoState.UncommittedChanges,
     onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
 ) =
     UncommittedChangesInfoView(
         modifier = Modifier.fillMaxSize(),
-        state = activeState.state,
+        state = filesInfoState.state,
         onEvent = onEvent,
     )
 
 @Composable
 private fun CommitInfoPage(
-    activeState: ActiveState.Commit,
+    filesInfoState: FilesInfoState.Commit,
     onEvent: (value: RepositoryViewEvent) -> Unit
 ) =
     CommitInfoView(
         modifier = Modifier.fillMaxSize(),
-        state = activeState.state,
+        state = filesInfoState.state,
         onFilesSelected = { event ->
             onEvent.invoke(RepositoryViewEvent.OnFilesSelected(event))
         }
