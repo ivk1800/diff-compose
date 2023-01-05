@@ -124,18 +124,18 @@ fun darkCommitFileTheme() =
 
 fun lightDiffLinesTheme() =
     DiffLinesThemeData(
-        addedColor = Color(0xFF42e25a).copy(alpha = 0.5F),
-        addedTextColor = Color(0xFF5cac1b),
-        removedColor = Color(0xFFe8876f).copy(alpha = 0.5F),
-        removedTextColor = Color(0xFFe8876f),
+        addedColor = Color(0xFFe6ffec),
+        addedTextColor = Color.Unspecified,
+        removedColor = Color(0xFFffebe9),
+        removedTextColor = Color.Unspecified,
     )
 
 fun darkDiffLinesTheme() =
     DiffLinesThemeData(
-        addedColor = Color(0xFF42e25a).copy(alpha = 0.5F),
-        addedTextColor = Color(0xFF42e25a),
-        removedColor = Color(0xFFe8716b).copy(alpha = 0.5F),
-        removedTextColor = Color(0xFFe8876f),
+        addedColor = Color(0xFF2ea043).copy(alpha = 0.2F),
+        addedTextColor = Color.Unspecified,
+        removedColor = Color(0xFFf85149).copy(alpha = 0.2F),
+        removedTextColor = Color.Unspecified,
     )
 
 fun lightDiffColors() =
