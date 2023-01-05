@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffId
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -27,6 +28,9 @@ class UncommittedChangesInteractor(
 ) {
     // TODO: add main dispatcher
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+
+    private var rawStagedDiff: List<Diff> = emptyList()
+    private var rawUnstagedDiff: List<Diff> = emptyList()
 
     private val checkEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
     private val errorsFlow = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
@@ -127,6 +131,20 @@ class UncommittedChangesInteractor(
         }
     }
 
+    fun getDiffIdOfStagedOrNull(fileName: String): DiffId? = getDiffIdOrNull(rawStagedDiff, fileName)
+
+    fun getDiffIdOfUnstagedOrNull(fileName: String): DiffId? = getDiffIdOrNull(rawUnstagedDiff, fileName)
+
+    private fun getDiffIdOrNull(diffs: List<Diff>, fileName: String): DiffId? =
+        diffs
+            .find { diff -> diff.filePath == fileName }
+            ?.let { diff ->
+                DiffId(
+                    oldId = diff.oldId,
+                    newId = diff.newId,
+                )
+            }
+
     fun dispose() {
         scope.cancel()
     }
@@ -160,6 +178,9 @@ class UncommittedChangesInteractor(
     private suspend fun checkInternal(): UncommittedChangesState {
         val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
         val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
+
+        rawStagedDiff = stagedDiff
+        rawUnstagedDiff = unstagedDiff
 
         return if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
             UncommittedChangesState.None

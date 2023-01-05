@@ -133,9 +133,11 @@ class RepositoryViewViewModel(
                     is RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged ->
                         uncommittedChangesInteractor.removeFilesFromStaged(value.ids)
 
-                    is RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected -> Unit
+                    is RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected ->
+                        selectionCoordinator.selectStatedFiles(value.items)
 
-                    is RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected -> Unit
+                    is RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected ->
+                        selectionCoordinator.selectUnstatedFiles(value.items)
                 }
         }
     }

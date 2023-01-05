@@ -13,6 +13,11 @@ class DiffRepository(
         return toDiff(diff)
     }
 
+    suspend fun getDiff(directory: File, oldBlobId: String, newBlobId: String): Diff {
+        val diff = vcs.getDiff(directory, oldBlobId, newBlobId)
+        return toDiff(diff)
+    }
+
     suspend fun getUnstagedDiff(directory: File): List<Diff> =
         vcs.getUnStagedDiff(directory).map(::toDiff)
 
@@ -39,6 +44,18 @@ class DiffRepository(
                 is VcsDiff.Deleted -> diff.fileName
                 is VcsDiff.Modified -> diff.fileName
                 is VcsDiff.Moved -> diff.renameTo
+            },
+            oldId = when (diff) {
+                is VcsDiff.Added -> diff.oldId
+                is VcsDiff.Deleted -> diff.oldId
+                is VcsDiff.Modified -> diff.oldId
+                is VcsDiff.Moved -> diff.oldId
+            },
+            newId = when (diff) {
+                is VcsDiff.Added -> diff.newId
+                is VcsDiff.Deleted -> diff.newId
+                is VcsDiff.Modified -> diff.newId
+                is VcsDiff.Moved -> diff.newId
             },
             hunks = diff.hunks.map { hunk ->
                 Diff.Hunk(

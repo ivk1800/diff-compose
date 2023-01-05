@@ -91,7 +91,12 @@ class RepositoryViewWindowScope(
             commitInfoInteractor = commitInfoInteractor,
             diffInfoInteractor = diffInfoInteractor,
             uncommittedChangesInteractor = uncommittedChangesInteractor,
-            selectionCoordinator = SelectionCoordinator(commitsTableInteractor, commitInfoInteractor),
+            selectionCoordinator = SelectionCoordinator(
+                commitsTableInteractor,
+                commitInfoInteractor,
+                diffInfoInteractor,
+                uncommittedChangesInteractor,
+            ),
             commitsTableInteractor = commitsTableInteractor,
             router = dependencies.router,
             dialogRouter = object : DialogRouter {

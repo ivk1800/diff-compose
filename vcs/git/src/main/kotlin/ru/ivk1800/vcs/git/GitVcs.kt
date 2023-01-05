@@ -106,6 +106,26 @@ class GitVcs : Vcs {
         )
     }
 
+    override suspend fun getDiff(
+        directory: File,
+        oldBlobId: String,
+        newBlobId: String,
+    ): VcsDiff {
+        val command = "git diff $oldBlobId..$newBlobId"
+        val process = createProcess(
+            directory,
+            command,
+        )
+
+        return runProcess(process,
+            onError = { error ->
+                VcsException.ProcessException(error)
+            }, onResult = { result ->
+                diffParser.parseSingle(result)
+            }
+        )
+    }
+
     override suspend fun getUnStagedDiff(directory: File): List<VcsDiff> =
         runProcess(createProcess(directory, "git diff"),
             onError = { error ->
