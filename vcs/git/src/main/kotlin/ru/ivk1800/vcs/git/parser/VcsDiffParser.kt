@@ -164,9 +164,9 @@ internal class VcsDiffParser {
         )
         result.setHunkInfo(aRange, bRange)
 
-        if (lineAfterHeader.isNotEmpty()) {
-            parseHunkLine(lineAfterHeader, result)
-        }
+//        if (lineAfterHeader.isNotEmpty()) {
+//            parseHunkLine(lineAfterHeader, result)
+//        }
     }
 
     private fun parseHunkLine(line: String, result: RawResult) {
