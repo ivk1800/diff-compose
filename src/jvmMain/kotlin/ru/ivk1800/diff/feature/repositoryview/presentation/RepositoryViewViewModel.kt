@@ -6,18 +6,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.presentation.BaseViewModel
 import ru.ivk1800.diff.presentation.DialogRouter
 import java.io.File
 
 class RepositoryViewViewModel(
     private val repositoryDirectory: File,
-    private val commitsInteractor: CommitsInteractor,
     private val commitInfoInteractor: CommitInfoInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val selectionCoordinator: SelectionCoordinator,
-    private val tableCommitsStateTransformer: TableCommitsStateTransformer,
+    private val commitsTableInteractor: CommitsTableInteractor,
     private val router: RepositoryViewRouter,
     private val dialogRouter: DialogRouter,
 ) : BaseViewModel() {
@@ -34,27 +34,28 @@ class RepositoryViewViewModel(
 
     init {
         uncommittedChangesInteractor.check()
-        commitInfoInteractor
-            .state
-            .combine(uncommittedChangesInteractor.state) { commitInfo, uncommittedChanges ->
-                _state.value.copy(
-                    activeState = if (commitInfo is CommitInfoState.Content) {
-                        ActiveState.Commit(commitInfo)
-                    } else if (uncommittedChanges is UncommittedChangesState.Content) {
-                        ActiveState.UncommittedChanges(uncommittedChanges)
-                    } else {
-                        ActiveState.None
-                    },
-                )
-            }
+        combine(
+            commitInfoInteractor.state,
+            uncommittedChangesInteractor.state,
+            commitsTableInteractor.state,
+        ) { commitInfo, uncommittedChanges, commitsTable ->
+            _state.value.copy(
+                activeState = if (commitInfo is CommitInfoState.Content) {
+                    ActiveState.Commit(commitInfo)
+                } else if (uncommittedChanges is UncommittedChangesState.Content &&
+                    commitsTable is CommitsTableState.Content &&
+                    commitsTable.selected.contains(CommitTableItem.Id.UncommittedChanges)
+                ) {
+                    ActiveState.UncommittedChanges(uncommittedChanges)
+                } else {
+                    ActiveState.None
+                },
+            )
+        }
             .onEach { newState -> _state.value = newState }
             .launchIn(viewModelScope)
 
-        tableCommitsStateTransformer.transform(
-            scope = viewModelScope,
-            commitsTableStateFlow = commitsInteractor.state,
-            uncommittedChangesStateFlow = uncommittedChangesInteractor.state,
-        )
+        commitsTableInteractor.state
             .map { newState ->
                 _state.value.copy(commitsTableState = newState)
             }
@@ -87,22 +88,6 @@ class RepositoryViewViewModel(
                 )
             }
             .launchIn(viewModelScope)
-
-        selectionCoordinator
-            .state
-            .onEach { state ->
-                commitsInteractor.selectCommits(state.selectedCommits)
-                commitInfoInteractor.selectCommit(state.commitInfo)
-                if (state.commitDiff != null) {
-                    diffInfoInteractor.onFileSelected(
-                        commitHash = state.commitDiff.id.hash,
-                        path = state.commitDiff.path,
-                    )
-                } else {
-                    diffInfoInteractor.onFileUnselected()
-                }
-            }
-            .launchIn(viewModelScope)
     }
 
     fun onEvent(value: RepositoryViewEvent) {
@@ -110,7 +95,7 @@ class RepositoryViewViewModel(
             RepositoryViewEvent.OnReload -> {
                 commitInfoInteractor.selectCommit(null)
                 diffInfoInteractor.onFileUnselected()
-                commitsInteractor.reload()
+                commitsTableInteractor.reload()
                 uncommittedChangesInteractor.check()
             }
 
@@ -131,10 +116,8 @@ class RepositoryViewViewModel(
                     diffInfoInteractor.onFileUnselected()
                 }
 
-            RepositoryViewEvent.OnLoadMoreCommits -> commitsInteractor.loadMore()
-            RepositoryViewEvent.OnUncommittedChangesSelected -> {
-                commitInfoInteractor.selectCommit(null)
-            }
+            RepositoryViewEvent.OnLoadMoreCommits -> commitsTableInteractor.loadMore()
+            RepositoryViewEvent.OnUncommittedChangesSelected -> selectionCoordinator.selectUncommittedChanges()
 
             is RepositoryViewEvent.UncommittedChanges ->
                 when (value) {

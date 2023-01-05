@@ -8,12 +8,12 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
-import ru.ivk1800.diff.feature.repositoryview.presentation.TableCommitsStateTransformer
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.window.DialogManager
@@ -81,19 +81,18 @@ class RepositoryViewWindowScope(
         )
     }
 
-    private val tableCommitsStateTransformer by lazy {
-        TableCommitsStateTransformer()
+    private val commitsTableInteractor by lazy {
+        CommitsTableInteractor(commitsInteractor, uncommittedChangesInteractor)
     }
 
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
             repositoryDirectory = repoPath,
-            commitsInteractor = commitsInteractor,
             commitInfoInteractor = commitInfoInteractor,
             diffInfoInteractor = diffInfoInteractor,
             uncommittedChangesInteractor = uncommittedChangesInteractor,
-            selectionCoordinator = SelectionCoordinator(),
-            tableCommitsStateTransformer = tableCommitsStateTransformer,
+            selectionCoordinator = SelectionCoordinator(commitsTableInteractor, commitInfoInteractor),
+            commitsTableInteractor = commitsTableInteractor,
             router = dependencies.router,
             dialogRouter = object : DialogRouter {
                 override fun show(dialog: DialogRouter.Dialog) {
@@ -108,5 +107,6 @@ class RepositoryViewWindowScope(
         uncommittedChangesInteractor.dispose()
         commitInfoInteractor.dispose()
         diffInfoInteractor.dispose()
+        commitsTableInteractor.dispose()
     }
 }
