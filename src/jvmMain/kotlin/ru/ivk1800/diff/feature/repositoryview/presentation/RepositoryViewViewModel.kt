@@ -156,12 +156,4 @@ class RepositoryViewViewModel(
                 }
         }
     }
-
-    override fun dispose() {
-        commitsInteractor.dispose()
-        uncommittedChangesInteractor.dispose()
-        commitInfoInteractor.dispose()
-        diffInfoInteractor.dispose()
-        super.dispose()
-    }
 }

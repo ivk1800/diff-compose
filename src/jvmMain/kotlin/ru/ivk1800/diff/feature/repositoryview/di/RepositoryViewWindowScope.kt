@@ -102,4 +102,11 @@ class RepositoryViewWindowScope(
             },
         )
     }
+
+    fun dispose() {
+        commitsInteractor.dispose()
+        uncommittedChangesInteractor.dispose()
+        commitInfoInteractor.dispose()
+        diffInfoInteractor.dispose()
+    }
 }
