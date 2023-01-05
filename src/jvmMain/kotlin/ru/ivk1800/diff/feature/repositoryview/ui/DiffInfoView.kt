@@ -70,11 +70,12 @@ fun DiffListView(
 @Composable
 private fun HunkHeader(item: DiffInfoItem.HunkHeader) =
     Row(
-        modifier = Modifier,
+        modifier = Modifier.fillMaxWidth().background(LocalDiffTheme.current.colors.header1Color),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ListTextView(
-            modifier = Modifier.padding(8.dp),
+            // TODO: magic numbers
+            modifier = Modifier.padding(start = (48 + 4).dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             text = item.text,
         )
     }
@@ -98,6 +99,17 @@ private fun Line(item: DiffInfoItem.Line) =
             DiffInfoItem.Line.Type.Added -> LocalDiffTheme.current.diffLinesTheme.addedTextColor
             DiffInfoItem.Line.Type.Removed -> LocalDiffTheme.current.diffLinesTheme.removedTextColor
         }
+        ListTextView(
+            modifier = Modifier.width(48.dp)
+                .background(LocalDiffTheme.current.colors.header1Color)
+                .padding(horizontal = 4.dp),
+            text = buildString {
+                if (item.number != null) {
+                    append("${item.number} ")
+                }
+            },
+            color = textColor,
+        )
         Box(
             modifier = Modifier.width(24.dp),
             contentAlignment = Alignment.Center,
@@ -113,6 +125,6 @@ private fun Line(item: DiffInfoItem.Line) =
         }
         ListTextView(
             text = item.text,
-            color = textColor
+            color = textColor,
         )
     }

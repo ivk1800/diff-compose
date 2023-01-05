@@ -7,12 +7,19 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import kotlin.math.min
 
 class DiffInfoItemMapper {
-    fun mapToItems(diff: Diff): ImmutableList<DiffInfoItem> =
-        diff.hunks.map { hunk ->
-            mutableListOf<DiffInfoItem>(mapToHeader(hunk)).apply {
+    fun mapToItems(diff: Diff): ImmutableList<DiffInfoItem> {
+        return diff.hunks.mapIndexed { index, hunk ->
+            mutableListOf<DiffInfoItem>(mapToHeader(index + 1, hunk)).apply {
+                var linesCount = hunk.getStartLineNumber()
                 hunk.lines.forEach { line ->
+                    val shouldDisplayNumber = line.shouldDisplayNumber()
                     add(
                         DiffInfoItem.Line(
+                            number = if (shouldDisplayNumber) {
+                                linesCount
+                            } else {
+                                null
+                            },
                             text = line.text,
                             type = when (line.type) {
                                 Diff.Hunk.Line.Type.NotChanged -> DiffInfoItem.Line.Type.NotChanged
@@ -21,22 +28,35 @@ class DiffInfoItemMapper {
                             }
                         )
                     )
+                    if (shouldDisplayNumber) {
+                        linesCount++
+                    }
                 }
             }
         }
             .flatten()
             .toImmutableList()
-
-    private fun mapToHeader(hunk: Diff.Hunk): DiffInfoItem.HunkHeader {
-        val firstStartLine = hunk.firstRange.first
-        val firstEndLine = hunk.firstRange.first + hunk.firstRange.last
-
-        val secondStartLine = hunk.secondRange.first
-        val secondEndLine = hunk.secondRange.first + hunk.secondRange.last
-
-        val start = min(firstStartLine, secondStartLine)
-        val end = min(firstEndLine, secondEndLine)
-
-        return DiffInfoItem.HunkHeader("Lines: ${start}:${end}")
     }
+
+    private fun mapToHeader(number: Int, hunk: Diff.Hunk): DiffInfoItem.HunkHeader {
+        val start = hunk.getStartLineNumber()
+        val end = hunk.getEndLineNumber()
+
+        return DiffInfoItem.HunkHeader("Hunk ${number}: Lines ${start}:${end}")
+    }
+
+    private fun Diff.Hunk.getStartLineNumber(): Int {
+        val firstStartLine = firstRange.first
+        val secondStartLine = secondRange.first
+        return min(firstStartLine, secondStartLine)
+    }
+
+    private fun Diff.Hunk.getEndLineNumber(): Int {
+        val firstEndLine = firstRange.first + firstRange.last
+        val secondEndLine = secondRange.first + secondRange.last
+        return min(firstEndLine, secondEndLine) - 1
+    }
+
+    private fun Diff.Hunk.Line.shouldDisplayNumber(): Boolean =
+        type == Diff.Hunk.Line.Type.NotChanged || type == Diff.Hunk.Line.Type.Removed
 }
