@@ -74,7 +74,6 @@ fun DiffListView(
     selected: ImmutableSet<DiffInfoItem.Id.Line>,
     onEvent: (value: RepositoryViewEvent.Diff) -> Unit,
 ) {
-    println(1)
     val currentSelected by rememberUpdatedState(selected)
     val currentItems by rememberUpdatedState(items)
     val currentOnEvent by rememberUpdatedState(onEvent)
@@ -146,6 +145,8 @@ private fun HunkHeader(
                         DiffInfoItem.HunkHeader.Action.DiscardLines -> MR.strings.discard_lines
                         DiffInfoItem.HunkHeader.Action.StageLines -> MR.strings.stage_lines
                         DiffInfoItem.HunkHeader.Action.UnstageLines -> MR.strings.unstage_lines
+                        DiffInfoItem.HunkHeader.Action.ReverseHunk -> MR.strings.reverse_hunk
+                        DiffInfoItem.HunkHeader.Action.ReverseLines -> MR.strings.reverse_lines
                     }.localized(),
                     onClick = { onActionClick.invoke(action) },
                 )
@@ -161,7 +162,7 @@ private fun HunkHeaderPreview() {
         HunkHeader(
             onActionClick = {},
             item = DiffInfoItem.HunkHeader(
-                id = DiffInfoItem.Id.Header(0),
+                id = DiffInfoItem.Id.Hunk(0),
                 actions = persistentListOf(
                     DiffInfoItem.HunkHeader.Action.DiscardHunk
                 ),

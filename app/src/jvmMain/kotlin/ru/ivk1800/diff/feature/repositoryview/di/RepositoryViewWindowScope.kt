@@ -90,6 +90,15 @@ class RepositoryViewWindowScope(
         FilesInfoInteractor(commitInfoInteractor, uncommittedChangesInteractor, commitsTableInteractor)
     }
 
+    private val selectionCoordinator by lazy {
+        SelectionCoordinator(
+            commitsTableInteractor,
+            commitInfoInteractor,
+            diffInfoInteractor,
+            uncommittedChangesInteractor,
+        )
+    }
+
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
             repositoryDirectory = repoPath,
@@ -97,12 +106,7 @@ class RepositoryViewWindowScope(
             diffInfoInteractor = diffInfoInteractor,
             filesInfoInteractor = filesInfoInteractor,
             uncommittedChangesInteractor = uncommittedChangesInteractor,
-            selectionCoordinator = SelectionCoordinator(
-                commitsTableInteractor,
-                commitInfoInteractor,
-                diffInfoInteractor,
-                uncommittedChangesInteractor,
-            ),
+            selectionCoordinator = selectionCoordinator,
             commitsTableInteractor = commitsTableInteractor,
             router = dependencies.router,
             dialogRouter = object : DialogRouter {
@@ -120,5 +124,6 @@ class RepositoryViewWindowScope(
         diffInfoInteractor.dispose()
         commitsTableInteractor.dispose()
         filesInfoInteractor.dispose()
+        selectionCoordinator.dispose()
     }
 }

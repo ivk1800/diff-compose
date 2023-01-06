@@ -22,7 +22,7 @@ sealed interface DiffInfoItem {
     }
 
     data class HunkHeader(
-        override val id: Id.Header,
+        override val id: Id.Hunk,
         val text: String,
         val actions: ImmutableList<Action>,
     ) : DiffInfoItem {
@@ -33,14 +33,19 @@ sealed interface DiffInfoItem {
             DiscardLines,
             StageLines,
             UnstageLines,
+            ReverseHunk,
+            ReverseLines,
         }
     }
 
     sealed interface Id {
-        data class Header(
+        data class Hunk(
             val number: Int,
         ) : Id
 
-        data class Line(val number: Int) : Id
+        data class Line(
+            val hunkId: Hunk,
+            val number: Int,
+        ) : Id
     }
 }

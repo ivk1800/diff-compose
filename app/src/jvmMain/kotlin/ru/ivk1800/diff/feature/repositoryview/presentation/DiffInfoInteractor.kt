@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
@@ -66,8 +65,8 @@ class DiffInfoInteractor(
         selectCommitEvent.tryEmit(Event.FileSelected(commitHash = commitHash, path = path))
     }
 
-    fun onDiffSelected(diffId: DiffId) {
-        selectCommitEvent.tryEmit(Event.DiffSelected(diffId))
+    fun onDiffSelected(diffId: DiffId, type: UncommittedChangesType) {
+        selectCommitEvent.tryEmit(Event.DiffSelected(diffId, type))
     }
 
     fun onFileUnselected() {
@@ -97,14 +96,13 @@ class DiffInfoInteractor(
                 )
 
                 emit(diff)
-            }.map { diff ->
-                diffInfoItemMapper.mapToItems(diff)
             },
             selectedLines,
-        ) { items, selected ->
+        ) { diff, selected ->
             DiffInfoState.Content(
                 selected = selected,
-                items = items,
+                // TODO: Improve remapping items
+                items = diffInfoItemMapper.mapToItems(DiffInfoItemMapper.DiffType.Commit, diff, selected),
             )
         }
 
@@ -118,20 +116,34 @@ class DiffInfoInteractor(
                         newBlobId = event.diffId.newId,
                     )
                 )
-            }.map { diff ->
-                diffInfoItemMapper.mapToItems(diff)
             },
             selectedLines,
-        ) { items, selected ->
+        ) { diff, selected ->
             DiffInfoState.Content(
                 selected = selected,
-                items = items,
+                // TODO: Improve remapping items
+                items = diffInfoItemMapper.mapToItems(
+                    type = when (event.type) {
+                        UncommittedChangesType.Staged -> DiffInfoItemMapper.DiffType.UncommittedChanges.Staged
+                        UncommittedChangesType.Unstaged -> DiffInfoItemMapper.DiffType.UncommittedChanges.Unstaged
+                    },
+                    diff,
+                    selected,
+                ),
             )
         }
 
+    enum class UncommittedChangesType {
+        Staged,
+        Unstaged,
+    }
+
     private sealed interface Event {
         data class FileSelected(val commitHash: String, val path: String) : Event
-        data class DiffSelected(val diffId: DiffId) : Event
+        data class DiffSelected(
+            val diffId: DiffId,
+            val type: UncommittedChangesType,
+        ) : Event
         object Unselected : Event
     }
 }
