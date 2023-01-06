@@ -25,8 +25,8 @@ kotlin {
         val jvmMain by getting {
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation(libs.kotlinx.collections.immutable)
+                implementation(libs.kotlinx.coroutines.core)
                 implementation(compose.desktop.currentOs)
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))
@@ -36,8 +36,8 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation("junit:junit:4.13.2")
-                implementation("io.mockk:mockk:1.13.3")
+                implementation(libs.junit)
+                implementation(libs.mockk)
             }
         }
     }

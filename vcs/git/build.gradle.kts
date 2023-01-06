@@ -8,10 +8,10 @@ repositories {
 
 dependencies {
     api(project(":vcs:api"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("com.google.code.gson:gson:2.10")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.gson)
 
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.10")
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test)
 
 }
