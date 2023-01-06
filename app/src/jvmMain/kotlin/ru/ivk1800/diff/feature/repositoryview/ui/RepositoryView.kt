@@ -95,6 +95,7 @@ private fun BottomHorizontalPanes(
             )
         }
         DiffInfoView(
+            onEvent = onEvent,
             modifier = Modifier.fillMaxSize(),
             state = state.diffInfoState,
         )

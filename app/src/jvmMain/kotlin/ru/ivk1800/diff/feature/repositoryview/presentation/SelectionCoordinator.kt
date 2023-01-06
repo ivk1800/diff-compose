@@ -3,6 +3,7 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 import kotlinx.collections.immutable.ImmutableSet
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 
 class SelectionCoordinator(
     private val commitsTableInteractor: CommitsTableInteractor,
@@ -48,5 +49,9 @@ class SelectionCoordinator(
                 diffInfoInteractor.onDiffSelected(diffId)
             }
         }
+    }
+
+    fun selectDiffLines(ids: ImmutableSet<DiffInfoItem.Id.Line>) {
+        diffInfoInteractor.selectLines(ids)
     }
 }

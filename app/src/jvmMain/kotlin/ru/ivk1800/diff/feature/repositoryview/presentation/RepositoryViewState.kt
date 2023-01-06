@@ -41,7 +41,10 @@ sealed interface DiffInfoState {
 
     data class Error(val message: String) : DiffInfoState
 
-    data class Content(val items: ImmutableList<DiffInfoItem>) : DiffInfoState
+    data class Content(
+        val selected: ImmutableSet<DiffInfoItem.Id.Line>,
+        val items: ImmutableList<DiffInfoItem>,
+    ) : DiffInfoState
 }
 
 @Immutable

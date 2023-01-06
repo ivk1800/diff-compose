@@ -108,6 +108,13 @@ class RepositoryViewViewModel(
                     is RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected ->
                         selectionCoordinator.selectUnstatedFiles(value.items)
                 }
+
+            is RepositoryViewEvent.Diff -> {
+                when(value) {
+                    is RepositoryViewEvent.Diff.OnLinesSelected ->
+                        selectionCoordinator.selectDiffLines(value.ids)
+                }
+            }
         }
     }
 

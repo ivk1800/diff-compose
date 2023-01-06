@@ -3,6 +3,7 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 import kotlinx.collections.immutable.ImmutableSet
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 
 sealed interface RepositoryViewEvent {
     object OnReload : RepositoryViewEvent
@@ -33,5 +34,9 @@ sealed interface RepositoryViewEvent {
         data class OnStatedFilesSelected(val items: Set<CommitFileId>) : UncommittedChanges
 
         data class OnUnstatedFilesSelected(val items: Set<CommitFileId>) : UncommittedChanges
+    }
+
+    sealed interface Diff: RepositoryViewEvent {
+        data class OnLinesSelected(val ids: ImmutableSet<DiffInfoItem.Id.Line>): Diff
     }
 }

@@ -14,20 +14,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.application.ApplicationTheme
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
@@ -36,9 +43,14 @@ import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedL
 fun DiffInfoView(
     modifier: Modifier = Modifier,
     state: DiffInfoState,
+    onEvent: (value: RepositoryViewEvent.Diff) -> Unit,
 ) = Box(modifier = modifier) {
     when (state) {
-        is DiffInfoState.Content -> DiffListView(items = state.items)
+        is DiffInfoState.Content -> DiffListView(
+            onEvent = onEvent,
+            items = state.items,
+            selected = state.selected,
+        )
         DiffInfoState.None -> Unit
         is DiffInfoState.Error -> Box(
             modifier = Modifier
@@ -59,16 +71,39 @@ fun DiffInfoView(
 fun DiffListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<DiffInfoItem>,
+    selected: ImmutableSet<DiffInfoItem.Id.Line>,
+    onEvent: (value: RepositoryViewEvent.Diff) -> Unit,
 ) {
+    println(1)
+    val currentSelected by rememberUpdatedState(selected)
     val currentItems by rememberUpdatedState(items)
+    val currentOnEvent by rememberUpdatedState(onEvent)
+    val selectableListState = rememberSelectedListState(
+        onSelect = { selectedItems ->
+            currentOnEvent.invoke(
+                RepositoryViewEvent.Diff.OnLinesSelected(
+                    selectedItems.filterIsInstance<DiffInfoItem.Id.Line>().toImmutableSet()
+                )
+            )
+            false
+        },
+        onInteractable = { id -> id is DiffInfoItem.Id.Line },
+        calculateIndex = { itemId -> currentItems.indexOfFirst { it.id == itemId } },
+        calculateId = { index -> currentItems[index].id },
+    )
+
+    LaunchedEffect(key1 = selectableListState) {
+        snapshotFlow { currentSelected }
+            .onEach { items ->
+                selectableListState.select(items)
+            }
+            .launchIn(this)
+    }
+
     SelectedList(
         modifier,
         itemsCount = items.size,
-        state = rememberSelectedListState(
-            onInteractable = { id -> id is DiffInfoItem.Id.Line },
-            calculateIndex = { itemId -> currentItems.indexOfFirst { it.id == itemId } },
-            calculateId = { index -> currentItems[index].id },
-        ),
+        state = selectableListState,
         itemContent = { index ->
             when (val item = items[index]) {
                 is DiffInfoItem.Line -> Line(item)
