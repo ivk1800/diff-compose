@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,12 +60,14 @@ fun DiffListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<DiffInfoItem>,
 ) {
-    SelectedList<Int>(
+    val currentItems by rememberUpdatedState(items)
+    SelectedList(
         modifier,
         itemsCount = items.size,
         state = rememberSelectedListState(
-            calculateIndex = { itemId -> itemId },
-            calculateId = { index -> index },
+            onInteractable = { id -> id is DiffInfoItem.Id.Line },
+            calculateIndex = { itemId -> currentItems.indexOfFirst { it.id == itemId } },
+            calculateId = { index -> currentItems[index].id },
         ),
         itemContent = { index ->
             when (val item = items[index]) {
@@ -122,6 +126,7 @@ private fun HunkHeaderPreview() {
         HunkHeader(
             onActionClick = {},
             item = DiffInfoItem.HunkHeader(
+                id = DiffInfoItem.Id.Header(0),
                 actions = persistentListOf(
                     DiffInfoItem.HunkHeader.Action.DiscardHunk
                 ),

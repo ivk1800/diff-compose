@@ -5,7 +5,11 @@ import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 sealed interface DiffInfoItem {
+
+    val id: Id
+
     data class Line(
+        override val id: Id.Line,
         val number: Int?,
         val text: String,
         val type: Type,
@@ -18,6 +22,7 @@ sealed interface DiffInfoItem {
     }
 
     data class HunkHeader(
+        override val id: Id.Header,
         val text: String,
         val actions: ImmutableList<Action>,
     ) : DiffInfoItem {
@@ -29,5 +34,13 @@ sealed interface DiffInfoItem {
             StageLines,
             UnstageLines,
         }
+    }
+
+    sealed interface Id {
+        data class Header(
+            val number: Int,
+        ) : Id
+
+        data class Line(val number: Int) : Id
     }
 }

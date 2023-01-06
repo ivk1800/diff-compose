@@ -9,13 +9,15 @@ import kotlin.math.min
 
 class DiffInfoItemMapper {
     fun mapToItems(diff: Diff): ImmutableList<DiffInfoItem> {
+        var totalLineCount = 0
         return diff.hunks.mapIndexed { index, hunk ->
             mutableListOf<DiffInfoItem>(mapToHeader(index + 1, hunk)).apply {
                 var linesCount = hunk.getStartLineNumber()
-                hunk.lines.forEach { line ->
+                hunk.lines.forEachIndexed { lineIndex, line ->
                     val shouldDisplayNumber = line.shouldDisplayNumber()
                     add(
                         DiffInfoItem.Line(
+                            id = DiffInfoItem.Id.Line(number = ++totalLineCount),
                             number = if (shouldDisplayNumber) {
                                 linesCount
                             } else {
@@ -44,6 +46,7 @@ class DiffInfoItemMapper {
         val end = hunk.getEndLineNumber()
 
         return DiffInfoItem.HunkHeader(
+            id = DiffInfoItem.Id.Header(number = number),
             text ="Hunk ${number}: Lines ${start}:${end}",
             actions = persistentListOf(),
         )
