@@ -1,10 +1,14 @@
 package ru.ivk1800.diff.feature.repositoryview.ui
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
@@ -16,6 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import ru.ivk1800.diff.application.ApplicationTheme
+import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -61,24 +68,67 @@ fun DiffListView(
             when (val item = items[index]) {
                 is DiffInfoItem.Line -> Line(item)
 
-                is DiffInfoItem.HunkHeader -> HunkHeader(item)
+                is DiffInfoItem.HunkHeader -> HunkHeader(
+                    item,
+                    onActionClick = { },
+                )
             }
         },
     )
 }
 
 @Composable
-private fun HunkHeader(item: DiffInfoItem.HunkHeader) =
+private fun HunkHeader(
+    item: DiffInfoItem.HunkHeader,
+    onActionClick: (DiffInfoItem.HunkHeader.Action) -> Unit,
+) =
     Row(
         modifier = Modifier.fillMaxWidth().background(LocalDiffTheme.current.colors.header1Color),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         ListTextView(
             // TODO: magic numbers
             modifier = Modifier.padding(start = (48 + 4).dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             text = item.text,
         )
+        Row(
+            // TODO: fixed height
+            modifier = Modifier.height(48.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item.actions.forEach { action ->
+                HunkActionButton(
+                    text = when (action) {
+                        DiffInfoItem.HunkHeader.Action.StageHunk -> "Stage hunk "
+                        DiffInfoItem.HunkHeader.Action.UnstageHunk -> "Unstage hunk"
+                        DiffInfoItem.HunkHeader.Action.DiscardHunk -> "Discard hunk"
+                        DiffInfoItem.HunkHeader.Action.DiscardLines -> "Discard lines"
+                        DiffInfoItem.HunkHeader.Action.StageLines -> "Stage lines"
+                        DiffInfoItem.HunkHeader.Action.UnstageLines -> "Unstage lines"
+                    },
+                    onClick = { onActionClick.invoke(action) },
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
     }
+
+@Preview
+@Composable
+private fun HunkHeaderPreview() {
+    DiffTheme(ApplicationTheme.Dark) {
+        HunkHeader(
+            onActionClick = {},
+            item = DiffInfoItem.HunkHeader(
+                actions = persistentListOf(
+                    DiffInfoItem.HunkHeader.Action.DiscardHunk
+                ),
+                text = "Test",
+            )
+        )
+    }
+}
 
 @Composable
 private fun Line(item: DiffInfoItem.Line) =

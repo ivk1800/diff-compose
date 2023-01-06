@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -42,7 +43,10 @@ class DiffInfoItemMapper {
         val start = hunk.getStartLineNumber()
         val end = hunk.getEndLineNumber()
 
-        return DiffInfoItem.HunkHeader("Hunk ${number}: Lines ${start}:${end}")
+        return DiffInfoItem.HunkHeader(
+            text ="Hunk ${number}: Lines ${start}:${end}",
+            actions = persistentListOf(),
+        )
     }
 
     private fun Diff.Hunk.getStartLineNumber(): Int {
