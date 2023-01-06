@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.application.ApplicationTheme
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
@@ -100,13 +101,13 @@ private fun HunkHeader(
             item.actions.forEach { action ->
                 HunkActionButton(
                     text = when (action) {
-                        DiffInfoItem.HunkHeader.Action.StageHunk -> "Stage hunk "
-                        DiffInfoItem.HunkHeader.Action.UnstageHunk -> "Unstage hunk"
-                        DiffInfoItem.HunkHeader.Action.DiscardHunk -> "Discard hunk"
-                        DiffInfoItem.HunkHeader.Action.DiscardLines -> "Discard lines"
-                        DiffInfoItem.HunkHeader.Action.StageLines -> "Stage lines"
-                        DiffInfoItem.HunkHeader.Action.UnstageLines -> "Unstage lines"
-                    },
+                        DiffInfoItem.HunkHeader.Action.StageHunk -> MR.strings.stage_hunk
+                        DiffInfoItem.HunkHeader.Action.UnstageHunk -> MR.strings.unstage_hunk
+                        DiffInfoItem.HunkHeader.Action.DiscardHunk -> MR.strings.discard_hunk
+                        DiffInfoItem.HunkHeader.Action.DiscardLines -> MR.strings.discard_lines
+                        DiffInfoItem.HunkHeader.Action.StageLines -> MR.strings.stage_lines
+                        DiffInfoItem.HunkHeader.Action.UnstageLines -> MR.strings.unstage_lines
+                    }.localized(),
                     onClick = { onActionClick.invoke(action) },
                 )
             }

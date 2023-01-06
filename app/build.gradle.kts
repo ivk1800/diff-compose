@@ -3,6 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 group = "ru.ivk1800.diff"
@@ -12,6 +13,10 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+}
+
+dependencies {
+    commonMainApi(libs.moko.resources)
 }
 
 kotlin {
@@ -52,4 +57,8 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+multiplatformResources {
+    multiplatformResourcesPackage = "ru.ivk1800.diff"
 }

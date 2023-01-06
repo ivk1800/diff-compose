@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="my_string">My default localization string</string>
+    <string name="stage_hunk">Stage hunk</string>
+    <string name="unstage_hunk">Unstage hunk</string>
+    <string name="discard_hunk">Discard hunk</string>
+    <string name="discard_lines">Discard lines</string>
+    <string name="stage_lines">Stage lines</string>
+    <string name="unstage_lines">Unstage lines</string>
+    <string name="uncommitted_changes">Uncommitted changes</string>
+    <string name="staged_files">Staged files</string>
+    <string name="staged_files">Staged files</string>
+    <string name="unstaged_files">Unstaged files</string>
+</resources>

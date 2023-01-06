@@ -39,6 +39,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesState
@@ -92,7 +93,7 @@ fun UncommittedChangesInfoView(
                             )
                         )
                     },
-                    title = "Staged files",
+                    title = MR.strings.staged_files.localized(),
                     files = state.staged.files,
                     vcsProcess = !state.staged.vcsProcess,
                     onStageActionClick = {
@@ -109,7 +110,7 @@ fun UncommittedChangesInfoView(
                             )
                         )
                     },
-                    title = "Unstaged files",
+                    title = MR.strings.unstaged_files.localized(),
                     files = state.unstaged.files,
                     vcsProcess = state.unstaged.vcsProcess,
                     onStageActionClick = {

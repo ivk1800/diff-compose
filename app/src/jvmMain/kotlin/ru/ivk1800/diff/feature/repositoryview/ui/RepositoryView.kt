@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
@@ -296,7 +297,7 @@ private fun UncommittedChangesItemView() {
     ListTextView(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        text = "Uncommitted changes",
+        text = MR.strings.uncommitted_changes.localized(),
         fontWeight = FontWeight.Bold,
     )
 }
