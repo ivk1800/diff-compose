@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation.model
 
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 sealed interface CommitTableItem {
@@ -10,6 +11,7 @@ sealed interface CommitTableItem {
         val commit: String,
         val author: String,
         val date: String,
+        val labels: ImmutableList<CommitLabel>,
     ) : CommitTableItem
 
     object UncommittedChanges : CommitTableItem
