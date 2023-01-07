@@ -5,6 +5,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.IndexRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.ext.getStartLineNumber
+import ru.ivk1800.vcs.git.VcsException
 import java.io.File
 
 // TODO: move from presentation folder
@@ -15,9 +16,18 @@ class IndexInteractor(
     private val indexRepository: IndexRepository,
 ) {
 
-    suspend fun removeFromIndex(fileName: String, hunk: Diff.Hunk, diffId: String) {
-        removeFromIndexInternal(fileName, hunk, diffId)
-    }
+    suspend fun removeFromIndex(fileName: String, hunk: Diff.Hunk, diffId: String): Result<Unit> =
+        try {
+            Result.success(removeFromIndexInternal(fileName, hunk, diffId))
+        } catch (error: Throwable) {
+            Result.failure(
+                // TODO
+                VcsException.ParseException(
+                    message = "An error occurred while remove hunk from index",
+                    cause = error
+                )
+            )
+        }
 
     private suspend fun removeFromIndexInternal(fileName: String, hunk: Diff.Hunk, diffId: String) {
         val startLineNumber = hunk.getStartLineNumber()

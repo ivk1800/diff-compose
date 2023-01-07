@@ -21,6 +21,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewMod
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
+import ru.ivk1800.diff.presentation.ErrorTransformer
 import ru.ivk1800.diff.window.DialogManager
 import java.io.File
 
@@ -130,6 +131,10 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val errorTransformer by lazy {
+        ErrorTransformer()
+    }
+
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
             repositoryDirectory = repoPath,
@@ -141,6 +146,7 @@ class RepositoryViewWindowScope(
             commitsTableInteractor = commitsTableInteractor,
             indexInteractor = indexInteractor,
             router = dependencies.router,
+            errorTransformer = errorTransformer,
             dialogRouter = object : DialogRouter {
                 override fun show(dialog: DialogRouter.Dialog) {
                     dialogManager.show(dialog)

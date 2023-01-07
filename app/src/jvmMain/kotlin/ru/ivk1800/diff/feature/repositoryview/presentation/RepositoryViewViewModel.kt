@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.ivk1800.diff.presentation.BaseViewModel
 import ru.ivk1800.diff.presentation.DialogRouter
+import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 
 class RepositoryViewViewModel(
@@ -22,6 +23,7 @@ class RepositoryViewViewModel(
     private val router: RepositoryViewRouter,
     private val dialogRouter: DialogRouter,
     private val filesInfoInteractor: FilesInfoInteractor,
+    private val errorTransformer: ErrorTransformer,
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(
@@ -42,19 +44,10 @@ class RepositoryViewViewModel(
 
         uncommittedChangesInteractor.errors
             .onEach { error ->
-                fun getMessage(e: Throwable): String {
-                    val cause = e.cause
-                    return if (cause == null) {
-                        e.message.orEmpty()
-                    } else {
-                        listOf(e.message.orEmpty(), getMessage(cause)).joinToString("\n")
-                    }
-                }
-
                 dialogRouter.show(
                     DialogRouter.Dialog(
                         title = "Error",
-                        text = getMessage(error),
+                        text = errorTransformer.transformForDisplay(error),
                     ),
                 )
             }
@@ -136,7 +129,16 @@ class RepositoryViewViewModel(
                         }
 
                         viewModelScope.launch {
-                            indexInteractor.removeFromIndex(file.id.path, hunk, diffId)
+                            val result = indexInteractor.removeFromIndex(file.id.path, hunk, diffId)
+                            val error = result.exceptionOrNull()
+                            if (error != null) {
+                                dialogRouter.show(
+                                    DialogRouter.Dialog(
+                                        title = "Error",
+                                        text = errorTransformer.transformForDisplay(error),
+                                    )
+                                )
+                            }
                         }
                     }
                 }
