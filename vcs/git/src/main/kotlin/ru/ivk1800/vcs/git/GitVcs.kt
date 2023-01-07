@@ -8,7 +8,9 @@ import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.git.parser.GitLogParser
 import ru.ivk1800.vcs.git.parser.VcsDiffParser
+import java.io.BufferedWriter
 import java.io.File
+import java.io.OutputStreamWriter
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -178,11 +180,26 @@ class GitVcs : Vcs {
             onResult = { },
         )
 
+    override suspend fun writeToDatabase(directory: File, content: String): String = withContext(Dispatchers.IO) {
+        val process = createProcess2(directory, "git hash-object -w --stdin")
+
+        BufferedWriter(OutputStreamWriter(process.outputStream)).apply {
+            write(content)
+            close()
+        }
+
+        runProcess(
+            process,
+            onResult = { it },
+            onError = VcsException::ProcessException,
+        )
+    }
+
     private inline fun <T> runProcess(
         process: Process,
         onResult: (result: String) -> T,
         onError: (error: String) -> Throwable,
-    ): T = if (process.exitValue() != 0) {
+    ): T = if (process.waitFor() != 0) {
         val error = process.errorStream.reader().readText()
         throw onError.invoke(error)
     } else {
@@ -193,6 +210,12 @@ class GitVcs : Vcs {
             onResult.invoke(result)
 //        }
     }
+
+    // TODO rename
+    private fun createProcess2(directory: File, command: String): Process =
+        ProcessBuilder(*command.split(" ").toTypedArray())
+            .directory(directory)
+            .start()
 
     private fun createProcess(directory: File, command: String): Process =
         ProcessBuilder(*command.split(" ").toTypedArray())

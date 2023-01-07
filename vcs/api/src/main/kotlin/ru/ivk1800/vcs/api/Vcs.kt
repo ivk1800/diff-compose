@@ -26,4 +26,6 @@ interface Vcs {
     suspend fun removeFilesFromStaged(directory: File, filePaths: List<String>)
 
     suspend fun addFilesToStaged(directory: File, filePaths: List<String>)
+
+    suspend fun writeToDatabase(directory: File, content: String): String
 }

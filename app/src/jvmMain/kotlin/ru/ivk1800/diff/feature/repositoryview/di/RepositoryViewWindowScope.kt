@@ -45,6 +45,12 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val objectRepository by lazy {
+        ObjectRepository(
+            vcs = dependencies.vcs,
+        )
+    }
+
     private val diffInfoInteractor by lazy {
         DiffInfoInteractor(
             repoDirectory = repoPath,
