@@ -6,7 +6,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
-import kotlin.math.min
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.ext.getEndLineNumber
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.ext.getStartLineNumber
 
 class DiffInfoItemMapper {
     fun mapToItems(
@@ -102,18 +103,6 @@ class DiffInfoItemMapper {
                 }
             }
         }
-
-    private fun Diff.Hunk.getStartLineNumber(): Int {
-        val firstStartLine = firstRange.first
-        val secondStartLine = secondRange.first
-        return min(firstStartLine, secondStartLine)
-    }
-
-    private fun Diff.Hunk.getEndLineNumber(): Int {
-        val firstEndLine = firstRange.first + firstRange.last
-        val secondEndLine = secondRange.first + secondRange.last
-        return min(firstEndLine, secondEndLine) - 1
-    }
 
     private fun Diff.Hunk.Line.shouldDisplayNumber(): Boolean =
         type == Diff.Hunk.Line.Type.NotChanged || type == Diff.Hunk.Line.Type.Removed

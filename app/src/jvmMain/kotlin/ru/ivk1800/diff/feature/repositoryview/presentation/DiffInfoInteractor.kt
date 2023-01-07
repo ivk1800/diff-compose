@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -36,12 +37,16 @@ class DiffInfoInteractor(
     private val selectCommitEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
     private val selectedLines = MutableStateFlow<ImmutableSet<DiffInfoItem.Id.Line>>(persistentSetOf())
 
+    private var rawDiff: Diff? = null
     private val _state = MutableStateFlow<DiffInfoState>(DiffInfoState.None)
     val state: StateFlow<DiffInfoState>
         get() = _state
 
     init {
         selectCommitEvent
+            .onEach {
+                rawDiff = null
+            }
             .flatMapLatest { event ->
                 when (event) {
                     is Event.DiffSelected -> handleDiffSelectedEvent(event)
@@ -77,6 +82,12 @@ class DiffInfoInteractor(
         selectedLines.value = lines
     }
 
+    fun getDiffId(): String? = rawDiff?.newId
+
+    fun getHunk(id: DiffInfoItem.Id.Hunk): Diff.Hunk? {
+        return rawDiff?.hunks?.get(id.number - 1)
+    }
+
     fun dispose() {
         scope.cancel()
     }
@@ -99,6 +110,7 @@ class DiffInfoInteractor(
             },
             selectedLines,
         ) { diff, selected ->
+            rawDiff = diff
             DiffInfoState.Content(
                 selected = selected,
                 // TODO: Improve remapping items
@@ -119,6 +131,7 @@ class DiffInfoInteractor(
             },
             selectedLines,
         ) { diff, selected ->
+            rawDiff = diff
             DiffInfoState.Content(
                 selected = selected,
                 // TODO: Improve remapping items
@@ -144,6 +157,7 @@ class DiffInfoInteractor(
             val diffId: DiffId,
             val type: UncommittedChangesType,
         ) : Event
+
         object Unselected : Event
     }
 }

@@ -51,6 +51,7 @@ fun DiffInfoView(
             items = state.items,
             selected = state.selected,
         )
+
         DiffInfoState.None -> Unit
         is DiffInfoState.Error -> Box(
             modifier = Modifier
@@ -109,7 +110,24 @@ fun DiffListView(
 
                 is DiffInfoItem.HunkHeader -> HunkHeader(
                     item,
-                    onActionClick = { },
+                    onActionClick = { action ->
+                        when (action) {
+                            DiffInfoItem.HunkHeader.Action.StageHunk -> Unit
+                            DiffInfoItem.HunkHeader.Action.UnstageHunk ->
+                                onEvent.invoke(
+                                    RepositoryViewEvent.Diff.OnUnstageHunk(
+                                        hunkId = item.id,
+                                    ),
+                                )
+
+                            DiffInfoItem.HunkHeader.Action.DiscardHunk -> Unit
+                            DiffInfoItem.HunkHeader.Action.DiscardLines -> Unit
+                            DiffInfoItem.HunkHeader.Action.StageLines -> Unit
+                            DiffInfoItem.HunkHeader.Action.UnstageLines -> Unit
+                            DiffInfoItem.HunkHeader.Action.ReverseHunk -> Unit
+                            DiffInfoItem.HunkHeader.Action.ReverseLines -> Unit
+                        }
+                    },
                 )
             }
         },

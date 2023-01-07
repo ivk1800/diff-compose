@@ -4,6 +4,9 @@ import ru.ivk1800.diff.feature.repositoryview.RepositoryId
 import ru.ivk1800.diff.feature.repositoryview.RepositoryViewDependencies
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.IndexRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
@@ -12,6 +15,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableInteracto
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.IndexInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
@@ -51,6 +55,18 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val fileRepository by lazy {
+        FileRepository(
+            vcs = dependencies.vcs,
+        )
+    }
+
+    private val indexRepository by lazy {
+        IndexRepository(
+            vcs = dependencies.vcs,
+        )
+    }
+
     private val diffInfoInteractor by lazy {
         DiffInfoInteractor(
             repoDirectory = repoPath,
@@ -77,6 +93,15 @@ class RepositoryViewWindowScope(
             repoDirectory = repoPath,
             commitsRepository = commitsRepository,
             commitItemMapper = CommitItemMapper(),
+        )
+    }
+
+    private val indexInteractor by lazy {
+        IndexInteractor(
+            repoDirectory = repoPath,
+            objectRepository = objectRepository,
+            fileRepository = fileRepository,
+            indexRepository = indexRepository,
         )
     }
 
@@ -114,6 +139,7 @@ class RepositoryViewWindowScope(
             uncommittedChangesInteractor = uncommittedChangesInteractor,
             selectionCoordinator = selectionCoordinator,
             commitsTableInteractor = commitsTableInteractor,
+            indexInteractor = indexInteractor,
             router = dependencies.router,
             dialogRouter = object : DialogRouter {
                 override fun show(dialog: DialogRouter.Dialog) {

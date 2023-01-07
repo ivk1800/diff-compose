@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.ivk1800.diff.presentation.BaseViewModel
 import ru.ivk1800.diff.presentation.DialogRouter
 import java.io.File
@@ -17,6 +18,7 @@ class RepositoryViewViewModel(
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val selectionCoordinator: SelectionCoordinator,
     private val commitsTableInteractor: CommitsTableInteractor,
+    private val indexInteractor: IndexInteractor,
     private val router: RepositoryViewRouter,
     private val dialogRouter: DialogRouter,
     private val filesInfoInteractor: FilesInfoInteractor,
@@ -113,6 +115,30 @@ class RepositoryViewViewModel(
                 when(value) {
                     is RepositoryViewEvent.Diff.OnLinesSelected ->
                         selectionCoordinator.selectDiffLines(value.ids)
+
+                    is RepositoryViewEvent.Diff.OnUnstageHunk -> {
+                        val file = when (val filesState  = filesInfoInteractor.state.value) {
+                            is FilesInfoState.Commit -> filesState.state.files.first()
+                            FilesInfoState.None -> error("TODO")
+                            is FilesInfoState.UncommittedChanges -> filesState.state.staged.files.first()
+                        }
+
+                        check(diffInfoInteractor.state.value is DiffInfoState.Content) {
+                            "Unable to unstage hunk, because diff is not selected"
+                        }
+                        val hunk = diffInfoInteractor.getHunk(value.hunkId)
+                        val diffId = diffInfoInteractor.getDiffId()
+                        checkNotNull(hunk) {
+                            "Unable to unstage hunk, because hunk not found"
+                        }
+                        checkNotNull(diffId) {
+                            "Unable to unstage hunk, because diff not found"
+                        }
+
+                        viewModelScope.launch {
+                            indexInteractor.removeFromIndex(file.id.path, hunk, diffId)
+                        }
+                    }
                 }
             }
         }

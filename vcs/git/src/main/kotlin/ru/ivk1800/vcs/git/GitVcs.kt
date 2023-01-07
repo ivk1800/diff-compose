@@ -190,7 +190,27 @@ class GitVcs : Vcs {
 
         runProcess(
             process,
-            onResult = { it },
+            onResult = { it.trim() },
+            onError = VcsException::ProcessException,
+        )
+    }
+
+    override suspend fun getContent(directory: File, id: String): List<String> {
+        val process = createProcess2(directory, "git show $id")
+
+        return runProcess(
+            process,
+            onResult = { it.split(System.lineSeparator()) },
+            onError = VcsException::ProcessException,
+        )
+    }
+
+    override suspend fun updateIndex(directory: File, fileName: String, id: String) {
+        val process = createProcess2(directory, "git update-index --add --cacheinfo 100644 $id $fileName")
+
+        return runProcess(
+            process,
+            onResult = { Unit },
             onError = VcsException::ProcessException,
         )
     }
@@ -207,7 +227,7 @@ class GitVcs : Vcs {
 //        if (result.isEmpty()) {
 //            throw onError.invoke("result of process is empty")
 //        } else {
-            onResult.invoke(result)
+        onResult.invoke(result)
 //        }
     }
 
