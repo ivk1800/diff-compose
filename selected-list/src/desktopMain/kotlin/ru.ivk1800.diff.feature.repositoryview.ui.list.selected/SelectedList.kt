@@ -26,13 +26,13 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun <Id> SelectedList(
+fun <Id : Any> SelectedList(
     modifier: Modifier = Modifier,
     state: SelectedListState<Id>,
     lazyListState: LazyListState = rememberLazyListState(),
     itemsCount: Int,
     itemContent: @Composable (index: Int) -> Unit,
-) = SelectedListInternal<Id>(
+) = SelectedListInternal(
     modifier = modifier,
     state = state,
     lazyListState = lazyListState,
@@ -41,7 +41,7 @@ fun <Id> SelectedList(
 )
 
 @Composable
-private fun <Id> SelectedListInternal(
+private fun <Id : Any> SelectedListInternal(
     modifier: Modifier,
     state: SelectedListState<Id>,
     lazyListState: LazyListState,
@@ -56,7 +56,10 @@ private fun <Id> SelectedListInternal(
         modifier = modifier,
         state = lazyListState,
     ) {
-        items(itemsCount) { index ->
+        items(
+            itemsCount,
+            key = state.calculateId::invoke,
+        ) { index ->
             val color by derivedStateOf {
                 if (state.selected.contains(state.calculateId.invoke(index))) {
                     hoveredColor
