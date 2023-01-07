@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -32,8 +33,7 @@ class CommitsInteractor(
     private val commitsRepository: CommitsRepository,
     private val commitItemMapper: CommitItemMapper,
 ) {
-    // TODO: add main dispatcher
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val eventsFlow = MutableSharedFlow<Event>(extraBufferCapacity = 1)
     private var isLoading = false

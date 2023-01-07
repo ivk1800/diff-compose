@@ -7,6 +7,7 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -21,9 +22,7 @@ class WindowKeyEventDelegate(
     private val test: (KeyEvent) -> Boolean,
     private val onDown: () -> Unit,
 ) {
-
-    // TODO: add main dispatcher
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val keyEventChannel = Channel<KeyEventType>()
 

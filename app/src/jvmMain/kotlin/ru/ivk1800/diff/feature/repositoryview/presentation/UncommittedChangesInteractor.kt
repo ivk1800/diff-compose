@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -26,13 +27,12 @@ class UncommittedChangesInteractor(
     private val diffRepository: DiffRepository,
     private val commitInfoMapper: CommitInfoMapper,
 ) {
-    // TODO: add main dispatcher
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private var rawStagedDiff: List<Diff> = emptyList()
     private var rawUnstagedDiff: List<Diff> = emptyList()
 
-    private val checkEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
+    private val checkEvent = MutableSharedFlow<Event>(replay = 1)
     private val errorsFlow = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
 
     private val _state = MutableStateFlow<UncommittedChangesState>(

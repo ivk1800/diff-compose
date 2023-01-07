@@ -3,6 +3,7 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -31,8 +32,7 @@ class DiffInfoInteractor(
     private val commitsRepository: CommitsRepository,
     private val diffInfoItemMapper: DiffInfoItemMapper,
 ) {
-    // TODO: add main dispatcher
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val selectCommitEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
     private val selectedLines = MutableStateFlow<ImmutableSet<DiffInfoItem.Id.Line>>(persistentSetOf())

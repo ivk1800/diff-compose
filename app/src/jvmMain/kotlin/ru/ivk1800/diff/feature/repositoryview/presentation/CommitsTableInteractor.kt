@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +20,7 @@ class CommitsTableInteractor(
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
 ) {
-
-    // TODO: add main dispatcher
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val uncommittedChangesSelected = MutableStateFlow<Boolean>(false)
 

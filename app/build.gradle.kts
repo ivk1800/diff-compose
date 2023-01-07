@@ -32,6 +32,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.collections.immutable)
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.coroutines.swing)
                 implementation(compose.desktop.currentOs)
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))

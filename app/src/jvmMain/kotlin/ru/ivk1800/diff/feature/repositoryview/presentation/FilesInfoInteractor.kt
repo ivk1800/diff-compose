@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -15,8 +16,7 @@ class FilesInfoInteractor(
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val commitsTableInteractor: CommitsTableInteractor,
 ) {
-    // TODO: add main dispatcher
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     val state: StateFlow<FilesInfoState> = getFilesInfoStateFlow()
         .stateIn(
