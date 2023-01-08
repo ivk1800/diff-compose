@@ -1,6 +1,10 @@
 package ru.ivk1800.vcs.api
 
+import ru.ivk1800.vcs.api.command.HashObjectCommand
+import ru.ivk1800.vcs.api.command.ShowCommand
+import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import java.io.File
+import java.nio.file.Path
 
 interface Vcs {
     suspend fun isRepository(directory: File): Boolean
@@ -27,9 +31,9 @@ interface Vcs {
 
     suspend fun addFilesToStaged(directory: File, filePaths: List<String>)
 
-    suspend fun writeToDatabase(directory: File, content: String): String
+    suspend fun getHashObjectCommand(directory: Path, options: HashObjectCommand.Options): String
 
-    suspend fun getContent(directory: File, id: String): List<String>
+    suspend fun getShowCommand(directory: Path, options: ShowCommand.Options): ShowCommand
 
-    suspend fun updateIndex(directory: File, fileName: String, id: String)
+    suspend fun getUpdateIndexCommand(directory: Path, options: UpdateIndexCommand.Options): UpdateIndexCommand
 }

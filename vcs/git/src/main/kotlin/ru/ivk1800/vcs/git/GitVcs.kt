@@ -6,11 +6,16 @@ import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
+import ru.ivk1800.vcs.api.command.HashObjectCommand
+import ru.ivk1800.vcs.api.command.ShowCommand
+import ru.ivk1800.vcs.api.command.UpdateIndexCommand
+import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
+import ru.ivk1800.vcs.git.command.ShowCommandImpl
+import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
 import ru.ivk1800.vcs.git.parser.GitLogParser
 import ru.ivk1800.vcs.git.parser.VcsDiffParser
-import java.io.BufferedWriter
 import java.io.File
-import java.io.OutputStreamWriter
+import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -180,40 +185,17 @@ class GitVcs : Vcs {
             onResult = { },
         )
 
-    override suspend fun writeToDatabase(directory: File, content: String): String = withContext(Dispatchers.IO) {
-        val process = createProcess2(directory, "git hash-object -w --stdin")
+    override suspend fun getHashObjectCommand(directory: Path, options: HashObjectCommand.Options): String =
+        HashObjectCommandImpl(directory, options).run()
 
-        BufferedWriter(OutputStreamWriter(process.outputStream)).apply {
-            write(content)
-            close()
-        }
+    override suspend fun getShowCommand(directory: Path, options: ShowCommand.Options): ShowCommand =
+        ShowCommandImpl(directory, options)
 
-        runProcess(
-            process,
-            onResult = { it.trim() },
-            onError = VcsException::ProcessException,
-        )
-    }
-
-    override suspend fun getContent(directory: File, id: String): List<String> {
-        val process = createProcess2(directory, "git show $id")
-
-        return runProcess(
-            process,
-            onResult = { it.split(System.lineSeparator()) },
-            onError = VcsException::ProcessException,
-        )
-    }
-
-    override suspend fun updateIndex(directory: File, fileName: String, id: String) {
-        val process = createProcess2(directory, "git update-index --add --cacheinfo 100644 $id $fileName")
-
-        return runProcess(
-            process,
-            onResult = { Unit },
-            onError = VcsException::ProcessException,
-        )
-    }
+    override suspend fun getUpdateIndexCommand(
+        directory: Path,
+        options: UpdateIndexCommand.Options,
+    ): UpdateIndexCommand =
+        UpdateIndexCommandImpl(directory, options)
 
     private inline fun <T> runProcess(
         process: Process,
