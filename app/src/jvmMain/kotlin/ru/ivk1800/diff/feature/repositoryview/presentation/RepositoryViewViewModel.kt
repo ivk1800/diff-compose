@@ -71,15 +71,7 @@ class RepositoryViewViewModel(
 
             RepositoryViewEvent.OnCommitsUnselected -> commitInfoInteractor.selectCommit(null)
             is RepositoryViewEvent.OnFilesSelected ->
-                if (value.items.size == 1) {
-                    commitInfoInteractor.selectFiles(value.items)
-                    diffInfoInteractor.onFileSelected(
-                        commitHash = requireNotNull(commitInfoInteractor.selectedCommitHash),
-                        path = value.items.first().path,
-                    )
-                } else {
-                    diffInfoInteractor.onFileUnselected()
-                }
+                selectionCoordinator.selectCommitFiles(value.items)
 
             RepositoryViewEvent.OnLoadMoreCommits -> commitsTableInteractor.loadMore()
             RepositoryViewEvent.OnUncommittedChangesSelected -> selectionCoordinator.selectUncommittedChanges()

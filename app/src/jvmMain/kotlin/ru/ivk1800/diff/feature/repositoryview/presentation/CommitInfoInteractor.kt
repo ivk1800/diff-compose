@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
@@ -91,7 +92,9 @@ class CommitInfoInteractor(
     }
 
     fun selectCommit(id: CommitId?) {
-        selectCommitEvent.tryEmit(id)
+        scope.launch {
+            selectCommitEvent.emit(id)
+        }
     }
 
     fun dispose() {

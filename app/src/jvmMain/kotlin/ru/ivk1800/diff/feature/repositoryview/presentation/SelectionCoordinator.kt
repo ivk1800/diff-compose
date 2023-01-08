@@ -7,18 +7,34 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import kotlin.coroutines.CoroutineContext
 
-class SelectionCoordinator(
+class SelectionCoordinator internal constructor(
     private val commitsTableInteractor: CommitsTableInteractor,
     private val commitInfoInteractor: CommitInfoInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
+    context: CoroutineContext,
 ) {
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
+
+    constructor(
+        commitsTableInteractor: CommitsTableInteractor,
+        commitInfoInteractor: CommitInfoInteractor,
+        diffInfoInteractor: DiffInfoInteractor,
+        uncommittedChangesInteractor: UncommittedChangesInteractor,
+    ) : this(
+        commitsTableInteractor,
+        commitInfoInteractor,
+        diffInfoInteractor,
+        uncommittedChangesInteractor,
+        Dispatchers.Main,
+    )
 
     init {
         commitInfoInteractor.state
@@ -26,6 +42,19 @@ class SelectionCoordinator(
                 diffInfoInteractor.selectLines(persistentSetOf())
             }
             .launchIn(scope)
+        listenSelectedCommits()
+    }
+
+    fun selectCommitFiles(items: ImmutableSet<CommitFileId>) {
+        if (items.size == 1) {
+            commitInfoInteractor.selectFiles(items)
+            diffInfoInteractor.onFileSelected(
+                commitHash = requireNotNull(commitInfoInteractor.selectedCommitHash),
+                path = items.first().path,
+            )
+        } else {
+            diffInfoInteractor.onFileUnselected()
+        }
     }
 
     fun selectUncommittedChanges() {
@@ -35,13 +64,6 @@ class SelectionCoordinator(
 
     fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
         commitsTableInteractor.selectCommits(commits)
-        commitInfoInteractor.selectCommit(
-            if (commits.size == 1) {
-                commits.first().id
-            } else {
-                null
-            }
-        )
     }
 
     fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
@@ -76,5 +98,25 @@ class SelectionCoordinator(
 
     fun dispose() {
         scope.cancel()
+    }
+
+    private fun listenSelectedCommits() {
+        commitsTableInteractor.state.map { state ->
+            when (state) {
+                is CommitsTableState.Content -> state.selected
+                CommitsTableState.Loading -> persistentSetOf()
+            }
+        }
+            .map { it.filterIsInstance<CommitTableItem.Id.Commit>() }
+            .onEach { selectedCommits ->
+                commitInfoInteractor.selectCommit(
+                    if (selectedCommits.size == 1) {
+                        selectedCommits.first().id
+                    } else {
+                        null
+                    }
+                )
+            }
+            .launchIn(scope)
     }
 }

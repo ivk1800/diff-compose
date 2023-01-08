@@ -94,9 +94,7 @@ fun DiffListView(
 
     LaunchedEffect(key1 = selectableListState) {
         snapshotFlow { currentSelected }
-            .onEach { items ->
-                selectableListState.select(items)
-            }
+            .onEach(selectableListState::select)
             .launchIn(this)
     }
 
