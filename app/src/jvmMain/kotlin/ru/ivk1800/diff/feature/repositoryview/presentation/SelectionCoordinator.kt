@@ -67,10 +67,10 @@ class SelectionCoordinator internal constructor(
     }
 
     fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
+        uncommittedChangesInteractor.selectStatedFiles(files)
         if (files.size == 1) {
             val selectedFile = files.first()
 
-            uncommittedChangesInteractor.selectStatedFiles(files)
             val diffId = uncommittedChangesInteractor.getDiffIdOfStagedOrNull(selectedFile.path)
 
             if (diffId != null) {

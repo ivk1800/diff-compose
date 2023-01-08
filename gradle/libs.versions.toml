@@ -6,6 +6,7 @@ junit = "4.13.2"
 mockk = "1.13.3"
 gson = "2.10"
 moko = "0.20.1"
+turbine = "0.12.1"
 
 [libraries]
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
@@ -18,3 +19,4 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 moko-resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

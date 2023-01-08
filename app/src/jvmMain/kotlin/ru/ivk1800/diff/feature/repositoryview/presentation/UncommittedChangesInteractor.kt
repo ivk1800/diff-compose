@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
@@ -24,20 +24,23 @@ import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffId
 import java.io.File
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class UncommittedChangesInteractor(
+class UncommittedChangesInteractor internal constructor(
     private val repoDirectory: File,
     private val diffRepository: DiffRepository,
     private val commitInfoMapper: CommitInfoMapper,
+    context: CoroutineContext,
 ) {
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
 
     private var rawStagedDiff: List<Diff> = emptyList()
     private var rawUnstagedDiff: List<Diff> = emptyList()
 
-    private val selectedStatedFiles = MutableStateFlow<ImmutableSet<CommitFileId>>(persistentSetOf())
-    private val selectedUnstatedFiles = MutableStateFlow<ImmutableSet<CommitFileId>>(persistentSetOf())
+    private val selectedFiles = MutableStateFlow<SelectedStatedFiles>(
+        SelectedStatedFiles(persistentSetOf(), persistentSetOf())
+    )
 
     private val checkEvent = MutableSharedFlow<Event>(replay = 1)
     private val errorsFlow = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
@@ -50,6 +53,17 @@ class UncommittedChangesInteractor(
 
     val errors: Flow<Throwable>
         get() = errorsFlow
+
+    constructor(
+        repoDirectory: File,
+         diffRepository: DiffRepository,
+         commitInfoMapper: CommitInfoMapper,
+    ): this(
+        repoDirectory,
+        diffRepository,
+        commitInfoMapper,
+        Dispatchers.Main,
+    )
 
     init {
         checkEvent
@@ -111,11 +125,17 @@ class UncommittedChangesInteractor(
     }
 
     fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
-        selectedStatedFiles.value = files
+        selectedFiles.value = SelectedStatedFiles(
+            staged = files,
+            unstaged = persistentSetOf(),
+        )
     }
 
     fun selectUnstatedFiles(files: ImmutableSet<CommitFileId>) {
-        selectedUnstatedFiles.value = files
+        selectedFiles.value = SelectedStatedFiles(
+            staged = persistentSetOf(),
+            unstaged = files,
+        )
     }
 
     fun addAllToStaged() {
@@ -207,15 +227,15 @@ class UncommittedChangesInteractor(
                 if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
                     flowOf(UncommittedChangesState.None)
                 } else {
-                    combine(selectedStatedFiles, selectedUnstatedFiles) { staged, unstaged ->
+                    selectedFiles.map { selected ->
                         UncommittedChangesState.Content(
                             staged = UncommittedChangesState.Content.Staged(
-                                selected = staged,
+                                selected = selected.staged,
                                 vcsProcess = false,
                                 files = commitInfoMapper.mapDiffToFiles(stagedDiff),
                             ),
                             unstaged = UncommittedChangesState.Content.Unstaged(
-                                selected = unstaged,
+                                selected = selected.unstaged,
                                 vcsProcess = false,
                                 files = commitInfoMapper.mapDiffToFiles(unstagedDiff),
                             ),
@@ -235,4 +255,9 @@ class UncommittedChangesInteractor(
 
         data class RemoveFilesFromStaged(val ids: Set<CommitFileId>) : Event
     }
+
+    private data class SelectedStatedFiles(
+        val staged: ImmutableSet<CommitFileId>,
+        val unstaged: ImmutableSet<CommitFileId>,
+    )
 }

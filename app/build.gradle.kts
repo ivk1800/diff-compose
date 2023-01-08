@@ -44,7 +44,9 @@ kotlin {
             dependencies {
                 implementation(libs.junit)
                 implementation(libs.mockk)
+                implementation(libs.turbine)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.kotlin.test)
             }
         }
     }
