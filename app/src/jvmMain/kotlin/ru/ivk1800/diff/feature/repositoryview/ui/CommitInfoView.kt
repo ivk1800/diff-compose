@@ -12,10 +12,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescription
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
@@ -25,7 +31,7 @@ import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedL
 fun CommitInfoView(
     modifier: Modifier = Modifier,
     state: CommitInfoState,
-    onFilesSelected: (items: Set<CommitFileId>) -> Unit,
+    onFilesSelected: (items: ImmutableSet<CommitFileId>) -> Unit,
 ) = Box(modifier = modifier) {
     when (state) {
         is CommitInfoState.Content -> {
@@ -33,15 +39,27 @@ fun CommitInfoView(
                 orientation = Orientation.Vertical,
                 percent = 50F,
             ) {
+                val currentSelected by rememberUpdatedState(state.selected)
                 val currentFiles by rememberUpdatedState(state.files)
+                val selectableListState = rememberSelectedListState<CommitFileId>(
+                    onSelect = { files ->
+                        onFilesSelected.invoke(files.toImmutableSet())
+                        false
+                    },
+                    calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
+                    calculateId = { index -> currentFiles[index].id },
+                )
+
+                LaunchedEffect(key1 = selectableListState) {
+                    snapshotFlow { currentSelected }
+                        .onEach(selectableListState::select)
+                        .launchIn(this)
+                }
+
                 CommitFilesListView(
                     modifier = Modifier.fillMaxSize(),
                     items = state.files,
-                    state = rememberSelectedListState<CommitFileId>(
-                        onSelected = onFilesSelected::invoke,
-                        calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
-                        calculateId = { index -> currentFiles[index].id },
-                    )
+                    state = selectableListState
                 )
                 DescriptionPane(state.description)
             }

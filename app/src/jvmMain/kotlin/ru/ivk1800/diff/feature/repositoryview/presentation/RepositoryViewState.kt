@@ -31,6 +31,7 @@ sealed interface CommitInfoState {
     object None : CommitInfoState
 
     data class Content(
+        val selected: ImmutableSet<CommitFileId>,
         val files: ImmutableList<CommitFileItem>,
         val description: CommitDescription,
     ) : CommitInfoState

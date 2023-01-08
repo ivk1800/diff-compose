@@ -16,7 +16,7 @@ sealed interface RepositoryViewEvent {
 
     object OnCommitsUnselected : RepositoryViewEvent
 
-    data class OnFilesSelected(val items: Set<CommitFileId>) : RepositoryViewEvent
+    data class OnFilesSelected(val items: ImmutableSet<CommitFileId>) : RepositoryViewEvent
 
     object OnLoadMoreCommits : RepositoryViewEvent
 
