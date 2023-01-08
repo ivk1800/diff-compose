@@ -27,13 +27,13 @@ sealed interface RepositoryViewEvent {
 
         object OnAddAllToStaged : UncommittedChanges
 
-        data class OnRemoveFilesFromStaged(val ids: Set<CommitFileId>) : UncommittedChanges
+        data class OnRemoveFilesFromStaged(val ids: ImmutableSet<CommitFileId>) : UncommittedChanges
 
-        data class OnAddFilesToStaged(val ids: Set<CommitFileId>) : UncommittedChanges
+        data class OnAddFilesToStaged(val ids: ImmutableSet<CommitFileId>) : UncommittedChanges
 
-        data class OnStatedFilesSelected(val items: Set<CommitFileId>) : UncommittedChanges
+        data class OnStatedFilesSelected(val items: ImmutableSet<CommitFileId>) : UncommittedChanges
 
-        data class OnUnstatedFilesSelected(val items: Set<CommitFileId>) : UncommittedChanges
+        data class OnUnstatedFilesSelected(val items: ImmutableSet<CommitFileId>) : UncommittedChanges
     }
 
     sealed interface Diff: RepositoryViewEvent {

@@ -44,10 +44,11 @@ class SelectionCoordinator(
         )
     }
 
-    fun selectStatedFiles(files: Set<CommitFileId>) {
+    fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
         if (files.size == 1) {
             val selectedFile = files.first()
 
+            uncommittedChangesInteractor.selectStatedFiles(files)
             val diffId = uncommittedChangesInteractor.getDiffIdOfStagedOrNull(selectedFile.path)
 
             if (diffId != null) {
@@ -56,10 +57,11 @@ class SelectionCoordinator(
         }
     }
 
-    fun selectUnstatedFiles(files: Set<CommitFileId>) {
+    fun selectUnstatedFiles(files: ImmutableSet<CommitFileId>) {
         if (files.size == 1) {
             val selectedFile = files.first()
 
+            uncommittedChangesInteractor.selectUnstatedFiles(files)
             val diffId = uncommittedChangesInteractor.getDiffIdOfUnstagedOrNull(selectedFile.path)
 
             if (diffId != null) {

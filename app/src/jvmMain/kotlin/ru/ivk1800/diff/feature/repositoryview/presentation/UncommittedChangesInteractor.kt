@@ -1,5 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,8 +12,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -32,6 +36,9 @@ class UncommittedChangesInteractor(
     private var rawStagedDiff: List<Diff> = emptyList()
     private var rawUnstagedDiff: List<Diff> = emptyList()
 
+    private val selectedStatedFiles = MutableStateFlow<ImmutableSet<CommitFileId>>(persistentSetOf())
+    private val selectedUnstatedFiles = MutableStateFlow<ImmutableSet<CommitFileId>>(persistentSetOf())
+
     private val checkEvent = MutableSharedFlow<Event>(replay = 1)
     private val errorsFlow = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
 
@@ -48,9 +55,7 @@ class UncommittedChangesInteractor(
         checkEvent
             .flatMapLatest { event ->
                 when (event) {
-                    Event.Check -> flow {
-                        emit(checkInternal())
-                    }
+                    Event.Check -> checkInternalFlow()
 
                     Event.AddAllToStaged -> flow {
                         _state.value = _state.value.tryCopyWithVcsProcess(
@@ -59,8 +64,9 @@ class UncommittedChangesInteractor(
                         )
 
                         diffRepository.addAllToStaged(repoDirectory)
-                        emit(checkInternal())
+                        emit(Unit)
                     }
+                        .flatMapLatest { checkInternalFlow() }
 
                     Event.RemoveAllFromStaged -> flow {
                         _state.value = _state.value.tryCopyWithVcsProcess(
@@ -69,18 +75,21 @@ class UncommittedChangesInteractor(
                         )
 
                         diffRepository.removeAllFromStaged(repoDirectory)
-                        emit(checkInternal())
+                        emit(Unit)
                     }
+                        .flatMapLatest { checkInternalFlow() }
 
                     is Event.AddFilesToStaged -> flow {
                         diffRepository.addFilesToStaged(repoDirectory, event.ids.map { it.path })
-                        emit(checkInternal())
+                        emit(Unit)
                     }
+                        .flatMapLatest { checkInternalFlow() }
 
                     is Event.RemoveFilesFromStaged -> flow {
                         diffRepository.removeFilesFromStaged(repoDirectory, event.ids.map { it.path })
-                        emit(checkInternal())
+                        emit(Unit)
                     }
+                        .flatMapLatest { checkInternalFlow() }
                 }
                     .catch {
                         emit(UncommittedChangesState.None)
@@ -99,6 +108,14 @@ class UncommittedChangesInteractor(
                 _state.value = newState
             }
             .launchIn(scope)
+    }
+
+    fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
+        selectedStatedFiles.value = files
+    }
+
+    fun selectUnstatedFiles(files: ImmutableSet<CommitFileId>) {
+        selectedUnstatedFiles.value = files
     }
 
     fun addAllToStaged() {
@@ -175,28 +192,37 @@ class UncommittedChangesInteractor(
             )
         )
 
-    private suspend fun checkInternal(): UncommittedChangesState {
-        val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
-        val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
+    private suspend fun checkInternalFlow(): Flow<UncommittedChangesState> =
+        flow {
+            val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
+            val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
 
-        rawStagedDiff = stagedDiff
-        rawUnstagedDiff = unstagedDiff
-
-        return if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
-            UncommittedChangesState.None
-        } else {
-            UncommittedChangesState.Content(
-                staged = UncommittedChangesState.Content.Staged(
-                    vcsProcess = false,
-                    files = commitInfoMapper.mapDiffToFiles(stagedDiff),
-                ),
-                unstaged = UncommittedChangesState.Content.Unstaged(
-                    vcsProcess = false,
-                    files = commitInfoMapper.mapDiffToFiles(unstagedDiff),
-                ),
-            )
+            emit(stagedDiff to unstagedDiff)
         }
-    }
+            .onEach { (stagedDiff, unstagedDiff) ->
+                rawStagedDiff = stagedDiff
+                rawUnstagedDiff = unstagedDiff
+            }
+            .flatMapLatest { (stagedDiff, unstagedDiff) ->
+                if (stagedDiff.isEmpty() && unstagedDiff.isEmpty()) {
+                    flowOf(UncommittedChangesState.None)
+                } else {
+                    combine(selectedStatedFiles, selectedUnstatedFiles) { staged, unstaged ->
+                        UncommittedChangesState.Content(
+                            staged = UncommittedChangesState.Content.Staged(
+                                selected = staged,
+                                vcsProcess = false,
+                                files = commitInfoMapper.mapDiffToFiles(stagedDiff),
+                            ),
+                            unstaged = UncommittedChangesState.Content.Unstaged(
+                                selected = unstaged,
+                                vcsProcess = false,
+                                files = commitInfoMapper.mapDiffToFiles(unstagedDiff),
+                            ),
+                        )
+                    }
+                }
+            }
 
     private sealed interface Event {
         object Check : Event

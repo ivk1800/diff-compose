@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescription
+import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -57,12 +58,14 @@ sealed interface UncommittedChangesState {
     ) : UncommittedChangesState {
         @Immutable
         data class Staged(
+            val selected: ImmutableSet<CommitFileId>,
             val vcsProcess: Boolean,
             val files: ImmutableList<CommitFileItem>,
         )
 
         @Immutable
         data class Unstaged(
+            val selected: ImmutableSet<CommitFileId>,
             val vcsProcess: Boolean,
             val files: ImmutableList<CommitFileItem>,
         )

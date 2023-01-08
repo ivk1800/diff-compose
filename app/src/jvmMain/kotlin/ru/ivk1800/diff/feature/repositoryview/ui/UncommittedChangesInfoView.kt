@@ -21,12 +21,8 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -36,7 +32,8 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.flow.drop
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.MR
@@ -64,60 +61,47 @@ fun UncommittedChangesInfoView(
         val focusManager = LocalFocusManager.current
         when (state) {
             is UncommittedChangesState.Content -> {
-                val stagedFilesPaneState = rememberFilesPaneState<CommitFileId>()
-                val unstagedFilesPaneState = rememberFilesPaneState<CommitFileId>()
-
                 val currentOnEvent by rememberUpdatedState(onEvent)
-
-                LaunchedEffect(key1 = null) {
-                    snapshotFlow { stagedFilesPaneState.selected }
-                        .drop(1)
-                        .onEach { files ->
-                            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
-                        }
-                        .launchIn(this)
-
-                    snapshotFlow { unstagedFilesPaneState.selected }
-                        .drop(1)
-                        .onEach { files ->
-                            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
-                        }
-                        .launchIn(this)
-                }
 
                 FilesPane(
                     modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
                         onEvent.invoke(
-                            RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(
-                                ids = stagedFilesPaneState.selected,
+                             RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(
+                                ids = state.staged.selected,
                             )
                         )
                     },
                     title = MR.strings.staged_files.localized(),
                     files = state.staged.files,
+                    selected = state.staged.selected,
                     vcsProcess = !state.staged.vcsProcess,
+                    onSelected = { files ->
+                        currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
+                    },
                     onStageActionClick = {
                         focusManager.clearFocus()
                         onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged)
                     },
-                    state = stagedFilesPaneState,
                 )
                 FilesPane(
                     modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
                         onEvent.invoke(
                             RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(
-                                ids = unstagedFilesPaneState.selected,
+                                ids = state.unstaged.selected,
                             )
                         )
                     },
                     title = MR.strings.unstaged_files.localized(),
                     files = state.unstaged.files,
+                    selected = state.unstaged.selected,
                     vcsProcess = state.unstaged.vcsProcess,
+                    onSelected = { files ->
+                        currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
+                    },
                     onStageActionClick = {
                         focusManager.clearFocus()
                         onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged)
                     },
-                    state = unstagedFilesPaneState,
                 )
             }
 
@@ -131,8 +115,9 @@ private fun FilesPane(
     title: String,
     vcsProcess: Boolean,
     files: ImmutableList<CommitFileItem>,
+    selected: ImmutableSet<CommitFileId>,
     onStageActionClick: () -> Unit,
-    state: FilesPaneState<CommitFileId>,
+    onSelected: (items: ImmutableSet<CommitFileId>) -> Unit,
 ) =
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -160,18 +145,27 @@ private fun FilesPane(
         }
         Box(modifier = Modifier.fillMaxSize()) {
             val currentFiles by rememberUpdatedState(files)
-            val currentState by rememberUpdatedState(state)
+            val currentSelected by rememberUpdatedState(selected)
             val lazyListState = rememberLazyListState()
+
+            val selectableListState = rememberSelectedListState(
+                onSelect = { selected ->
+                    onSelected.invoke(selected.toImmutableSet())
+                    false
+                },
+                calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
+                calculateId = { index -> currentFiles[index].id },
+            )
+
+            LaunchedEffect(key1 = selectableListState) {
+                snapshotFlow { currentSelected }
+                    .onEach(selectableListState::select)
+                    .launchIn(this)
+            }
 
             CommitFilesListView(
                 lazyListState = lazyListState,
-                state = rememberSelectedListState(
-                    onSelected = { selected ->
-                        currentState.selected = selected
-                    },
-                    calculateIndex = { itemId -> currentFiles.indexOfFirst { it.id == itemId } },
-                    calculateId = { index -> currentFiles[index].id },
-                ),
+                state = selectableListState,
                 items = files,
             )
 
@@ -183,11 +177,3 @@ private fun FilesPane(
             )
         }
     }
-
-@Stable
-class FilesPaneState<Id> {
-    var selected by mutableStateOf(emptySet<Id>())
-}
-
-@Composable
-fun <Id> rememberFilesPaneState(): FilesPaneState<Id> = remember { FilesPaneState() }
