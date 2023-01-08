@@ -45,7 +45,6 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 import ru.ivk1800.diff.ui.compose.onKeyDownEvent
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun UncommittedChangesInfoView(
     modifier: Modifier = Modifier,
@@ -58,56 +57,75 @@ fun UncommittedChangesInfoView(
         orientation = Orientation.Vertical,
         percent = 50F,
     ) {
-        val focusManager = LocalFocusManager.current
         when (state) {
             is UncommittedChangesState.Content -> {
-                val currentOnEvent by rememberUpdatedState(onEvent)
-
-                FilesPane(
-                    modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
-                        onEvent.invoke(
-                             RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(
-                                ids = state.staged.selected,
-                            )
-                        )
-                    },
-                    title = MR.strings.staged_files.localized(),
-                    files = state.staged.files,
-                    selected = state.staged.selected,
-                    vcsProcess = !state.staged.vcsProcess,
-                    onSelected = { files ->
-                        currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
-                    },
-                    onStageActionClick = {
-                        focusManager.clearFocus()
-                        onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged)
-                    },
-                )
-                FilesPane(
-                    modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
-                        onEvent.invoke(
-                            RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(
-                                ids = state.unstaged.selected,
-                            )
-                        )
-                    },
-                    title = MR.strings.unstaged_files.localized(),
-                    files = state.unstaged.files,
-                    selected = state.unstaged.selected,
-                    vcsProcess = state.unstaged.vcsProcess,
-                    onSelected = { files ->
-                        currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
-                    },
-                    onStageActionClick = {
-                        focusManager.clearFocus()
-                        onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged)
-                    },
-                )
+                StagedFilesPane(onEvent, state.staged)
+                UnstagedFilesPane(onEvent, state.unstaged)
             }
 
             UncommittedChangesState.None -> Box(modifier)
         }
     }
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun UnstagedFilesPane(
+    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+    state: UncommittedChangesState.Content.Unstaged,
+) {
+    val currentOnEvent by rememberUpdatedState(onEvent)
+    val focusManager = LocalFocusManager.current
+    FilesPane(
+        modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
+            onEvent.invoke(
+                RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(
+                    ids = state.selected,
+                )
+            )
+        },
+        title = MR.strings.unstaged_files.localized(),
+        files = state.files,
+        selected = state.selected,
+        vcsProcess = state.vcsProcess,
+        onSelected = { files ->
+            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
+        },
+        onStageActionClick = {
+            focusManager.clearFocus()
+            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged)
+        },
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun StagedFilesPane(
+    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+    state: UncommittedChangesState.Content.Staged,
+) {
+    val currentOnEvent by rememberUpdatedState(onEvent)
+    val focusManager = LocalFocusManager.current
+    FilesPane(
+        modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
+            onEvent.invoke(
+                RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(
+                    ids = state.selected,
+                )
+            )
+        },
+        title = MR.strings.staged_files.localized(),
+        files = state.files,
+        selected = state.selected,
+        vcsProcess = !state.vcsProcess,
+        onSelected = { files ->
+            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
+        },
+        onStageActionClick = {
+            focusManager.clearFocus()
+            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged)
+        },
+    )
+}
 
 @Composable
 private fun FilesPane(
