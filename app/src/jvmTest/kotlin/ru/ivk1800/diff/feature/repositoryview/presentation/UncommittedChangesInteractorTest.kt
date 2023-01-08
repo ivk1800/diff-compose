@@ -130,6 +130,45 @@ class UncommittedChangesInteractorTest {
         }
     }
 
+    @Test
+    fun `should unselect staged files`() = runTest {
+        val sut = sut {
+            stagedDiff = listOf(
+                mockk()
+            )
+        }
+        sut.state.test {
+            sut.check()
+            sut.selectStatedFiles(persistentSetOf<CommitFileId>(mockk()))
+            sut.selectStatedFiles(persistentSetOf())
+
+            skipItems(1)
+            val content = awaitItem().asContent()
+            assertTrue(content.staged.selected.isEmpty())
+            expectNoEvents()
+        }
+    }
+
+
+    @Test
+    fun `should unselect unstaged files`() = runTest {
+        val sut = sut {
+            stagedDiff = listOf(
+                mockk()
+            )
+        }
+        sut.state.test {
+            sut.check()
+            sut.selectUnstatedFiles(persistentSetOf<CommitFileId>(mockk()))
+            sut.selectUnstatedFiles(persistentSetOf())
+
+            skipItems(1)
+            val content = awaitItem().asContent()
+            assertTrue(content.staged.selected.isEmpty())
+            expectNoEvents()
+        }
+    }
+
     private fun UncommittedChangesState.asContent(): UncommittedChangesState.Content =
         this as UncommittedChangesState.Content
 

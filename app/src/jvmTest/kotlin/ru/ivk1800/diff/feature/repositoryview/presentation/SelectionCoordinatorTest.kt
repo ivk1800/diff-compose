@@ -36,7 +36,7 @@ class SelectionCoordinatorTest {
     }
 
     @Test
-    fun `should select commits`() {
+    fun `should select commits`() = runTest {
         sut().selectCommits(persistentSetOf())
         verify { mockCommitsTableInteractor.selectCommits(persistentSetOf()) }
     }

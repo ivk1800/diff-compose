@@ -80,10 +80,10 @@ class SelectionCoordinator internal constructor(
     }
 
     fun selectUnstatedFiles(files: ImmutableSet<CommitFileId>) {
+        uncommittedChangesInteractor.selectUnstatedFiles(files)
         if (files.size == 1) {
             val selectedFile = files.first()
 
-            uncommittedChangesInteractor.selectUnstatedFiles(files)
             val diffId = uncommittedChangesInteractor.getDiffIdOfUnstagedOrNull(selectedFile.path)
 
             if (diffId != null) {
