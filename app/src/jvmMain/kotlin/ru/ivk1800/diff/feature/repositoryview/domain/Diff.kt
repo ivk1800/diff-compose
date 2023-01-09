@@ -5,6 +5,7 @@ data class Diff(
     val oldId: String,
     val newId: String,
     val hunks: List<Hunk>,
+    val changeType: ChangeType,
 ) {
     data class Hunk(
         val firstRange: IntRange,

@@ -72,7 +72,13 @@ class DiffRepository(
                         )
                     }
                 )
-            }
+            },
+            changeType = when (diff) {
+                is VcsDiff.Added -> ChangeType.Add
+                is VcsDiff.Deleted -> ChangeType.Delete
+                is VcsDiff.Modified -> ChangeType.Modify
+                is VcsDiff.Moved -> ChangeType.Rename
+            },
         )
     }
 }

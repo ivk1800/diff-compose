@@ -22,7 +22,7 @@ class CommitInfoMapper {
             CommitFileItem(
                 id = CommitFileId(file.filePath),
                 name = file.filePath,
-                type = CommitFileItem.Type.Added,
+                type = file.changeType.toType(),
             )
         }.toImmutableList()
 
