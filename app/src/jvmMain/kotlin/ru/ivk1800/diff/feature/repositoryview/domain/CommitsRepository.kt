@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.domain
 
 import ru.ivk1800.vcs.api.Vcs
+import ru.ivk1800.vcs.api.VcsChangeType
 import ru.ivk1800.vcs.api.VcsCommit
 import java.io.File
 import java.time.Instant
@@ -15,7 +16,12 @@ class CommitsRepository(
         vcs.getCommits(directory, branchName = branchName, limit = limit, offset = offset).map { it.toCommit() }
 
     suspend fun getCommitFiles(directory: File, commitHash: String): List<CommitFile> =
-        vcs.getCommitFiles(directory, commitHash).map { file -> CommitFile(path = file.fullPath) }
+        vcs.getCommitFiles(directory, commitHash).map { file ->
+            CommitFile(
+                name = file.name,
+                changeType = file.changeType.toChangeType(),
+            )
+        }
 
     private fun VcsCommit.toCommit(): Commit =
         Commit(
@@ -31,4 +37,12 @@ class CommitsRepository(
             refNames = refNames.map(::RefName),
         )
 
+    private fun VcsChangeType.toChangeType(): ChangeType =
+        when (this) {
+            VcsChangeType.Add -> ChangeType.Add
+            VcsChangeType.Modify -> ChangeType.Modify
+            VcsChangeType.Delete -> ChangeType.Delete
+            VcsChangeType.Rename -> ChangeType.Rename
+            VcsChangeType.Copy -> ChangeType.Copy
+        }
 }

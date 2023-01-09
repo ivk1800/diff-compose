@@ -13,5 +13,6 @@ data class CommitFileItem(
         Added,
         Renamed,
         Deleted,
+        Copied,
     }
 }

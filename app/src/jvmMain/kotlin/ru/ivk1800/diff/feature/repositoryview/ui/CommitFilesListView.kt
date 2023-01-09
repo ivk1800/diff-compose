@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import ru.ivk1800.diff.compose.LocalDiffTheme
@@ -62,6 +63,7 @@ private fun CommitFileItemView(
                     CommitFileItem.Type.Added -> commitFileTheme.addedColor
                     CommitFileItem.Type.Renamed -> commitFileTheme.renamedColor
                     CommitFileItem.Type.Deleted -> commitFileTheme.deletedColor
+                    CommitFileItem.Type.Copied -> Color.Unspecified // TODO
                 }
             ),
         contentAlignment = Alignment.Center,
@@ -72,6 +74,7 @@ private fun CommitFileItemView(
                 CommitFileItem.Type.Added -> "A"
                 CommitFileItem.Type.Renamed -> "R"
                 CommitFileItem.Type.Deleted -> "D"
+                CommitFileItem.Type.Copied -> "C"
             },
             style = MaterialTheme.typography.caption,
             color = commitFileTheme.textColor,

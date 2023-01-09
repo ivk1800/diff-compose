@@ -83,7 +83,7 @@ class GitVcs : Vcs {
     override suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile> {
         val process = createProcess(
             directory,
-            "git show --name-only $commitHash -n 1 --oneline",
+            "git show $commitHash --name-status --oneline",
         )
 
         val result = process.inputStream.reader().readText()

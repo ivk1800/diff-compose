@@ -2,6 +2,7 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
@@ -28,9 +29,9 @@ class CommitInfoMapper {
     fun mapToFiles(files: List<CommitFile>): ImmutableList<CommitFileItem> =
         files.map { file ->
             CommitFileItem(
-                id = CommitFileId(file.path),
-                name = file.path,
-                type = CommitFileItem.Type.Added,
+                id = CommitFileId(file.name),
+                name = file.name,
+                type = file.changeType.toType(),
             )
         }.toImmutableList()
 
@@ -43,4 +44,13 @@ class CommitInfoMapper {
             date = commitDateFormat.format(ZonedDateTime.ofInstant(commit.authorDate, ZoneId.systemDefault())),
         )
     }
+
+    private fun ChangeType.toType():CommitFileItem.Type =
+        when (this) {
+            ChangeType.Add -> CommitFileItem.Type.Added
+            ChangeType.Modify -> CommitFileItem.Type.Modified
+            ChangeType.Delete -> CommitFileItem.Type.Deleted
+            ChangeType.Rename -> CommitFileItem.Type.Renamed
+            ChangeType.Copy -> CommitFileItem.Type.Copied
+        }
 }
