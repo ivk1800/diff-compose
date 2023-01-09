@@ -66,6 +66,7 @@ fun CommitInfoView(
         }
 
         CommitInfoState.None -> Unit
+        is CommitInfoState.Error -> ErrorMessageView(state.message)
     }
 }
 

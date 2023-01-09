@@ -10,6 +10,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -22,6 +23,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
+import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -29,6 +31,7 @@ class CommitInfoInteractor(
     private val repoDirectory: File,
     private val commitsRepository: CommitsRepository,
     private val commitInfoMapper: CommitInfoMapper,
+    private val errorTransformer: ErrorTransformer,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -78,8 +81,12 @@ class CommitInfoInteractor(
                                 selected = newSelected,
                             )
 
-                            CommitInfoState.None -> state
+                            CommitInfoState.None,
+                            is CommitInfoState.Error -> state
                         }
+                    }
+                    .catch { error ->
+                        emit(CommitInfoState.Error(message = errorTransformer.transformForDisplay(error)))
                     }
             }
             .onEach { state ->

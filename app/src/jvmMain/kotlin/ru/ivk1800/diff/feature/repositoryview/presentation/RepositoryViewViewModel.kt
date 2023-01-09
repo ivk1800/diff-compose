@@ -98,13 +98,18 @@ class RepositoryViewViewModel(
                 }
 
             is RepositoryViewEvent.Diff -> {
-                when(value) {
+                when (value) {
                     is RepositoryViewEvent.Diff.OnLinesSelected ->
                         selectionCoordinator.selectDiffLines(value.ids)
 
                     is RepositoryViewEvent.Diff.OnUnstageHunk -> {
-                        val file = when (val filesState  = filesInfoInteractor.state.value) {
-                            is FilesInfoState.Commit -> filesState.state.files.first()
+                        val file = when (val filesState = filesInfoInteractor.state.value) {
+                            is FilesInfoState.Commit -> when (filesState.state) {
+                                is CommitInfoState.Content -> filesState.state.files.first()
+                                is CommitInfoState.Error,
+                                CommitInfoState.None -> error("TODO")
+                            }
+
                             FilesInfoState.None -> error("TODO")
                             is FilesInfoState.UncommittedChanges -> filesState.state.staged.files.first()
                         }

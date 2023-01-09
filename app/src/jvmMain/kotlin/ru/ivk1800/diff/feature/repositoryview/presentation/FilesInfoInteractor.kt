@@ -31,7 +31,7 @@ class FilesInfoInteractor(
             uncommittedChangesInteractor.state,
             commitsTableInteractor.state,
         ) { commitInfo, uncommittedChanges, commitsTable ->
-            if (commitInfo is CommitInfoState.Content) {
+            if (commitInfo !is CommitInfoState.None) {
                 FilesInfoState.Commit(commitInfo)
             } else if (uncommittedChanges is UncommittedChangesState.Content &&
                 commitsTable is CommitsTableState.Content &&

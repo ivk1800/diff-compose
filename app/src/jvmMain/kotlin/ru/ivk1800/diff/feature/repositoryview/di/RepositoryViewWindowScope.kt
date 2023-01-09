@@ -86,6 +86,7 @@ class RepositoryViewWindowScope(
             repoDirectory = repoPath,
             commitsRepository = commitsRepository,
             commitInfoMapper = commitInfoMapper,
+            errorTransformer = errorTransformer,
         )
     }
 

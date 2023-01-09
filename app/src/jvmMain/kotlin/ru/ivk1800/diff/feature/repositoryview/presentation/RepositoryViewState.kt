@@ -30,6 +30,8 @@ sealed interface CommitsTableState {
 sealed interface CommitInfoState {
     object None : CommitInfoState
 
+    data class Error(val message: String) : CommitInfoState
+
     data class Content(
         val selected: ImmutableSet<CommitFileId>,
         val files: ImmutableList<CommitFileItem>,
@@ -78,7 +80,7 @@ sealed interface FilesInfoState {
     object None : FilesInfoState
 
     data class Commit(
-        val state: CommitInfoState.Content,
+        val state: CommitInfoState,
     ) : FilesInfoState
 
     data class UncommittedChanges(
