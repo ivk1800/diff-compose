@@ -10,7 +10,10 @@ class DiffRepository(
     private val vcs: Vcs,
 ) {
     suspend fun getDiff(directory: File, oldCommitHash: String, newCommitHash: String, filePath: String): Diff {
-        val diff = vcs.getDiff(directory, oldCommitHash, newCommitHash, filePath)
+        val diff = vcs.getDiffCommand(
+            directory.toPath(),
+            DiffCommand.Options.FileInCommit(oldCommitHash, newCommitHash, filePath),
+        ).run()
         return toDiff(diff)
     }
 
