@@ -7,6 +7,7 @@ mockk = "1.13.3"
 gson = "2.10"
 moko = "0.20.1"
 turbine = "0.12.1"
+sqldelight = "1.5.4"
 
 [libraries]
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
@@ -20,3 +21,5 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 moko-resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+sqldelight-sqliteDriver = { module = "com.squareup.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-gradlePlugin = { module = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }

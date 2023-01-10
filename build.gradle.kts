@@ -5,6 +5,7 @@ buildscript {
 
     dependencies {
         classpath(libs.moko.resources.generator)
+        classpath(libs.sqldelight.gradlePlugin)
     }
 }
 
