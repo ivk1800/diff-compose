@@ -6,9 +6,11 @@ import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
+import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
+import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
 import ru.ivk1800.vcs.git.command.ShowCommandImpl
 import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
@@ -130,6 +132,9 @@ class GitVcs : Vcs {
             }
         )
     }
+
+    override suspend fun getDiffCommand(directory: Path, options: DiffCommand.Options): DiffCommand =
+        DiffCommandImpl(diffParser, directory, options)
 
     override suspend fun getUnStagedDiff(directory: File): List<VcsDiff> =
         runProcess(createProcess(directory, "git diff"),

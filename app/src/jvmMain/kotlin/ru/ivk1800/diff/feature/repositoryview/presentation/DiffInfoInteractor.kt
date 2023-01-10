@@ -21,8 +21,8 @@ import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -31,6 +31,7 @@ class DiffInfoInteractor(
     private val diffRepository: DiffRepository,
     private val commitsRepository: CommitsRepository,
     private val diffInfoItemMapper: DiffInfoItemMapper,
+    private val errorTransformer: ErrorTransformer,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -56,7 +57,7 @@ class DiffInfoInteractor(
                     .catch { error ->
                         emit(
                             DiffInfoState.Error(
-                                message = "$error",
+                                message = errorTransformer.transformForDisplay(error)
                             )
                         )
                     }
@@ -70,8 +71,8 @@ class DiffInfoInteractor(
         selectCommitEvent.tryEmit(Event.FileSelected(commitHash = commitHash, path = path))
     }
 
-    fun onDiffSelected(diffId: DiffId, type: UncommittedChangesType) {
-        selectCommitEvent.tryEmit(Event.DiffSelected(diffId, type))
+    fun selectUncommittedFiles(fileName: String, type: UncommittedChangesType) {
+        selectCommitEvent.tryEmit(Event.DiffSelected(fileName, type))
     }
 
     fun onFileUnselected() {
@@ -121,13 +122,11 @@ class DiffInfoInteractor(
     private fun handleDiffSelectedEvent(event: Event.DiffSelected): Flow<DiffInfoState> =
         combine(
             flow {
-                emit(
-                    diffRepository.getDiff(
-                        repoDirectory,
-                        oldBlobId = event.diffId.oldId,
-                        newBlobId = event.diffId.newId,
-                    )
-                )
+                val diff = when (event.type) {
+                    UncommittedChangesType.Staged -> diffRepository.getStagedFileDiff(repoDirectory, event.fileName)
+                    UncommittedChangesType.Unstaged -> diffRepository.getUnstagedFileDiff(repoDirectory, event.fileName)
+                }
+                emit(diff)
             },
             selectedLines,
         ) { diff, selected ->
@@ -154,7 +153,7 @@ class DiffInfoInteractor(
     private sealed interface Event {
         data class FileSelected(val commitHash: String, val path: String) : Event
         data class DiffSelected(
-            val diffId: DiffId,
+            val fileName: String,
             val type: UncommittedChangesType,
         ) : Event
 

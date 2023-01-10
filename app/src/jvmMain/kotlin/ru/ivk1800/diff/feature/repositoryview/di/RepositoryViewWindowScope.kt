@@ -74,6 +74,7 @@ class RepositoryViewWindowScope(
             diffRepository = diffRepository,
             commitsRepository = commitsRepository,
             diffInfoItemMapper = DiffInfoItemMapper(),
+            errorTransformer = errorTransformer,
         )
     }
 

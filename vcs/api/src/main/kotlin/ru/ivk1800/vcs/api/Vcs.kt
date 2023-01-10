@@ -1,5 +1,6 @@
 package ru.ivk1800.vcs.api
 
+import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
@@ -16,6 +17,8 @@ interface Vcs {
     suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile>
 
     suspend fun getDiff(directory: File, oldCommitHash: String, newCommitHash: String, filePath: String): VcsDiff
+
+    suspend fun getDiffCommand(directory: Path, options: DiffCommand.Options): DiffCommand
 
     suspend fun getDiff(directory: File, oldBlobId: String, newBlobId: String): VcsDiff
 
