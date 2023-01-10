@@ -60,6 +60,16 @@ class SelectionCoordinatorTest {
         verify { mockCommitInfoInteractor.selectCommit(CommitId("")) }
     }
 
+    // region commits selection
+
+    @Test
+    fun `should reset selected files if select nothing`() = runTest {
+        sut().selectCommitFiles(persistentSetOf())
+        verify { mockCommitInfoInteractor.selectFiles(persistentSetOf()) }
+    }
+
+    // endregion commits selection
+
     private fun TestScope.sut(init: Sut.() -> Unit = { }): SelectionCoordinator = Sut()
         .apply(init)
         .apply { context = testScheduler }

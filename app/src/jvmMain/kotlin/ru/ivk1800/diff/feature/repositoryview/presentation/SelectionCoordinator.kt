@@ -53,6 +53,7 @@ class SelectionCoordinator internal constructor(
                 path = items.first().path,
             )
         } else {
+            commitInfoInteractor.selectFiles(persistentSetOf())
             diffInfoInteractor.onFileUnselected()
         }
     }
