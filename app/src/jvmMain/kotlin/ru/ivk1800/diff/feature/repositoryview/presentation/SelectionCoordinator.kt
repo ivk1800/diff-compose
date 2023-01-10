@@ -43,19 +43,11 @@ class SelectionCoordinator internal constructor(
             }
             .launchIn(scope)
         listenSelectedCommits()
+        listenSelectedCommitFiles()
     }
 
     fun selectCommitFiles(items: ImmutableSet<CommitFileId>) {
-        if (items.size == 1) {
-            commitInfoInteractor.selectFiles(items)
-            diffInfoInteractor.onFileSelected(
-                commitHash = requireNotNull(commitInfoInteractor.selectedCommitHash),
-                path = items.first().path,
-            )
-        } else {
-            commitInfoInteractor.selectFiles(persistentSetOf())
-            diffInfoInteractor.onFileUnselected()
-        }
+        commitInfoInteractor.selectFiles(items)
     }
 
     fun selectUncommittedChanges() {
@@ -125,5 +117,24 @@ class SelectionCoordinator internal constructor(
                 )
             }
             .launchIn(scope)
+    }
+
+    private fun listenSelectedCommitFiles() {
+        commitInfoInteractor.state.map {
+            when (it) {
+                is CommitInfoState.Content -> it.selected
+                is CommitInfoState.Error,
+                CommitInfoState.None -> persistentSetOf()
+            }
+        }.onEach { selected ->
+            if (selected.size == 1) {
+                diffInfoInteractor.onFileSelected(
+                    commitHash = requireNotNull(commitInfoInteractor.selectedCommitHash),
+                    path = selected.first().path,
+                )
+            } else {
+                diffInfoInteractor.onFileUnselected()
+            }
+        }.launchIn(scope)
     }
 }
