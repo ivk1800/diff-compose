@@ -54,6 +54,9 @@ class CommitInfoInteractor(
     init {
         selectCommitEvent
             .distinctUntilChanged()
+            .onEach {
+                selectFiles(persistentSetOf())
+            }
             .flatMapLatest { id ->
                 val hash = id?.hash
                 flow {
