@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalMinimumTouchTargetEnforcement
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -29,6 +32,7 @@ import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.application.ApplicationTheme
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
+import ru.ivk1800.diff.di.compose.LocalApplicationScope
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -117,6 +121,7 @@ fun DiffListView(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun HunkHeader(
     item: DiffInfoItem.HunkHeader,
@@ -133,27 +138,35 @@ private fun HunkHeader(
             text = item.text,
         )
         Row(
-            // TODO: fixed height
-            modifier = Modifier.height(48.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            item.actions.forEach { action ->
-                HunkActionButton(
-                    text = when (action) {
-                        DiffInfoItem.HunkHeader.Action.StageHunk -> MR.strings.stage_hunk
-                        DiffInfoItem.HunkHeader.Action.UnstageHunk -> MR.strings.unstage_hunk
-                        DiffInfoItem.HunkHeader.Action.DiscardHunk -> MR.strings.discard_hunk
-                        DiffInfoItem.HunkHeader.Action.DiscardLines -> MR.strings.discard_lines
-                        DiffInfoItem.HunkHeader.Action.StageLines -> MR.strings.stage_lines
-                        DiffInfoItem.HunkHeader.Action.UnstageLines -> MR.strings.unstage_lines
-                        DiffInfoItem.HunkHeader.Action.ReverseHunk -> MR.strings.reverse_hunk
-                        DiffInfoItem.HunkHeader.Action.ReverseLines -> MR.strings.reverse_lines
-                    }.localized(),
-                    onClick = { onActionClick.invoke(action) },
-                )
+            CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+                Actions(item.actions, onActionClick)
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
+    }
+
+@Composable
+private fun Actions(
+    actions: ImmutableList<DiffInfoItem.HunkHeader.Action>,
+    onActionClick: (DiffInfoItem.HunkHeader.Action) -> Unit,
+) =
+    actions.forEach { action ->
+        HunkActionButton(
+            text = when (action) {
+                DiffInfoItem.HunkHeader.Action.StageHunk -> MR.strings.stage_hunk
+                DiffInfoItem.HunkHeader.Action.UnstageHunk -> MR.strings.unstage_hunk
+                DiffInfoItem.HunkHeader.Action.DiscardHunk -> MR.strings.discard_hunk
+                DiffInfoItem.HunkHeader.Action.DiscardLines -> MR.strings.discard_lines
+                DiffInfoItem.HunkHeader.Action.StageLines -> MR.strings.stage_lines
+                DiffInfoItem.HunkHeader.Action.UnstageLines -> MR.strings.unstage_lines
+                DiffInfoItem.HunkHeader.Action.ReverseHunk -> MR.strings.reverse_hunk
+                DiffInfoItem.HunkHeader.Action.ReverseLines -> MR.strings.reverse_lines
+            }.localized(),
+            onClick = { onActionClick.invoke(action) },
+        )
     }
 
 @Preview
