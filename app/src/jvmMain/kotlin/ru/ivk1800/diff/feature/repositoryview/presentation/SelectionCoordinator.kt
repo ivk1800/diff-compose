@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -37,13 +38,10 @@ class SelectionCoordinator internal constructor(
     )
 
     init {
-        commitInfoInteractor.state
-            .onEach {
-                diffInfoInteractor.selectLines(persistentSetOf())
-            }
-            .launchIn(scope)
+        listenCommitInfo()
         listenSelectedCommits()
         listenSelectedCommitFiles()
+        listenUncommittedChanges()
     }
 
     fun selectCommitFiles(items: ImmutableSet<CommitFileId>) {
@@ -61,24 +59,10 @@ class SelectionCoordinator internal constructor(
 
     fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
         uncommittedChangesInteractor.selectStatedFiles(files)
-        if (files.size == 1) {
-            val selectedFile = files.first()
-            diffInfoInteractor.selectUncommittedFiles(
-                selectedFile.path,
-                DiffInfoInteractor.UncommittedChangesType.Staged,
-            )
-        }
     }
 
     fun selectUnstatedFiles(files: ImmutableSet<CommitFileId>) {
         uncommittedChangesInteractor.selectUnstatedFiles(files)
-        if (files.size == 1) {
-            val selectedFile = files.first()
-            diffInfoInteractor.selectUncommittedFiles(
-                selectedFile.path,
-                DiffInfoInteractor.UncommittedChangesType.Unstaged,
-            )
-        }
     }
 
     fun selectDiffLines(ids: ImmutableSet<DiffInfoItem.Id.Line>) {
@@ -123,8 +107,73 @@ class SelectionCoordinator internal constructor(
                     path = selected.first().path,
                 )
             } else {
-                diffInfoInteractor.onFileUnselected()
+                diffInfoInteractor.unselect()
             }
         }.launchIn(scope)
+    }
+
+    private fun listenCommitInfo() {
+        commitInfoInteractor.state
+            .onEach {
+                diffInfoInteractor.selectLines(persistentSetOf())
+            }
+            .launchIn(scope)
+    }
+
+    private fun listenUncommittedChanges() {
+        uncommittedChangesInteractor.state.map { state ->
+            when (state) {
+                is UncommittedChangesState.Content -> {
+                    check(!(state.staged.selected.isNotEmpty() && state.unstaged.selected.isNotEmpty())) {
+                        "Staged and unstaged cannot be selected at the same time"
+                    }
+                    when {
+                        state.staged.selected.isNotEmpty() -> UncommittedChangesType.Staged to state.staged.selected
+                        state.unstaged.selected.isNotEmpty() ->
+                            UncommittedChangesType.Unstaged to state.unstaged.selected
+                        else -> UncommittedChangesType.None to persistentSetOf()
+                    }
+                }
+
+                UncommittedChangesState.None -> UncommittedChangesType.None to persistentSetOf()
+            }
+        }
+            // TODO: add test for distinct
+            .distinctUntilChanged()
+            .onEach { (type, selected) ->
+                when (type) {
+                    UncommittedChangesType.None -> diffInfoInteractor.unselect()
+                    UncommittedChangesType.Staged -> {
+                        if (selected.size == 1) {
+                            val selectedFile = selected.first()
+                            diffInfoInteractor.selectUncommittedFiles(
+                                selectedFile.path,
+                                DiffInfoInteractor.UncommittedChangesType.Staged,
+                            )
+                        } else {
+                            diffInfoInteractor.unselect()
+                        }
+                    }
+
+                    UncommittedChangesType.Unstaged -> {
+                        if (selected.size == 1) {
+                            val selectedFile = selected.first()
+                            diffInfoInteractor.selectUncommittedFiles(
+                                selectedFile.path,
+                                DiffInfoInteractor.UncommittedChangesType.Unstaged,
+                            )
+                        } else {
+                            diffInfoInteractor.unselect()
+                        }
+                    }
+                }
+            }
+            .launchIn(scope)
+    }
+
+    private enum class UncommittedChangesType {
+        None,
+        Staged,
+        Unstaged,
     }
 }

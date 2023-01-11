@@ -75,7 +75,7 @@ class DiffInfoInteractor(
         selectCommitEvent.tryEmit(Event.DiffSelected(fileName, type))
     }
 
-    fun onFileUnselected() {
+    fun unselect() {
         selectCommitEvent.tryEmit(Event.Unselected)
     }
 

@@ -58,7 +58,7 @@ class RepositoryViewViewModel(
         when (value) {
             RepositoryViewEvent.OnReload -> {
                 commitInfoInteractor.selectCommit(null)
-                diffInfoInteractor.onFileUnselected()
+                diffInfoInteractor.unselect()
                 commitsTableInteractor.reload()
                 uncommittedChangesInteractor.check()
             }

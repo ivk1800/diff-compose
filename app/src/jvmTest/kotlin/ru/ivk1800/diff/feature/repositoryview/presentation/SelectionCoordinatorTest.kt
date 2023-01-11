@@ -93,10 +93,95 @@ class SelectionCoordinatorTest {
                 description = mockk(),
             )
         }
-        verify { mockDiffInfoInteractor.onFileUnselected() }
+        verify { mockDiffInfoInteractor.unselect() }
     }
 
     // endregion commits selection
+
+    // region diff selection
+
+    @Test
+    fun `should not display diff if uncommitted files not selected`() = runTest {
+        sut {
+            uncommittedChangesState = UncommittedChangesState.None
+        }
+        verify { mockDiffInfoInteractor.unselect() }
+    }
+
+    @Test
+    fun `should display diff if selected staged uncommitted files`() = runTest {
+        sut {
+            uncommittedChangesState = UncommittedChangesState.Content(
+                staged = UncommittedChangesState.Content.Staged(
+                    selected = persistentSetOf(
+                        CommitFileId(""),
+                    ),
+                    vcsProcess = false,
+                    files = persistentListOf(),
+                ),
+                unstaged = UncommittedChangesState.Content.Unstaged(
+                    selected = persistentSetOf(),
+                    vcsProcess = false,
+                    files = persistentListOf(),
+                ),
+            )
+        }
+        verify {
+            mockDiffInfoInteractor.selectUncommittedFiles(
+                fileName = "",
+                type = DiffInfoInteractor.UncommittedChangesType.Staged,
+            )
+        }
+    }
+
+    @Test
+    fun `should display diff if selected unstaged uncommitted files`() = runTest {
+        sut {
+            uncommittedChangesState = UncommittedChangesState.Content(
+                staged = UncommittedChangesState.Content.Staged(
+                    selected = persistentSetOf(),
+                    vcsProcess = false,
+                    files = persistentListOf(),
+                ),
+                unstaged = UncommittedChangesState.Content.Unstaged(
+                    selected = persistentSetOf(
+                        CommitFileId(""),
+                    ),
+                    vcsProcess = false,
+                    files = persistentListOf(),
+                ),
+            )
+        }
+        verify {
+            mockDiffInfoInteractor.selectUncommittedFiles(
+                fileName = "",
+                type = DiffInfoInteractor.UncommittedChangesType.Unstaged,
+            )
+        }
+    }
+
+    @Test
+    fun `should not display diff if nothing selected`() = runTest {
+        sut {
+            uncommittedChangesState = UncommittedChangesState.Content(
+                staged = UncommittedChangesState.Content.Staged(
+                    selected = persistentSetOf(),
+                    vcsProcess = false,
+                    files = persistentListOf(),
+                ),
+                unstaged = UncommittedChangesState.Content.Unstaged(
+                    selected = persistentSetOf(),
+                    vcsProcess = false,
+                    files = persistentListOf(),
+                ),
+            )
+        }
+        verify {
+            mockDiffInfoInteractor.unselect()
+        }
+    }
+
+    // endregion diff selection
 
     private fun TestScope.sut(init: Sut.() -> Unit = { }): SelectionCoordinator = Sut()
         .apply(init)
@@ -108,11 +193,13 @@ class SelectionCoordinatorTest {
     private inner class Sut {
         var commitsTableState: CommitsTableState = CommitsTableState.Loading
         var commitInfoState: CommitInfoState = CommitInfoState.None
+        var uncommittedChangesState: UncommittedChangesState = UncommittedChangesState.None
         var context: CoroutineContext? = null
 
         fun build(): SelectionCoordinator {
             every { mockCommitsTableInteractor.state } returns MutableStateFlow(commitsTableState)
             every { mockCommitInfoInteractor.state } returns MutableStateFlow(commitInfoState)
+            every { mockUncommittedChangesInteractor.state } returns MutableStateFlow(uncommittedChangesState)
 
             return SelectionCoordinator(
                 commitsTableInteractor = mockCommitsTableInteractor,

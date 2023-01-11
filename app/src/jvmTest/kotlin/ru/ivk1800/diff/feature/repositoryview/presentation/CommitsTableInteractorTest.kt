@@ -26,13 +26,13 @@ class CommitsTableInteractorTest {
     @Test
     fun `should unselect file of diff if new files selected`() {
         sut().selectCommits(persistentSetOf())
-        verify { mockDiffInfoInteractor.onFileUnselected() }
+        verify { mockDiffInfoInteractor.unselect() }
     }
 
     @Test
     fun `should unselect file of diff if uncommitted changes selected`() {
         sut().selectUncommittedChanges()
-        verify { mockDiffInfoInteractor.onFileUnselected() }
+        verify { mockDiffInfoInteractor.unselect() }
     }
 
     private fun sut(): CommitsTableInteractor = Sut().build()

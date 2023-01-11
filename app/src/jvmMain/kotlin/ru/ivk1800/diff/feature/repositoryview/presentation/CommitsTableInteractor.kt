@@ -64,13 +64,13 @@ class CommitsTableInteractor(
     fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
         uncommittedChangesSelected.value = false
         commitsInteractor.selectCommits(commits)
-        diffInfoInteractor.onFileUnselected()
+        diffInfoInteractor.unselect()
     }
 
     fun selectUncommittedChanges() {
         uncommittedChangesSelected.value = true
         commitsInteractor.selectCommits(persistentSetOf())
-        diffInfoInteractor.onFileUnselected()
+        diffInfoInteractor.unselect()
     }
 
     fun reload() = commitsInteractor.reload()
