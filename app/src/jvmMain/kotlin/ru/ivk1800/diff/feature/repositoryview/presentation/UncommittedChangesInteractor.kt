@@ -20,9 +20,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ru.ivk1800.diff.ext.onFirst
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.helper.UncommittedChangesNextSelectionHelper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffId
@@ -35,13 +37,16 @@ class UncommittedChangesInteractor internal constructor(
     private val diffRepository: DiffRepository,
     private val uncommittedRepository: UncommittedRepository,
     private val commitInfoMapper: CommitInfoMapper,
+    private val selectionHelper: UncommittedChangesNextSelectionHelper,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
 
     private var rawStagedDiff: List<Diff> = emptyList()
+    private var rawStagedFiles: List<String> = emptyList()
     private var rawUnstagedDiff: List<Diff> = emptyList()
     private var rawUntrackedFiles: List<String> = emptyList()
+    private var rawAllUnstagedFiles: List<String> = emptyList()
 
     private val selectedFiles = MutableStateFlow<SelectedStatedFiles>(
         SelectedStatedFiles(persistentSetOf(), persistentSetOf())
@@ -69,6 +74,7 @@ class UncommittedChangesInteractor internal constructor(
         diffRepository,
         uncommittedRepository,
         commitInfoMapper,
+        UncommittedChangesNextSelectionHelper(),
         Dispatchers.Main,
     )
 
@@ -100,17 +106,9 @@ class UncommittedChangesInteractor internal constructor(
                     }
                         .flatMapLatest { checkInternalFlow() }
 
-                    is Event.AddFilesToStaged -> flow {
-                        uncommittedRepository.addFilesToStaged(repoDirectory, event.ids.map { it.path })
-                        emit(Unit)
-                    }
-                        .flatMapLatest { checkInternalFlow() }
+                    is Event.AddFilesToStaged -> handleAddFilesToStagedFlow(event)
 
-                    is Event.RemoveFilesFromStaged -> flow {
-                        uncommittedRepository.removeFilesFromStaged(repoDirectory, event.ids.map { it.path })
-                        emit(Unit)
-                    }
-                        .flatMapLatest { checkInternalFlow() }
+                    is Event.RemoveFilesFromStaged -> handleRemoveFilesFromStagedFlow(event)
                 }
                     .catch {
                         emit(UncommittedChangesState.None)
@@ -229,8 +227,10 @@ class UncommittedChangesInteractor internal constructor(
         }
             .onEach { (stagedDiff, unstagedDiff, untrackedFiles) ->
                 rawStagedDiff = stagedDiff
+                rawStagedFiles = stagedDiff.map { it.filePath }
                 rawUnstagedDiff = unstagedDiff
                 rawUntrackedFiles = untrackedFiles
+                rawAllUnstagedFiles = unstagedDiff.map { it.filePath } + untrackedFiles
             }
             .flatMapLatest { (stagedDiff, unstagedDiff, rawUntrackedFiles) ->
                 if (stagedDiff.isEmpty() && unstagedDiff.isEmpty() && rawUntrackedFiles.isEmpty()) {
@@ -257,6 +257,56 @@ class UncommittedChangesInteractor internal constructor(
                         )
                     }
                 }
+            }
+
+    private fun handleAddFilesToStagedFlow(event: Event.AddFilesToStaged) =
+        flow {
+            uncommittedRepository.addFilesToStaged(repoDirectory, event.ids.map { it.path })
+            if (event.ids.size == 1) {
+                emit(
+                    selectionHelper.calculateIndex(
+                        rawAllUnstagedFiles,
+                        event.ids.first(),
+                    )
+                )
+            } else {
+                emit(null)
+            }
+        }
+            .flatMapLatest { indexForSelection ->
+                checkInternalFlow()
+                    .onFirst {
+                        if (indexForSelection != null) {
+                            selectUnstatedFiles(
+                                selectionHelper.confirm(rawAllUnstagedFiles, indexForSelection),
+                            )
+                        }
+                    }
+            }
+
+    private fun handleRemoveFilesFromStagedFlow(event: Event.RemoveFilesFromStaged) =
+        flow {
+            uncommittedRepository.removeFilesFromStaged(repoDirectory, event.ids.map { it.path })
+            if (event.ids.size == 1) {
+                emit(
+                    selectionHelper.calculateIndex(
+                        rawStagedFiles,
+                        event.ids.first(),
+                    )
+                )
+            } else {
+                emit(null)
+            }
+        }
+            .flatMapLatest { indexForSelection ->
+                checkInternalFlow()
+                    .onFirst {
+                        if (indexForSelection != null) {
+                            selectStatedFiles(
+                                selectionHelper.confirm(rawStagedFiles, indexForSelection),
+                            )
+                        }
+                    }
             }
 
     private sealed interface Event {
