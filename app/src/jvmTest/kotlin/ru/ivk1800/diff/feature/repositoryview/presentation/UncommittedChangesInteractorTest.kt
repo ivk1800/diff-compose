@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Test
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import java.io.File
 import kotlin.coroutines.CoroutineContext
@@ -27,6 +28,9 @@ class UncommittedChangesInteractorTest {
 
     @RelaxedMockK
     lateinit var mockDiffRepository: DiffRepository
+
+    @RelaxedMockK
+    lateinit var mockUncommittedRepository: UncommittedRepository
 
     @Before
     fun before() {
@@ -190,6 +194,7 @@ class UncommittedChangesInteractorTest {
                 repoDirectory = File(""),
                 commitInfoMapper = mockCommitInfoMapper,
                 diffRepository = mockDiffRepository,
+                uncommittedRepository = mockUncommittedRepository,
                 context = requireNotNull(context),
             )
         }

@@ -7,10 +7,12 @@ import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.command.DiffCommand
+import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
+import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
 import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
 import ru.ivk1800.vcs.git.command.ShowCommandImpl
 import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
@@ -201,6 +203,9 @@ class GitVcs : Vcs {
         options: UpdateIndexCommand.Options,
     ): UpdateIndexCommand =
         UpdateIndexCommandImpl(directory, options)
+
+    override suspend fun getUntrackedFilesCommand(directory: Path): GetUntrackedFilesCommand =
+        GetUntrackedFilesCommandImpl(directory)
 
     private inline fun <T> runProcess(
         process: Process,

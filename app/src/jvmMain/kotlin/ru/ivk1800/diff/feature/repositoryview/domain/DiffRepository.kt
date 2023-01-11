@@ -37,20 +37,6 @@ class DiffRepository(
 
     suspend fun getStagedDiff(directory: File): List<Diff> = vcs.getStagedDiff(directory).map(::toDiff)
 
-    suspend fun removeAllFromStaged(directory: File) = vcs.removeAllFromStaged(directory)
-
-    suspend fun addAllToStaged(directory: File) = vcs.addAllToStaged(directory)
-
-    suspend fun removeFilesFromStaged(directory: File, filePaths: List<String>) {
-        check(filePaths.isNotEmpty())
-        vcs.removeFilesFromStaged(directory, filePaths)
-    }
-
-    suspend fun addFilesToStaged(directory: File, filePaths: List<String>) {
-        check(filePaths.isNotEmpty())
-        vcs.addFilesToStaged(directory, filePaths)
-    }
-
     private fun toDiff(diff: VcsDiff): Diff {
         return Diff(
             filePath = when (diff) {

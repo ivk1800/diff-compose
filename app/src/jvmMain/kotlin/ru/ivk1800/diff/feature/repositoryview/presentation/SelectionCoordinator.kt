@@ -63,15 +63,10 @@ class SelectionCoordinator internal constructor(
         uncommittedChangesInteractor.selectStatedFiles(files)
         if (files.size == 1) {
             val selectedFile = files.first()
-
-            val diffId = uncommittedChangesInteractor.getDiffIdOfStagedOrNull(selectedFile.path)
-
-            if (diffId != null) {
-                diffInfoInteractor.selectUncommittedFiles(
-                    selectedFile.path,
-                    DiffInfoInteractor.UncommittedChangesType.Staged,
-                )
-            }
+            diffInfoInteractor.selectUncommittedFiles(
+                selectedFile.path,
+                DiffInfoInteractor.UncommittedChangesType.Staged,
+            )
         }
     }
 
@@ -79,15 +74,10 @@ class SelectionCoordinator internal constructor(
         uncommittedChangesInteractor.selectUnstatedFiles(files)
         if (files.size == 1) {
             val selectedFile = files.first()
-
-            val diffId = uncommittedChangesInteractor.getDiffIdOfUnstagedOrNull(selectedFile.path)
-
-            if (diffId != null) {
-                diffInfoInteractor.selectUncommittedFiles(
-                    selectedFile.path,
-                    DiffInfoInteractor.UncommittedChangesType.Unstaged,
-                )
-            }
+            diffInfoInteractor.selectUncommittedFiles(
+                selectedFile.path,
+                DiffInfoInteractor.UncommittedChangesType.Unstaged,
+            )
         }
     }
 
