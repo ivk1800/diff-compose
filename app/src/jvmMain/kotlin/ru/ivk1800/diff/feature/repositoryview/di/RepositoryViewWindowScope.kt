@@ -16,6 +16,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
+import ru.ivk1800.diff.feature.repositoryview.presentation.DiffOperationsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.IndexInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
@@ -77,6 +78,14 @@ class RepositoryViewWindowScope(
             commitsRepository = commitsRepository,
             diffInfoItemMapper = DiffInfoItemMapper(),
             errorTransformer = errorTransformer,
+        )
+    }
+
+    private val diffOperationsInteractor by lazy {
+        DiffOperationsInteractor(
+            filesInfoInteractor,
+            diffInfoInteractor,
+            indexInteractor,
         )
     }
 
@@ -160,7 +169,7 @@ class RepositoryViewWindowScope(
             uncommittedChangesInteractor = uncommittedChangesInteractor,
             selectionCoordinator = selectionCoordinator,
             commitsTableInteractor = commitsTableInteractor,
-            indexInteractor = indexInteractor,
+            diffOperationsInteractor = diffOperationsInteractor,
             router = dependencies.router,
             errorTransformer = errorTransformer,
             dialogRouter = object : DialogRouter {
@@ -172,6 +181,7 @@ class RepositoryViewWindowScope(
     }
 
     fun dispose() {
+        diffOperationsInteractor.dispose()
         commitsInteractor.dispose()
         uncommittedChangesInteractor.dispose()
         commitInfoInteractor.dispose()

@@ -19,7 +19,7 @@ class RepositoryViewViewModel(
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val selectionCoordinator: SelectionCoordinator,
     private val commitsTableInteractor: CommitsTableInteractor,
-    private val indexInteractor: IndexInteractor,
+    private val diffOperationsInteractor: DiffOperationsInteractor,
     private val router: RepositoryViewRouter,
     private val dialogRouter: DialogRouter,
     private val filesInfoInteractor: FilesInfoInteractor,
@@ -102,43 +102,7 @@ class RepositoryViewViewModel(
                     is RepositoryViewEvent.Diff.OnLinesSelected ->
                         selectionCoordinator.selectDiffLines(value.ids)
 
-                    is RepositoryViewEvent.Diff.OnUnstageHunk -> {
-                        val file = when (val filesState = filesInfoInteractor.state.value) {
-                            is FilesInfoState.Commit -> when (filesState.state) {
-                                is CommitInfoState.Content -> filesState.state.files.first()
-                                is CommitInfoState.Error,
-                                CommitInfoState.None -> error("TODO")
-                            }
-
-                            FilesInfoState.None -> error("TODO")
-                            is FilesInfoState.UncommittedChanges -> filesState.state.staged.files.first()
-                        }
-
-                        check(diffInfoInteractor.state.value is DiffInfoState.Content) {
-                            "Unable to unstage hunk, because diff is not selected"
-                        }
-                        val hunk = diffInfoInteractor.getHunk(value.hunkId)
-                        val diffId = diffInfoInteractor.getDiffId()
-                        checkNotNull(hunk) {
-                            "Unable to unstage hunk, because hunk not found"
-                        }
-                        checkNotNull(diffId) {
-                            "Unable to unstage hunk, because diff not found"
-                        }
-
-                        viewModelScope.launch {
-                            val result = indexInteractor.removeFromIndex(file.id.path, hunk, diffId)
-                            val error = result.exceptionOrNull()
-                            if (error != null) {
-                                dialogRouter.show(
-                                    DialogRouter.Dialog(
-                                        title = "Error",
-                                        text = errorTransformer.transformForDisplay(error),
-                                    )
-                                )
-                            }
-                        }
-                    }
+                    is RepositoryViewEvent.Diff.OnUnstageHunk -> onUnstageHunk(value)
                 }
             }
         }
@@ -156,4 +120,19 @@ class RepositoryViewViewModel(
                 filesInfoState = activeState,
             )
         }
+
+    private fun onUnstageHunk(event: RepositoryViewEvent.Diff.OnUnstageHunk) {
+        viewModelScope.launch {
+            val result = diffOperationsInteractor.unstageHunk(event.hunkId)
+            val error = result.exceptionOrNull()
+            if (error != null) {
+                dialogRouter.show(
+                    DialogRouter.Dialog(
+                        title = "Error",
+                        text = errorTransformer.transformForDisplay(error),
+                    )
+                )
+            }
+        }
+    }
 }
