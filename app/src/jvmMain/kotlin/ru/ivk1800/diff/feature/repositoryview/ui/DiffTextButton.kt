@@ -29,14 +29,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HunkActionButton(
+fun DiffTextButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     text: String,
+    enabled: Boolean = true,
 ) =
-    HunkActionButtonInternal(
+    ButtonInternal(
         modifier = modifier,
         onClick = onClick,
+        enabled = enabled,
     ) {
         Text(
             text = text,
@@ -48,10 +50,10 @@ fun HunkActionButton(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun HunkActionButtonInternal(
+private fun ButtonInternal(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
+    enabled: Boolean,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     elevation: ButtonElevation? = ButtonDefaults.elevation(),
     shape: Shape = MaterialTheme.shapes.small,
@@ -96,7 +98,7 @@ private fun HunkActionButtonInternal(
 @Preview
 @Composable
 private fun HunkHeaderPreview() {
-    HunkActionButton(
+    DiffTextButton(
         onClick = {},
         text = "Unstage lines",
     )

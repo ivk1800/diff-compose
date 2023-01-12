@@ -13,4 +13,8 @@
     <string name="staged_files">Staged files</string>
     <string name="staged_files">Staged files</string>
     <string name="unstaged_files">Unstaged files</string>
+    <string name="unstage_all">Unstage all</string>
+    <string name="unstage_selected">Unstage selected</string>
+    <string name="stage_all">Stage all</string>
+    <string name="stage_selected">Stage selected</string>
 </resources>

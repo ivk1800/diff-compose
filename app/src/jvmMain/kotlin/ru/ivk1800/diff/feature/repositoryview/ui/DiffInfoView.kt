@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ExperimentalMaterialApi
@@ -32,7 +30,6 @@ import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.application.ApplicationTheme
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
-import ru.ivk1800.diff.di.compose.LocalApplicationScope
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -128,13 +125,15 @@ private fun HunkHeader(
     onActionClick: (DiffInfoItem.HunkHeader.Action) -> Unit,
 ) =
     Row(
-        modifier = Modifier.fillMaxWidth().background(LocalDiffTheme.current.colors.header1Color),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(LocalDiffTheme.current.colors.header1Color)
+            // TODO: magic numbers
+            .padding(start = (48 + 4).dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         ListTextView(
-            // TODO: magic numbers
-            modifier = Modifier.padding(start = (48 + 4).dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             text = item.text,
         )
         Row(
@@ -144,7 +143,6 @@ private fun HunkHeader(
             CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
                 Actions(item.actions, onActionClick)
             }
-            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 
@@ -154,7 +152,7 @@ private fun Actions(
     onActionClick: (DiffInfoItem.HunkHeader.Action) -> Unit,
 ) =
     actions.forEach { action ->
-        HunkActionButton(
+        DiffTextButton(
             text = when (action) {
                 DiffInfoItem.HunkHeader.Action.StageHunk -> MR.strings.stage_hunk
                 DiffInfoItem.HunkHeader.Action.UnstageHunk -> MR.strings.unstage_hunk

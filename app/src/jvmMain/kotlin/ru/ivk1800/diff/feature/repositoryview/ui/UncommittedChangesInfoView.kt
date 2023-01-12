@@ -12,14 +12,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalMinimumTouchTargetEnforcement
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -27,9 +26,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -74,7 +71,6 @@ private fun UnstagedFilesPane(
     state: UncommittedChangesState.Content.Unstaged,
 ) {
     val currentOnEvent by rememberUpdatedState(onEvent)
-    val focusManager = LocalFocusManager.current
     FilesPane(
         modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
             onEvent.invoke(
@@ -84,15 +80,19 @@ private fun UnstagedFilesPane(
             )
         },
         title = MR.strings.unstaged_files.localized(),
+        processAddText = MR.strings.stage_all.localized(),
+        processSelectedText = MR.strings.stage_selected.localized(),
         files = state.files,
         selected = state.selected,
         vcsProcess = state.vcsProcess,
         onSelected = { files ->
             currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
         },
-        onStageActionClick = {
-            focusManager.clearFocus()
+        onStageAll = {
             onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged)
+        },
+        onStageSelected = {
+            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(state.selected))
         },
     )
 }
@@ -104,7 +104,6 @@ private fun StagedFilesPane(
     state: UncommittedChangesState.Content.Staged,
 ) {
     val currentOnEvent by rememberUpdatedState(onEvent)
-    val focusManager = LocalFocusManager.current
     FilesPane(
         modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
             onEvent.invoke(
@@ -114,27 +113,35 @@ private fun StagedFilesPane(
             )
         },
         title = MR.strings.staged_files.localized(),
+        processAddText = MR.strings.unstage_all.localized(),
+        processSelectedText = MR.strings.unstage_selected.localized(),
         files = state.files,
         selected = state.selected,
-        vcsProcess = !state.vcsProcess,
+        vcsProcess = state.vcsProcess,
         onSelected = { files ->
             currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
         },
-        onStageActionClick = {
-            focusManager.clearFocus()
+        onStageAll = {
             onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged)
+        },
+        onStageSelected = {
+            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(state.selected))
         },
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun FilesPane(
     modifier: Modifier = Modifier,
     title: String,
+    processAddText: String,
+    processSelectedText: String,
     vcsProcess: Boolean,
     files: ImmutableList<CommitFileItem>,
     selected: ImmutableSet<CommitFileId>,
-    onStageActionClick: () -> Unit,
+    onStageAll: () -> Unit,
+    onStageSelected: () -> Unit,
     onSelected: (items: ImmutableSet<CommitFileId>) -> Unit,
 ) =
     Column(modifier = modifier.fillMaxSize()) {
@@ -142,24 +149,27 @@ private fun FilesPane(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(LocalDiffTheme.current.colors.header1Color)
-                .padding(8.dp),
+                .padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Checkbox(
-                modifier = Modifier.scale(0.7F)
-                    .size(16.dp),
-                checked = vcsProcess,
-                onCheckedChange = {
-                    onStageActionClick.invoke()
-                },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colors.primary,
-                )
-            )
             Spacer(modifier = Modifier.width(8.dp))
             ListTextView(
                 text = title,
             )
+            Spacer(modifier = Modifier.weight(1F))
+            CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+                DiffTextButton(
+                    enabled = files.isNotEmpty() && !vcsProcess,
+                    onClick = onStageAll,
+                    text = processAddText,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                DiffTextButton(
+                    enabled = selected.isNotEmpty(),
+                    onClick = onStageSelected,
+                    text = processSelectedText,
+                )
+            }
         }
         Box(modifier = Modifier.fillMaxSize()) {
             val currentFiles by rememberUpdatedState(files)
