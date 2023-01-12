@@ -1,5 +1,6 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
@@ -21,32 +22,29 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.ivk1800.diff.ext.onFirst
-import ru.ivk1800.diff.feature.repositoryview.domain.Diff
-import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
+import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
+import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.helper.UncommittedChangesNextSelectionHelper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
-import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffId
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UncommittedChangesInteractor internal constructor(
     private val repoDirectory: File,
-    private val diffRepository: DiffRepository,
+    private val statusRepository: StatusRepository,
     private val uncommittedRepository: UncommittedRepository,
-    private val commitInfoMapper: CommitInfoMapper,
     private val selectionHelper: UncommittedChangesNextSelectionHelper,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
 
-    private var rawStagedDiff: List<Diff> = emptyList()
-    private var rawStagedFiles: List<String> = emptyList()
-    private var rawUnstagedDiff: List<Diff> = emptyList()
-    private var rawUntrackedFiles: List<String> = emptyList()
-    private var rawAllUnstagedFiles: List<String> = emptyList()
+    private var rawStagedFiles: List<CommitFile> = emptyList()
+    private var rawUntrackedFiles: List<CommitFile> = emptyList()
+    private var rawAllUnstagedFiles: List<CommitFile> = emptyList()
 
     private val selectedFiles = MutableStateFlow<SelectedStatedFiles>(
         SelectedStatedFiles(persistentSetOf(), persistentSetOf())
@@ -66,14 +64,12 @@ class UncommittedChangesInteractor internal constructor(
 
     constructor(
         repoDirectory: File,
-        diffRepository: DiffRepository,
-        commitInfoMapper: CommitInfoMapper,
+        statusRepository: StatusRepository,
         uncommittedRepository: UncommittedRepository
     ) : this(
         repoDirectory,
-        diffRepository,
+        statusRepository,
         uncommittedRepository,
-        commitInfoMapper,
         UncommittedChangesNextSelectionHelper(),
         Dispatchers.Main,
     )
@@ -205,21 +201,15 @@ class UncommittedChangesInteractor internal constructor(
 
     private suspend fun checkInternalFlow(): Flow<UncommittedChangesState> =
         flow {
-            val stagedDiff: List<Diff> = diffRepository.getStagedDiff(repoDirectory)
-            val unstagedDiff: List<Diff> = diffRepository.getUnstagedDiff(repoDirectory)
-            val untrackedFiles: List<String> = uncommittedRepository.getUntrackedFiles(repoDirectory)
-
-            emit(RawData(stagedDiff, unstagedDiff, untrackedFiles))
+            emit(statusRepository.getStatus(repoDirectory))
         }
-            .onEach { (stagedDiff, unstagedDiff, untrackedFiles) ->
-                rawStagedDiff = stagedDiff
-                rawStagedFiles = stagedDiff.map { it.filePath }
-                rawUnstagedDiff = unstagedDiff
-                rawUntrackedFiles = untrackedFiles
-                rawAllUnstagedFiles = unstagedDiff.map { it.filePath } + untrackedFiles
+            .onEach { (staged, unstaged, untracked) ->
+                rawStagedFiles = staged
+                rawAllUnstagedFiles = unstaged + untracked
+                rawUntrackedFiles = untracked
             }
-            .flatMapLatest { (stagedDiff, unstagedDiff, rawUntrackedFiles) ->
-                if (stagedDiff.isEmpty() && unstagedDiff.isEmpty() && rawUntrackedFiles.isEmpty()) {
+            .flatMapLatest { (staged, unstaged, untracked) ->
+                if (staged.isEmpty() && unstaged.isEmpty() && untracked.isEmpty()) {
                     flowOf(UncommittedChangesState.None)
                 } else {
                     selectedFiles.map { selected ->
@@ -227,18 +217,12 @@ class UncommittedChangesInteractor internal constructor(
                             staged = UncommittedChangesState.Content.Staged(
                                 selected = selected.staged,
                                 vcsProcess = false,
-                                files = commitInfoMapper.mapDiffToFiles(stagedDiff),
+                                files = toFileItems(staged),
                             ),
                             unstaged = UncommittedChangesState.Content.Unstaged(
                                 selected = selected.unstaged,
                                 vcsProcess = false,
-                                files = (commitInfoMapper.mapDiffToFiles(unstagedDiff) + rawUntrackedFiles.map {
-                                    CommitFileItem(
-                                        id = CommitFileId(path = it),
-                                        name = it,
-                                        type = CommitFileItem.Type.Added,
-                                    )
-                                }).toImmutableList(),
+                                files = (toFileItems(unstaged) + toFileItems(untracked)).toImmutableList(),
                             ),
                         )
                     }
@@ -299,6 +283,21 @@ class UncommittedChangesInteractor internal constructor(
                     }
             }
 
+    private fun toFileItems(files: List<CommitFile>): ImmutableList<CommitFileItem> =
+        files.map { file ->
+            CommitFileItem(
+                id = CommitFileId(path = file.name),
+                name = file.name,
+                type = when (file.changeType) {
+                    ChangeType.Add -> CommitFileItem.Type.Added
+                    ChangeType.Modify -> CommitFileItem.Type.Modified
+                    ChangeType.Delete -> CommitFileItem.Type.Deleted
+                    ChangeType.Rename -> CommitFileItem.Type.Renamed
+                    ChangeType.Copy -> CommitFileItem.Type.Copied
+                }
+            )
+        }.toImmutableList()
+
     private sealed interface Event {
         object Check : Event
 
@@ -314,11 +313,5 @@ class UncommittedChangesInteractor internal constructor(
     private data class SelectedStatedFiles(
         val staged: ImmutableSet<CommitFileId>,
         val unstaged: ImmutableSet<CommitFileId>,
-    )
-
-    private data class RawData(
-        val stagedDiff: List<Diff>,
-        val unstagedDiff: List<Diff>,
-        val untrackedFiles: List<String>,
     )
 }

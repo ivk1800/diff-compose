@@ -7,6 +7,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.IndexRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoMapper
@@ -115,11 +116,16 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val statusRepository by lazy {
+        StatusRepository(
+            vcs = dependencies.vcs,
+        )
+    }
+
     private val uncommittedChangesInteractor by lazy {
         UncommittedChangesInteractor(
             repoDirectory = repoPath,
-            diffRepository = diffRepository,
-            commitInfoMapper = commitInfoMapper,
+            statusRepository = statusRepository,
             uncommittedRepository = uncommittedRepository,
         )
     }

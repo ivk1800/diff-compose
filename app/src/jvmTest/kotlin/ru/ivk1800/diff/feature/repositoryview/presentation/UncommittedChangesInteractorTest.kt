@@ -12,8 +12,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
-import ru.ivk1800.diff.feature.repositoryview.domain.Diff
-import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
+import ru.ivk1800.diff.feature.repositoryview.domain.Status
+import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.helper.UncommittedChangesNextSelectionHelper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
@@ -26,10 +27,7 @@ import kotlin.test.assertTrue
 class UncommittedChangesInteractorTest {
 
     @RelaxedMockK
-    lateinit var mockCommitInfoMapper: CommitInfoMapper
-
-    @RelaxedMockK
-    lateinit var mockDiffRepository: DiffRepository
+    lateinit var mockStatusRepository: StatusRepository
 
     @RelaxedMockK
     lateinit var mockUncommittedRepository: UncommittedRepository
@@ -46,7 +44,7 @@ class UncommittedChangesInteractorTest {
     fun `should emit staged selected files`() = runTest {
         val selected = persistentSetOf<CommitFileId>(mockk())
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
 
         sut.state.test {
@@ -63,7 +61,7 @@ class UncommittedChangesInteractorTest {
     fun `should emit empty unstaged selected files if select staged`() = runTest {
         val selected = persistentSetOf<CommitFileId>(mockk())
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
 
         sut.state.test {
@@ -80,7 +78,7 @@ class UncommittedChangesInteractorTest {
     fun `should emit unstaged selected files`() = runTest {
         val selected = persistentSetOf<CommitFileId>(mockk())
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
 
         sut.state.test {
@@ -97,7 +95,7 @@ class UncommittedChangesInteractorTest {
     fun `should emit empty staged selected files if select unstaged`() = runTest {
         val selected = persistentSetOf<CommitFileId>(mockk())
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
 
         sut.state.test {
@@ -114,7 +112,7 @@ class UncommittedChangesInteractorTest {
     fun `should switch selected files`() = runTest {
         val selected = persistentSetOf<CommitFileId>(mockk())
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
         sut.state.test {
             sut.check()
@@ -132,7 +130,7 @@ class UncommittedChangesInteractorTest {
     @Test
     fun `should unselect staged files`() = runTest {
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
         sut.state.test {
             sut.check()
@@ -149,7 +147,7 @@ class UncommittedChangesInteractorTest {
     @Test
     fun `should unselect unstaged files`() = runTest {
         val sut = sut {
-            stagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
         sut.state.test {
             sut.check()
@@ -166,15 +164,7 @@ class UncommittedChangesInteractorTest {
     @Test
     fun `should select next file after add to staged`() = runTest {
         val sut = sut {
-            stagedDiff = listOf(
-                Diff(
-                    filePath = "1",
-                    oldId = "",
-                    newId = "",
-                    hunks = emptyList(),
-                    changeType = ChangeType.Modify,
-                )
-            )
+            staged = listOf(TestFile)
             nextSelectedUnstagedFile = CommitFileId("2")
         }
         sut.state.test {
@@ -195,7 +185,7 @@ class UncommittedChangesInteractorTest {
     @Test
     fun `should select next file after remove from staged`() = runTest {
         val sut = sut {
-            unstagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
             nextSelectedUnstagedFile = CommitFileId("2")
         }
         sut.state.test {
@@ -216,7 +206,7 @@ class UncommittedChangesInteractorTest {
     @Test
     fun `should reset selection if remove multiple files from staged`() = runTest {
         val sut = sut {
-            unstagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
         sut.state.test {
             sut.removeFilesFromStaged(
@@ -237,7 +227,7 @@ class UncommittedChangesInteractorTest {
     @Test
     fun `should reset selection if add multiple files to staged`() = runTest {
         val sut = sut {
-            unstagedDiff = listOf(TestDiff)
+            staged = listOf(TestFile)
         }
         sut.state.test {
             sut.addFilesToStaged(
@@ -263,14 +253,18 @@ class UncommittedChangesInteractorTest {
         .build()
 
     private inner class Sut {
-        var stagedDiff: List<Diff> = emptyList()
-        var unstagedDiff: List<Diff> = emptyList()
+        var staged: List<CommitFile> = emptyList()
+        var unstaged: List<CommitFile> = emptyList()
+        var untracked: List<CommitFile> = emptyList()
         var nextSelectedUnstagedFile: CommitFileId? = null
         var context: CoroutineContext? = null
 
         fun build(): UncommittedChangesInteractor {
-            coEvery { mockDiffRepository.getStagedDiff(any()) } returns stagedDiff
-            coEvery { mockDiffRepository.getUnstagedDiff(any()) } returns unstagedDiff
+            coEvery { mockStatusRepository.getStatus(any()) } returns Status(
+                staged = staged,
+                unstaged = unstaged,
+                untracked = untracked,
+            )
             coEvery { mockUncommittedChangesNextSelectionHelper.confirm(any(), any()) }.returns(
                 nextSelectedUnstagedFile?.let {
                     persistentSetOf(it)
@@ -279,8 +273,7 @@ class UncommittedChangesInteractorTest {
 
             return UncommittedChangesInteractor(
                 repoDirectory = File(""),
-                commitInfoMapper = mockCommitInfoMapper,
-                diffRepository = mockDiffRepository,
+                statusRepository = mockStatusRepository,
                 uncommittedRepository = mockUncommittedRepository,
                 selectionHelper = mockUncommittedChangesNextSelectionHelper,
                 context = requireNotNull(context),
@@ -289,11 +282,8 @@ class UncommittedChangesInteractorTest {
     }
 
     private companion object {
-        private val TestDiff = Diff(
-            filePath = "1",
-            oldId = "",
-            newId = "",
-            hunks = emptyList(),
+        private val TestFile = CommitFile(
+            name = "1",
             changeType = ChangeType.Modify,
         )
     }

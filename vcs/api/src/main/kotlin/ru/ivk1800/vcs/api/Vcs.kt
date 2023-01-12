@@ -4,6 +4,7 @@ import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
+import ru.ivk1800.vcs.api.command.StatusCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import java.io.File
 import java.nio.file.Path
@@ -42,4 +43,6 @@ interface Vcs {
     suspend fun getUpdateIndexCommand(directory: Path, options: UpdateIndexCommand.Options): UpdateIndexCommand
 
     suspend fun getUntrackedFilesCommand(directory: Path): GetUntrackedFilesCommand
+
+    suspend fun getStatusCommand(directory: Path): StatusCommand
 }

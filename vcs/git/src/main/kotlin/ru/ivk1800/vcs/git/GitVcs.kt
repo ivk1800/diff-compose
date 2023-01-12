@@ -10,13 +10,16 @@ import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
+import ru.ivk1800.vcs.api.command.StatusCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
 import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
 import ru.ivk1800.vcs.git.command.ShowCommandImpl
+import ru.ivk1800.vcs.git.command.StatusCommandImpl
 import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
 import ru.ivk1800.vcs.git.parser.GitLogParser
+import ru.ivk1800.vcs.git.parser.GitStatusParser
 import ru.ivk1800.vcs.git.parser.VcsDiffParser
 import java.io.File
 import java.nio.file.Path
@@ -26,6 +29,7 @@ import kotlin.io.path.exists
 
 class GitVcs : Vcs {
     private val parser = VcsParser()
+    private val gitStatusParser = GitStatusParser()
     private val diffParser = VcsDiffParser()
     private val separatorBuilder = SeparatorBuilder()
     private val gitLogParser = GitLogParser(separatorBuilder)
@@ -206,6 +210,9 @@ class GitVcs : Vcs {
 
     override suspend fun getUntrackedFilesCommand(directory: Path): GetUntrackedFilesCommand =
         GetUntrackedFilesCommandImpl(directory)
+
+    override suspend fun getStatusCommand(directory: Path): StatusCommand =
+        StatusCommandImpl(directory, gitStatusParser)
 
     private inline fun <T> runProcess(
         process: Process,

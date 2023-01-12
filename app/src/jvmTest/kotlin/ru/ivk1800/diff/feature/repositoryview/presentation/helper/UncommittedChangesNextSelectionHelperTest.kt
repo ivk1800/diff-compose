@@ -2,6 +2,8 @@ package ru.ivk1800.diff.feature.repositoryview.presentation.helper
 
 import kotlinx.collections.immutable.persistentSetOf
 import org.junit.Test
+import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
+import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import kotlin.test.assertEquals
 
@@ -10,9 +12,18 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should calculate index for first file`() {
         val result = sut().calculateIndex(
             allFiles = listOf(
-                "1",
-                "2",
-                "3",
+                CommitFile(
+                    name = "1",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "2",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "3",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             id = CommitFileId("1")
         )
@@ -23,9 +34,18 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should calculate index for last file`() {
         val result = sut().calculateIndex(
             allFiles = listOf(
-                "1",
-                "2",
-                "3",
+                CommitFile(
+                    name = "1",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "2",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "3",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             id = CommitFileId("3")
         )
@@ -36,9 +56,18 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should calculate index for center file`() {
         val result = sut().calculateIndex(
             allFiles = listOf(
-                "1",
-                "2",
-                "3",
+                CommitFile(
+                    name = "1",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "2",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "3",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             id = CommitFileId("2")
         )
@@ -49,8 +78,14 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should return file if first removed`() {
         val result = sut().confirm(
             allFiles = listOf(
-                "2",
-                "3",
+                CommitFile(
+                    name = "2",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "3",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             removedFileIndex = 0,
         )
@@ -66,8 +101,14 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should return file if center removed`() {
         val result = sut().confirm(
             allFiles = listOf(
-                "1",
-                "3",
+                CommitFile(
+                    name = "1",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "3",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             removedFileIndex = 1,
         )
@@ -83,8 +124,14 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should return file if last removed`() {
         val result = sut().confirm(
             allFiles = listOf(
-                "1",
-                "2",
+                CommitFile(
+                    name = "1",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "2",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             removedFileIndex = 2,
         )
@@ -112,8 +159,14 @@ class UncommittedChangesNextSelectionHelperTest {
     fun `should return file if index out bounds`() {
         val result = sut().confirm(
             allFiles = listOf(
-                "1",
-                "2",
+                CommitFile(
+                    name = "1",
+                    changeType = ChangeType.Modify,
+                ),
+                CommitFile(
+                    name = "2",
+                    changeType = ChangeType.Modify,
+                ),
             ),
             removedFileIndex = 10,
         )
