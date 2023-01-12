@@ -213,6 +213,47 @@ class UncommittedChangesInteractorTest {
         }
     }
 
+    @Test
+    fun `should reset selection if remove multiple files from staged`() = runTest {
+        val sut = sut {
+            unstagedDiff = listOf(TestDiff)
+        }
+        sut.state.test {
+            sut.removeFilesFromStaged(
+                persistentSetOf<CommitFileId>(
+                    CommitFileId("1"),
+                    CommitFileId("2"),
+                )
+            )
+
+            skipItems(1)
+            val selected = awaitItem().asContent().staged.selected
+            assertTrue(selected.isEmpty())
+            expectNoEvents()
+        }
+    }
+
+
+    @Test
+    fun `should reset selection if add multiple files to staged`() = runTest {
+        val sut = sut {
+            unstagedDiff = listOf(TestDiff)
+        }
+        sut.state.test {
+            sut.addFilesToStaged(
+                persistentSetOf<CommitFileId>(
+                    CommitFileId("1"),
+                    CommitFileId("2"),
+                )
+            )
+
+            skipItems(1)
+            val selected = awaitItem().asContent().unstaged.selected
+            assertTrue(selected.isEmpty())
+            expectNoEvents()
+        }
+    }
+
     private fun UncommittedChangesState.asContent(): UncommittedChangesState.Content =
         this as UncommittedChangesState.Content
 

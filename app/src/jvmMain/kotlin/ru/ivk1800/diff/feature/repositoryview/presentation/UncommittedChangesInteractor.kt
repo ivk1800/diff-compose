@@ -173,20 +173,6 @@ class UncommittedChangesInteractor internal constructor(
         }
     }
 
-    fun getDiffIdOfStagedOrNull(fileName: String): DiffId? = getDiffIdOrNull(rawStagedDiff, fileName)
-
-    fun getDiffIdOfUnstagedOrNull(fileName: String): DiffId? = getDiffIdOrNull(rawUnstagedDiff, fileName)
-
-    private fun getDiffIdOrNull(diffs: List<Diff>, fileName: String): DiffId? =
-        diffs
-            .find { diff -> diff.filePath == fileName }
-            ?.let { diff ->
-                DiffId(
-                    oldId = diff.oldId,
-                    newId = diff.newId,
-                )
-            }
-
     fun dispose() {
         scope.cancel()
     }
@@ -280,6 +266,8 @@ class UncommittedChangesInteractor internal constructor(
                             selectUnstatedFiles(
                                 selectionHelper.confirm(rawAllUnstagedFiles, indexForSelection),
                             )
+                        } else {
+                            selectStatedFiles(persistentSetOf())
                         }
                     }
             }
@@ -305,6 +293,8 @@ class UncommittedChangesInteractor internal constructor(
                             selectStatedFiles(
                                 selectionHelper.confirm(rawStagedFiles, indexForSelection),
                             )
+                        } else {
+                            selectStatedFiles(persistentSetOf())
                         }
                     }
             }
