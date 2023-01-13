@@ -89,7 +89,12 @@ class UncommittedChangesInteractor internal constructor(
                         uncommittedRepository.addAllToStaged(repoDirectory)
                         emit(Unit)
                     }
-                        .flatMapLatest { checkInternalFlow() }
+                        .flatMapLatest {
+                            checkInternalFlow()
+                                .onFirst {
+                                    selectStatedFiles(persistentSetOf())
+                                }
+                        }
 
                     Event.RemoveAllFromStaged -> flow {
                         _state.value = _state.value.tryCopyWithVcsProcess(
@@ -100,7 +105,12 @@ class UncommittedChangesInteractor internal constructor(
                         uncommittedRepository.removeAllFromStaged(repoDirectory)
                         emit(Unit)
                     }
-                        .flatMapLatest { checkInternalFlow() }
+                        .flatMapLatest {
+                            checkInternalFlow()
+                                .onFirst {
+                                    selectStatedFiles(persistentSetOf())
+                                }
+                        }
 
                     is Event.AddFilesToStaged -> handleAddFilesToStagedFlow(event)
 

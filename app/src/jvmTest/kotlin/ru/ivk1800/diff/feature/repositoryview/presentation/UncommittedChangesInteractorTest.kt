@@ -209,6 +209,7 @@ class UncommittedChangesInteractorTest {
             staged = listOf(TestFile)
         }
         sut.state.test {
+            sut.selectStatedFiles(persistentSetOf<CommitFileId>(mockk(), mockk()))
             sut.removeFilesFromStaged(
                 persistentSetOf<CommitFileId>(
                     CommitFileId("1"),
@@ -216,13 +217,12 @@ class UncommittedChangesInteractorTest {
                 )
             )
 
-            skipItems(1)
+            skipItems(2)
             val selected = awaitItem().asContent().staged.selected
             assertTrue(selected.isEmpty())
             expectNoEvents()
         }
     }
-
 
     @Test
     fun `should reset selection if add multiple files to staged`() = runTest {
@@ -230,6 +230,7 @@ class UncommittedChangesInteractorTest {
             staged = listOf(TestFile)
         }
         sut.state.test {
+            sut.selectUnstatedFiles(persistentSetOf<CommitFileId>(mockk(), mockk()))
             sut.addFilesToStaged(
                 persistentSetOf<CommitFileId>(
                     CommitFileId("1"),
@@ -237,8 +238,40 @@ class UncommittedChangesInteractorTest {
                 )
             )
 
-            skipItems(1)
+            skipItems(2)
             val selected = awaitItem().asContent().unstaged.selected
+            assertTrue(selected.isEmpty())
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `should reset selection if add all files to staged`() = runTest {
+        val sut = sut {
+            staged = listOf(TestFile)
+        }
+        sut.state.test {
+            sut.selectUnstatedFiles(persistentSetOf<CommitFileId>(mockk()))
+            sut.addAllToStaged()
+
+            skipItems(2)
+            val selected = awaitItem().asContent().unstaged.selected
+            assertTrue(selected.isEmpty())
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `should reset selection if add all files to unstaged`() = runTest {
+        val sut = sut {
+            staged = listOf(TestFile)
+        }
+        sut.state.test {
+            sut.selectStatedFiles(persistentSetOf<CommitFileId>(mockk()))
+            sut.removeAllFromStaged()
+
+            skipItems(2)
+            val selected = awaitItem().asContent().staged.selected
             assertTrue(selected.isEmpty())
             expectNoEvents()
         }
