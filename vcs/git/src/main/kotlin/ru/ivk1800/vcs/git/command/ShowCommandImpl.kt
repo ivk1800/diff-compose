@@ -10,7 +10,7 @@ import java.nio.file.Path
 
 internal class ShowCommandImpl(private val directory: Path, options: Options) : ShowCommand(options) {
     override suspend fun run(): List<String> = withContext(Dispatchers.IO) {
-        val process = createProcess(directory, "git show ${options.objectId}")
+        val process = createProcess(directory, "git show HEAD:${options.fileName}")
 
         handleResult(
             process,

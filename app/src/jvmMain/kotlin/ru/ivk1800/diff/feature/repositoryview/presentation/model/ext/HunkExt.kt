@@ -1,6 +1,7 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation.model.ext
 
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
+import kotlin.math.max
 import kotlin.math.min
 
 fun Diff.Hunk.getStartLineNumber(): Int {
@@ -10,7 +11,7 @@ fun Diff.Hunk.getStartLineNumber(): Int {
 }
 
 fun Diff.Hunk.getEndLineNumber(): Int {
-    val firstEndLine = firstRange.first + firstRange.last
-    val secondEndLine = secondRange.first + secondRange.last
-    return min(firstEndLine, secondEndLine) - 1
+    val firstEndLine = firstRange.last
+    val secondEndLine = secondRange.last
+    return max(firstEndLine, secondEndLine)
 }

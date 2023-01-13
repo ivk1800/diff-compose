@@ -7,6 +7,6 @@ import java.io.File
 class FileRepository(
     private val vcs: Vcs,
 ) {
-    suspend fun getFileLines(directory: File, diffId: String): List<String> =
-        vcs.getShowCommand(directory.toPath(), ShowCommand.Options(objectId = diffId)).run()
+    suspend fun getFileLines(directory: File, fileName: String): List<String> =
+        vcs.getShowCommand(directory.toPath(), ShowCommand.Options(fileName = fileName)).run()
 }

@@ -114,6 +114,7 @@ class RepositoryViewWindowScope(
         IndexInteractor(
             repoDirectory = repoPath,
             fileRepository = fileRepository,
+            diffRepository = diffRepository,
             indexRepository = indexRepository,
         )
     }

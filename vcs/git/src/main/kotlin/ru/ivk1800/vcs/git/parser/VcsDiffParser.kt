@@ -147,22 +147,23 @@ internal class VcsDiffParser {
         val aRaw = r[0].split(",")
         val bRaw = r[1].split(",")
 
+        val aStart = requireNotNull(aRaw[0].toIntOrNull()) {
+            "Unable to parse range of first file"
+        }
+        val aEnd = aStart + requireNotNull(aRaw[1].toIntOrNull()) {
+            "Unable to parse range of first file"
+        } - 1
         val aRange = IntRange(
-            requireNotNull(aRaw[0].toIntOrNull()) {
-                "Unable to parse range of first file"
-            },
-            requireNotNull(aRaw[1].toIntOrNull()) {
-                "Unable to parse range of first file"
-            },
+            aStart,
+            aEnd,
         )
-        val bRange = IntRange(
-            requireNotNull(bRaw[0].toIntOrNull()) {
-                "Unable to parse range of second file"
-            },
-            requireNotNull(bRaw[1].toIntOrNull()) {
-                "Unable to parse range of second file"
-            },
-        )
+        val bStart = requireNotNull(bRaw[0].toIntOrNull()) {
+            "Unable to parse range of second file"
+        }
+        val bEnd = bStart + requireNotNull(bRaw[1].toIntOrNull()) {
+            "Unable to parse range of second file"
+        } - 1
+        val bRange = IntRange(bStart, bEnd)
         result.setHunkInfo(aRange, bRange)
 
 //        if (lineAfterHeader.isNotEmpty()) {
