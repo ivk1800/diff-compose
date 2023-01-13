@@ -66,6 +66,7 @@ internal class VcsDiffParser {
                             RawResult.RawHunk.Line.Type.NotChanged -> VcsHunkLine.Type.NotChanged
                             RawResult.RawHunk.Line.Type.Added -> VcsHunkLine.Type.Added
                             RawResult.RawHunk.Line.Type.Removed -> VcsHunkLine.Type.Removed
+                            RawResult.RawHunk.Line.Type.NoNewline -> VcsHunkLine.Type.NoNewline
                         }
                     )
                 }
@@ -177,7 +178,7 @@ internal class VcsDiffParser {
         result.addHunkLine(
             RawResult.RawHunk.Line(
                 type = when (lineChar) {
-                    '\\',
+                    '\\' -> RawResult.RawHunk.Line.Type.NoNewline
                     ' ' -> RawResult.RawHunk.Line.Type.NotChanged
 
                     '+' -> RawResult.RawHunk.Line.Type.Added
@@ -316,6 +317,7 @@ internal class VcsDiffParser {
                     NotChanged,
                     Added,
                     Removed,
+                    NoNewline,
                 }
             }
         }

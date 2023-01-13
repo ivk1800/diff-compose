@@ -17,6 +17,7 @@ data class Diff(
                 NotChanged,
                 Added,
                 Removed,
+                NoNewline,
             }
         }
     }

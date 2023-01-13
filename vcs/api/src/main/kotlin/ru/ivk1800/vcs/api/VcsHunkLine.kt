@@ -5,5 +5,6 @@ data class VcsHunkLine(val text: String, val type: Type) {
         NotChanged,
         Added,
         Removed,
+        NoNewline,
     }
 }

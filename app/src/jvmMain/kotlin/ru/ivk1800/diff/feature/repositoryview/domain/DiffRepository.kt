@@ -68,6 +68,7 @@ class DiffRepository(
                                 VcsHunkLine.Type.NotChanged -> Diff.Hunk.Line.Type.NotChanged
                                 VcsHunkLine.Type.Added -> Diff.Hunk.Line.Type.Added
                                 VcsHunkLine.Type.Removed -> Diff.Hunk.Line.Type.Removed
+                                VcsHunkLine.Type.NoNewline -> Diff.Hunk.Line.Type.NoNewline
                             }
                         )
                     }

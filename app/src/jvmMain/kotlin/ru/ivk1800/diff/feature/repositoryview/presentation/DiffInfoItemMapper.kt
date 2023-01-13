@@ -41,7 +41,9 @@ class DiffInfoItemMapper {
                             text = line.text,
                             type = when (line.type) {
                                 Diff.Hunk.Line.Type.NotChanged -> DiffInfoItem.Line.Type.NotChanged
-                                Diff.Hunk.Line.Type.Added -> DiffInfoItem.Line.Type.Added
+                                Diff.Hunk.Line.Type.NoNewline,
+                                Diff.Hunk.Line.Type.Added -> DiffInfoItem.Line.Type.NotChanged
+
                                 Diff.Hunk.Line.Type.Removed -> DiffInfoItem.Line.Type.Removed
                             }
                         )
