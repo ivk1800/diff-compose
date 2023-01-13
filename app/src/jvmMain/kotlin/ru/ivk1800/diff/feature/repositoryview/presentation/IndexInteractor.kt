@@ -3,7 +3,6 @@ package ru.ivk1800.diff.feature.repositoryview.presentation
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.IndexRepository
-import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.ext.getStartLineNumber
 import ru.ivk1800.vcs.git.VcsException
 import java.io.File
@@ -11,7 +10,6 @@ import java.io.File
 // TODO: move from presentation folder
 class IndexInteractor(
     private val repoDirectory: File,
-    private val objectRepository: ObjectRepository,
     private val fileRepository: FileRepository,
     private val indexRepository: IndexRepository,
 ) {
@@ -46,8 +44,7 @@ class IndexInteractor(
                 removeAt(line.first - 1)
             }
         }.joinToString(separator = System.lineSeparator())
-        val objectId = objectRepository.writeToDatabase(repoDirectory, contentForUnstage)
 
-        indexRepository.updateIndex(repoDirectory, fileName = fileName, id = objectId)
+        indexRepository.updateIndex(repoDirectory, fileName = fileName, content = contentForUnstage)
     }
 }

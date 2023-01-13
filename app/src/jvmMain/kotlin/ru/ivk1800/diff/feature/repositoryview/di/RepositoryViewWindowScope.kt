@@ -113,7 +113,6 @@ class RepositoryViewWindowScope(
     private val indexInteractor by lazy {
         IndexInteractor(
             repoDirectory = repoPath,
-            objectRepository = objectRepository,
             fileRepository = fileRepository,
             indexRepository = indexRepository,
         )
