@@ -132,6 +132,9 @@ class RepositoryViewViewModel(
                         text = errorTransformer.transformForDisplay(error),
                     )
                 )
+            } else {
+                uncommittedChangesInteractor.check()
+                diffInfoInteractor.refresh()
             }
         }
     }

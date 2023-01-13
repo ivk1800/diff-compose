@@ -18,24 +18,29 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DiffInfoInteractor(
+class DiffInfoInteractor internal constructor(
     private val repoDirectory: File,
     private val diffRepository: DiffRepository,
     private val commitsRepository: CommitsRepository,
     private val diffInfoItemMapper: DiffInfoItemMapper,
     private val errorTransformer: ErrorTransformer,
+    context: CoroutineContext,
 ) {
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
 
-    private val selectCommitEvent = MutableSharedFlow<Event>(extraBufferCapacity = 1)
+    private val eventsFlow = MutableSharedFlow<Event>()
+    private val refreshEventFlow = MutableSharedFlow<Unit>()
     private val selectedLines = MutableStateFlow<ImmutableSet<DiffInfoItem.Id.Line>>(persistentSetOf())
 
     private var rawDiff: Diff? = null
@@ -43,15 +48,36 @@ class DiffInfoInteractor(
     val state: StateFlow<DiffInfoState>
         get() = _state
 
+    constructor(
+        repoDirectory: File,
+        diffRepository: DiffRepository,
+        commitsRepository: CommitsRepository,
+        diffInfoItemMapper: DiffInfoItemMapper,
+        errorTransformer: ErrorTransformer,
+    ) : this(
+        repoDirectory,
+        diffRepository,
+        commitsRepository,
+        diffInfoItemMapper,
+        errorTransformer,
+        Dispatchers.Main,
+    )
+
     init {
-        selectCommitEvent
+        eventsFlow
             .onEach {
                 rawDiff = null
             }
             .flatMapLatest { event ->
                 when (event) {
-                    is Event.DiffSelected -> handleDiffSelectedEvent(event)
-                    is Event.FileSelected -> handleFileSelectedEvent(event)
+                    is Event.DiffSelected -> refreshEventFlow
+                        .onStart { emit(Unit) }
+                        .flatMapLatest { handleDiffSelectedEvent(event) }
+
+                    is Event.FileSelected -> refreshEventFlow
+                        .onStart { emit(Unit) }
+                        .flatMapLatest { handleFileSelectedEvent(event) }
+
                     Event.Unselected -> flowOf(DiffInfoState.None)
                 }
                     .catch { error ->
@@ -68,15 +94,19 @@ class DiffInfoInteractor(
     }
 
     fun onFileSelected(commitHash: String, path: String) {
-        selectCommitEvent.tryEmit(Event.FileSelected(commitHash = commitHash, path = path))
+        scope.launch { eventsFlow.emit(Event.FileSelected(commitHash = commitHash, path = path)) }
     }
 
     fun selectUncommittedFiles(fileName: String, type: UncommittedChangesType) {
-        selectCommitEvent.tryEmit(Event.DiffSelected(fileName, type))
+        scope.launch { eventsFlow.emit(Event.DiffSelected(fileName, type)) }
+    }
+
+    fun refresh() {
+        scope.launch { refreshEventFlow.emit(Unit) }
     }
 
     fun unselect() {
-        selectCommitEvent.tryEmit(Event.Unselected)
+        scope.launch { eventsFlow.emit(Event.Unselected) }
     }
 
     fun selectLines(lines: ImmutableSet<DiffInfoItem.Id.Line>) {

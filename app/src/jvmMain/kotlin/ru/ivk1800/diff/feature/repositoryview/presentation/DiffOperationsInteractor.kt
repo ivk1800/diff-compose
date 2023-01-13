@@ -1,11 +1,16 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 // TODO: move from presentation folder
@@ -34,7 +39,7 @@ class DiffOperationsInteractor internal constructor(
         scope.cancel()
     }
 
-    private suspend fun unstageHunkInternal(hunkId: DiffInfoItem.Id.Hunk) {
+    private suspend fun unstageHunkInternal(hunkId: DiffInfoItem.Id.Hunk) = withContext(scope.coroutineContext) {
         val file = when (val filesState = filesInfoInteractor.state.value) {
             is FilesInfoState.Commit -> when (filesState.state) {
                 is CommitInfoState.Content -> filesState.state.files.first()
@@ -58,12 +63,10 @@ class DiffOperationsInteractor internal constructor(
             "Unable to unstage hunk, because diff not found"
         }
 
-        scope.launch {
-            val result = indexInteractor.removeFromIndex(file.id.path, hunk, diffId)
-            val error = result.exceptionOrNull()
-            if (error != null) {
-                throw error
-            }
+        val result = indexInteractor.removeFromIndex(file.id.path, hunk, diffId)
+        val error = result.exceptionOrNull()
+        if (error != null) {
+            throw error
         }
     }
 }
