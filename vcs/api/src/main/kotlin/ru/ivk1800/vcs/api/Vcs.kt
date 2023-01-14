@@ -1,6 +1,7 @@
 package ru.ivk1800.vcs.api
 
 import ru.ivk1800.vcs.api.command.DiffCommand
+import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
@@ -41,6 +42,8 @@ interface Vcs {
     suspend fun getShowCommand(directory: Path, options: ShowCommand.Options): ShowCommand
 
     suspend fun getUpdateIndexCommand(directory: Path, options: UpdateIndexCommand.Options): UpdateIndexCommand
+
+    suspend fun getDiscardCommand(directory: Path, options: DiscardCommand.Options): DiscardCommand
 
     suspend fun getUntrackedFilesCommand(directory: Path): GetUntrackedFilesCommand
 

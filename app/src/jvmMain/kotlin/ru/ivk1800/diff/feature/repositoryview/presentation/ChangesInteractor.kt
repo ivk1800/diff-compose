@@ -1,18 +1,18 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
+import ru.ivk1800.diff.feature.repositoryview.domain.ChangesRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
-import ru.ivk1800.diff.feature.repositoryview.domain.IndexRepository
 import ru.ivk1800.vcs.git.VcsException
 import java.io.File
 
 // TODO: move from presentation folder
-class IndexInteractor(
+class ChangesInteractor(
     private val repoDirectory: File,
     private val fileRepository: FileRepository,
     private val diffRepository: DiffRepository,
-    private val indexRepository: IndexRepository,
+    private val changesRepository: ChangesRepository,
 ) {
 
     suspend fun removeFromIndex(fileName: String, hunk: Diff.Hunk): Result<Unit> =
@@ -28,13 +28,35 @@ class IndexInteractor(
             )
         }
 
+    suspend fun discard(fileName: String, hunk: Diff.Hunk): Result<Unit> =
+        try {
+            Result.success(discardInternal(fileName, hunk))
+        } catch (error: Throwable) {
+            Result.failure(
+                // TODO
+                VcsException.ParseException(
+                    message = "An error occurred while discard hunk",
+                    cause = error,
+                )
+            )
+        }
+
+    private suspend fun discardInternal(fileName: String, hunk: Diff.Hunk) {
+        val diff: Diff = diffRepository.getUnstagedFileDiff(repoDirectory, fileName)
+        val fileContent: List<Diff.Hunk.Line> = getFileLines(fileName)
+
+        val actualContent = removeHunk(fileContent, diff, hunk)
+            .joinToString(separator = System.lineSeparator()) { it.text }
+        changesRepository.discard(repoDirectory, fileName = fileName, content = actualContent)
+    }
+
     private suspend fun removeFromIndexInternal(fileName: String, hunk: Diff.Hunk) {
         val diff: Diff = diffRepository.getStagedFileDiff(repoDirectory, fileName)
         val fileContent: List<Diff.Hunk.Line> = getFileLines(fileName)
 
         val contentForUnstage = removeHunk(fileContent, diff, hunk)
             .joinToString(separator = System.lineSeparator()) { it.text }
-        indexRepository.updateIndex(repoDirectory, fileName = fileName, content = contentForUnstage)
+        changesRepository.updateIndex(repoDirectory, fileName = fileName, content = contentForUnstage)
     }
 
     private fun removeHunk(

@@ -2,13 +2,14 @@ package ru.ivk1800.diff.feature.repositoryview.di
 
 import ru.ivk1800.diff.feature.repositoryview.RepositoryId
 import ru.ivk1800.diff.feature.repositoryview.RepositoryViewDependencies
+import ru.ivk1800.diff.feature.repositoryview.domain.ChangesRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
-import ru.ivk1800.diff.feature.repositoryview.domain.IndexRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.ChangesInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
@@ -18,7 +19,6 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffOperationsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.IndexInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
@@ -65,8 +65,8 @@ class RepositoryViewWindowScope(
         )
     }
 
-    private val indexRepository by lazy {
-        IndexRepository(
+    private val changesRepository by lazy {
+        ChangesRepository(
             vcs = dependencies.vcs,
         )
     }
@@ -85,7 +85,7 @@ class RepositoryViewWindowScope(
         DiffOperationsInteractor(
             filesInfoInteractor,
             diffInfoInteractor,
-            indexInteractor,
+            changesInteractor,
         )
     }
 
@@ -110,12 +110,12 @@ class RepositoryViewWindowScope(
         )
     }
 
-    private val indexInteractor by lazy {
-        IndexInteractor(
+    private val changesInteractor by lazy {
+        ChangesInteractor(
             repoDirectory = repoPath,
             fileRepository = fileRepository,
             diffRepository = diffRepository,
-            indexRepository = indexRepository,
+            changesRepository = changesRepository,
         )
     }
 

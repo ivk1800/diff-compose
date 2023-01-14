@@ -17,7 +17,7 @@ class DiffOperationsInteractorTest {
     lateinit var mockDiffInfoInteractor: DiffInfoInteractor
 
     @RelaxedMockK
-    lateinit var mockIndexInteractor: IndexInteractor
+    lateinit var mockChangesInteractor: ChangesInteractor
 
     @Before
     fun before() {
@@ -36,7 +36,7 @@ class DiffOperationsInteractorTest {
             return DiffOperationsInteractor(
                 filesInfoInteractor = mockFilesInfoInteractor,
                 diffInfoInteractor = mockDiffInfoInteractor,
-                indexInteractor = mockIndexInteractor,
+                changesInteractor = mockChangesInteractor,
                 context = requireNotNull(context),
             )
         }

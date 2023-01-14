@@ -104,7 +104,12 @@ fun DiffListView(
                                     ),
                                 )
 
-                            DiffInfoItem.HunkHeader.Action.DiscardHunk -> Unit
+                            DiffInfoItem.HunkHeader.Action.DiscardHunk ->
+                                onEvent.invoke(
+                                    RepositoryViewEvent.Diff.OnDiscardHunk(
+                                        hunkId = item.id,
+                                    ),
+                                )
                             DiffInfoItem.HunkHeader.Action.DiscardLines -> Unit
                             DiffInfoItem.HunkHeader.Action.StageLines -> Unit
                             DiffInfoItem.HunkHeader.Action.UnstageLines -> Unit

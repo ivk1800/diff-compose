@@ -10,7 +10,10 @@ import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 
-class UpdateIndexCommandImpl(private val directory: Path, options: Options) : UpdateIndexCommand(options) {
+internal class UpdateIndexCommandImpl(
+    private val directory: Path,
+    options: Options,
+) : UpdateIndexCommand(options) {
     override suspend fun run() = withContext(Dispatchers.IO) {
         val hashObjectProcess = createProcess(directory, "git hash-object -w --stdin")
 

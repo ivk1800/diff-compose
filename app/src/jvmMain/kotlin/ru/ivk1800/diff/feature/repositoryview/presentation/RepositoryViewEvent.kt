@@ -38,6 +38,9 @@ sealed interface RepositoryViewEvent {
 
     sealed interface Diff: RepositoryViewEvent {
         data class OnLinesSelected(val ids: ImmutableSet<DiffInfoItem.Id.Line>): Diff
+
         data class OnUnstageHunk(val hunkId: DiffInfoItem.Id.Hunk): Diff
+
+        data class OnDiscardHunk(val hunkId: DiffInfoItem.Id.Hunk): Diff
     }
 }

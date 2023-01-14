@@ -103,6 +103,7 @@ class RepositoryViewViewModel(
                         selectionCoordinator.selectDiffLines(value.ids)
 
                     is RepositoryViewEvent.Diff.OnUnstageHunk -> onUnstageHunk(value)
+                    is RepositoryViewEvent.Diff.OnDiscardHunk -> onDiscardHunk(value)
                 }
             }
         }
@@ -138,4 +139,23 @@ class RepositoryViewViewModel(
             }
         }
     }
+
+    private fun onDiscardHunk(event: RepositoryViewEvent.Diff.OnDiscardHunk) {
+        viewModelScope.launch {
+            val result = diffOperationsInteractor.discardHunk(event.hunkId)
+            val error = result.exceptionOrNull()
+            if (error != null) {
+                dialogRouter.show(
+                    DialogRouter.Dialog(
+                        title = "Error",
+                        text = errorTransformer.transformForDisplay(error),
+                    )
+                )
+            } else {
+                uncommittedChangesInteractor.check()
+                diffInfoInteractor.refresh()
+            }
+        }
+    }
+
 }
