@@ -5,6 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import ru.ivk1800.diff.feature.repositoryview.presentation.event.HistoryEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.event.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
@@ -51,17 +53,23 @@ class RepositoryViewEventHandler internal constructor(
         Dispatchers.Main,
     )
 
-    fun onHistoryEvent(value: HistoryEvent) {
+    fun onEvent(value: RepositoryViewEvent) {
         when (value) {
-            HistoryEvent.OnReload -> {
+            RepositoryViewEvent.OnReload -> {
                 commitInfoInteractor.selectCommit(null)
                 diffInfoInteractor.unselect()
                 commitsTableInteractor.reload()
                 uncommittedChangesInteractor.check()
             }
 
-            HistoryEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
-            HistoryEvent.OpenFinder -> router.toFinder(repositoryDirectory)
+            RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
+            RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
+        }
+    }
+
+    fun onHistoryEvent(value: HistoryEvent) {
+        when (value) {
+
             is HistoryEvent.OnCommitsSelected -> {
                 selectionCoordinator.selectCommits(value.items)
             }

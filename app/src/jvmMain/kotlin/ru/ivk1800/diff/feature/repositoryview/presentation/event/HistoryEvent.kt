@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.event
 
 import kotlinx.collections.immutable.ImmutableSet
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
@@ -6,12 +6,6 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 
 sealed interface HistoryEvent {
-    object OnReload : HistoryEvent
-
-    object OpenTerminal : HistoryEvent
-
-    object OpenFinder : HistoryEvent
-
     data class OnCommitsSelected(val items: ImmutableSet<CommitTableItem.Id.Commit>) : HistoryEvent
 
     object OnCommitsUnselected : HistoryEvent

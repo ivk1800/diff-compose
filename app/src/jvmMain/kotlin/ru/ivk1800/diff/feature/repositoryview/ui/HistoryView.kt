@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.toImmutableSet
-import ru.ivk1800.diff.feature.repositoryview.presentation.HistoryEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.event.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
