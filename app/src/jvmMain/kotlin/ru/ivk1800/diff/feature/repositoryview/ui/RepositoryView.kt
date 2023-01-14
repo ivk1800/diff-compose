@@ -17,20 +17,18 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.toImmutableSet
-import ru.ivk1800.diff.MR
-import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
-import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
 
 @Composable
-fun RepositoryView(
-    state: RepositoryViewState,
+fun HistoryView(
+    state: HistoryState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
 ) =
     Scaffold(
@@ -62,7 +60,7 @@ fun RepositoryView(
 
 @Composable
 private fun BottomHorizontalPanes(
-    state: RepositoryViewState,
+    state: HistoryState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
 ) =
     DraggableTwoPanes(

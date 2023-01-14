@@ -11,6 +11,7 @@ import org.junit.Test
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 import kotlin.test.assertTrue

@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 
 class CommitsTableInteractor(
     private val commitsInteractor: CommitsInteractor,

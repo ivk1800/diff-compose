@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 import kotlin.coroutines.CoroutineContext
 
 class SelectionCoordinator internal constructor(

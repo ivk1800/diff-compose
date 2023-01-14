@@ -22,9 +22,9 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescription
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 
 @Composable

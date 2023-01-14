@@ -30,9 +30,9 @@ import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.application.ApplicationTheme
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
-import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 

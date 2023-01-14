@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.onStart
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)

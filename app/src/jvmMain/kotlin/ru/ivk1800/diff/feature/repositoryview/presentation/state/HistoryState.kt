@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.state
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
@@ -10,7 +10,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 
 @Immutable
-data class RepositoryViewState(
+data class HistoryState(
     val commitsTableState: CommitsTableState,
     val diffInfoState: DiffInfoState,
     val filesInfoState: FilesInfoState,

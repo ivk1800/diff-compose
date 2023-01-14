@@ -1,38 +1,39 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryStateComposer
 import ru.ivk1800.diff.presentation.BaseViewModel
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 
 class RepositoryViewViewModel(
-    private val diffInfoInteractor: DiffInfoInteractor,
-    private val commitsTableInteractor: CommitsTableInteractor,
     private val dialogRouter: DialogRouter,
-    private val filesInfoInteractor: FilesInfoInteractor,
     private val errorTransformer: ErrorTransformer,
     private val repositoryViewEventHandler: RepositoryViewEventHandler,
+    historyStateComposer: HistoryStateComposer,
     uncommittedChangesInteractor: UncommittedChangesInteractor,
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(
-        RepositoryViewState(
+        HistoryState(
             commitsTableState = CommitsTableState.Loading,
             diffInfoState = DiffInfoState.None,
             filesInfoState = FilesInfoState.None,
         )
     )
-    val state: StateFlow<RepositoryViewState>
+    val state: StateFlow<HistoryState>
         get() = _state
 
     init {
         uncommittedChangesInteractor.check()
-        getStateFlow()
+        historyStateComposer.getState(viewModelScope)
             .onEach { newState -> _state.value = newState }
             .launchIn(viewModelScope)
 
@@ -49,17 +50,4 @@ class RepositoryViewViewModel(
     }
 
     fun onEvent(value: RepositoryViewEvent) { repositoryViewEventHandler.onEvent(value) }
-
-    private fun getStateFlow(): Flow<RepositoryViewState> =
-        combine(
-            filesInfoInteractor.state,
-            commitsTableInteractor.state,
-            diffInfoInteractor.state,
-        ) { activeState, commitsTableState, diffInfoState ->
-            RepositoryViewState(
-                commitsTableState = commitsTableState,
-                diffInfoState = diffInfoState,
-                filesInfoState = activeState,
-            )
-        }
 }

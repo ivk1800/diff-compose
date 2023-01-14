@@ -29,6 +29,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.helper.UncommittedChangesNextSelectionHelper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 

@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 
 class FilesInfoInteractor(
     private val commitInfoInteractor: CommitInfoInteractor,

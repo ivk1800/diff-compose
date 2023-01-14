@@ -24,6 +24,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 import kotlin.coroutines.CoroutineContext

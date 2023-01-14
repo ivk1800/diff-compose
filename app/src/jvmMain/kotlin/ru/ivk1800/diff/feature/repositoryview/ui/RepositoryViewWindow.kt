@@ -40,7 +40,7 @@ fun RepositoryViewWindow() {
     ) {
 
         val state by viewModel.state.collectAsState()
-        RepositoryView(state, onEvent = viewModel::onEvent)
+        HistoryView(state, onEvent = viewModel::onEvent)
 
         val currentDialog by scope.dialogManager.currentDialog.collectAsState()
 

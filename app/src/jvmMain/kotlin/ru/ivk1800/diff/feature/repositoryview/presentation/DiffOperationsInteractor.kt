@@ -9,6 +9,9 @@ import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
 import kotlin.coroutines.CoroutineContext
 
 // TODO: move from presentation folder

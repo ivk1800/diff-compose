@@ -31,10 +31,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.MR
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitLabel
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 

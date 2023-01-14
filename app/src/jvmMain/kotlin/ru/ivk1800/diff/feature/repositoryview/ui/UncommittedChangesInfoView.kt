@@ -36,9 +36,9 @@ import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.compose.LocalDiffTheme
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
-import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesState
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedListState
 import ru.ivk1800.diff.ui.compose.onKeyDownEvent
 
