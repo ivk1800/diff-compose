@@ -24,7 +24,8 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryStateComposer
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.HistoryStateComposer
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.RepositoryViewStateComposer
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import ru.ivk1800.diff.window.DialogManager
@@ -171,6 +172,12 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val repositoryViewStateComposer by lazy {
+        RepositoryViewStateComposer(
+            historyStateComposer,
+        )
+    }
+
     private val repositoryViewEventHandler by lazy {
         RepositoryViewEventHandler(
             repositoryDirectory = repoPath,
@@ -200,7 +207,7 @@ class RepositoryViewWindowScope(
                 }
             },
             repositoryViewEventHandler = repositoryViewEventHandler,
-            historyStateComposer = historyStateComposer,
+            repositoryViewStateComposer = repositoryViewStateComposer,
         )
     }
 

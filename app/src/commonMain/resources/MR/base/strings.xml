@@ -17,4 +17,7 @@
     <string name="unstage_selected">Unstage selected</string>
     <string name="stage_all">Stage all</string>
     <string name="stage_selected">Stage selected</string>
+    <string name="workspace_title">Workspace</string>
+    <string name="workspace_file_status">File status</string>
+    <string name="workspace_history">History</string>
 </resources>

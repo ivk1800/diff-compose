@@ -1,18 +1,17 @@
 package ru.ivk1800.diff.feature.repositoryview.ui
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
-import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.RepositoryViewState
 
 @Composable
 fun RepositoryView(
     modifier: Modifier = Modifier,
-    state: HistoryState,
+    state: RepositoryViewState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
 ) =
     Scaffold(
@@ -24,7 +23,7 @@ fun RepositoryView(
 
 @Composable
 private fun Body(
-    state: HistoryState,
+    state: RepositoryViewState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
 ) =
     DraggableTwoPanes(
@@ -32,12 +31,13 @@ private fun Body(
         orientation = Orientation.Horizontal,
         percent = 15F,
     ) {
-        Box(
+        SidePanel(
             modifier = Modifier.fillMaxSize(),
+            state.sidePanelState,
         )
         HistoryView(
             modifier = Modifier.fillMaxSize(),
-            state,
+            state.historyState,
             onEvent,
         )
     }
