@@ -5,23 +5,18 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.toImmutableSet
-import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
@@ -30,7 +25,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
 fun HistoryView(
     modifier: Modifier = Modifier,
     state: HistoryState,
-    onEvent: (value: RepositoryViewEvent) -> Unit,
+    onEvent: (value: HistoryEvent) -> Unit,
 ) =
     Column(modifier = modifier) {
         TopSections()
@@ -43,13 +38,13 @@ fun HistoryView(
                 state = state.commitsTableState,
                 onItemsSelected = { items ->
                     if (items.size == 1 && items.first() is CommitTableItem.Id.UncommittedChanges) {
-                        onEvent.invoke(RepositoryViewEvent.OnUncommittedChangesSelected)
+                        onEvent.invoke(HistoryEvent.OnUncommittedChangesSelected)
                     } else {
                         val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().toImmutableSet()
-                        onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
+                        onEvent.invoke(HistoryEvent.OnCommitsSelected(ids))
                     }
                 },
-                onLoadMore = { onEvent.invoke(RepositoryViewEvent.OnLoadMoreCommits) }
+                onLoadMore = { onEvent.invoke(HistoryEvent.OnLoadMoreCommits) }
             )
             BottomHorizontalPanes(state, onEvent)
         }
@@ -59,7 +54,7 @@ fun HistoryView(
 @Composable
 private fun BottomHorizontalPanes(
     state: HistoryState,
-    onEvent: (value: RepositoryViewEvent) -> Unit,
+    onEvent: (value: HistoryEvent) -> Unit,
 ) =
     DraggableTwoPanes(
         orientation = Orientation.Horizontal,
@@ -84,7 +79,7 @@ private fun BottomHorizontalPanes(
 @Composable
 private fun UncommittedChangesInfoPane(
     filesInfoState: FilesInfoState.UncommittedChanges,
-    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+    onEvent: (value: HistoryEvent.UncommittedChanges) -> Unit,
 ) =
     UncommittedChangesInfoView(
         modifier = Modifier.fillMaxSize(),
@@ -95,13 +90,13 @@ private fun UncommittedChangesInfoPane(
 @Composable
 private fun CommitInfoPage(
     filesInfoState: FilesInfoState.Commit,
-    onEvent: (value: RepositoryViewEvent) -> Unit
+    onEvent: (value: HistoryEvent) -> Unit
 ) =
     CommitInfoView(
         modifier = Modifier.fillMaxSize(),
         state = filesInfoState.state,
         onFilesSelected = { event ->
-            onEvent.invoke(RepositoryViewEvent.OnFilesSelected(event))
+            onEvent.invoke(HistoryEvent.OnFilesSelected(event))
         }
     )
 

@@ -5,14 +5,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.RepositoryViewState
 
 @Composable
 fun RepositoryView(
     modifier: Modifier = Modifier,
     state: RepositoryViewState,
-    onEvent: (value: RepositoryViewEvent) -> Unit,
+    onEvent: (value: HistoryEvent) -> Unit,
 ) =
     Scaffold(
         modifier = modifier,
@@ -24,7 +24,7 @@ fun RepositoryView(
 @Composable
 private fun Body(
     state: RepositoryViewState,
-    onEvent: (value: RepositoryViewEvent) -> Unit,
+    onEvent: (value: HistoryEvent) -> Unit,
 ) =
     DraggableTwoPanes(
         modifier = Modifier,

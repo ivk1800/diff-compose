@@ -44,5 +44,5 @@ class RepositoryViewViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun onEvent(value: RepositoryViewEvent) { repositoryViewEventHandler.onEvent(value) }
+    fun onEvent(value: HistoryEvent) { repositoryViewEventHandler.onHistoryEvent(value) }
 }

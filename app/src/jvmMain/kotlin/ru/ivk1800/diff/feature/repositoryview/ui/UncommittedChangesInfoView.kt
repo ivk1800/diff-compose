@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.compose.LocalDiffTheme
-import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
@@ -46,7 +46,7 @@ import ru.ivk1800.diff.ui.compose.onKeyDownEvent
 fun UncommittedChangesInfoView(
     modifier: Modifier = Modifier,
     state: UncommittedChangesState,
-    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+    onEvent: (value: HistoryEvent.UncommittedChanges) -> Unit,
 ) =
     DraggableTwoPanes(
         modifier = modifier
@@ -67,14 +67,14 @@ fun UncommittedChangesInfoView(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun UnstagedFilesPane(
-    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+    onEvent: (value: HistoryEvent.UncommittedChanges) -> Unit,
     state: UncommittedChangesState.Content.Unstaged,
 ) {
     val currentOnEvent by rememberUpdatedState(onEvent)
     FilesPane(
         modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
             onEvent.invoke(
-                RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(
+                HistoryEvent.UncommittedChanges.OnAddFilesToStaged(
                     ids = state.selected,
                 )
             )
@@ -86,13 +86,13 @@ private fun UnstagedFilesPane(
         selected = state.selected,
         vcsProcess = state.vcsProcess,
         onSelected = { files ->
-            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
+            currentOnEvent.invoke(HistoryEvent.UncommittedChanges.OnUnstatedFilesSelected(files))
         },
         onStageAll = {
-            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged)
+            onEvent.invoke(HistoryEvent.UncommittedChanges.OnAddAllToStaged)
         },
         onStageSelected = {
-            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged(state.selected))
+            onEvent.invoke(HistoryEvent.UncommittedChanges.OnAddFilesToStaged(state.selected))
         },
     )
 }
@@ -100,14 +100,14 @@ private fun UnstagedFilesPane(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun StagedFilesPane(
-    onEvent: (value: RepositoryViewEvent.UncommittedChanges) -> Unit,
+    onEvent: (value: HistoryEvent.UncommittedChanges) -> Unit,
     state: UncommittedChangesState.Content.Staged,
 ) {
     val currentOnEvent by rememberUpdatedState(onEvent)
     FilesPane(
         modifier = Modifier.onKeyDownEvent(key = Key.Spacebar) {
             onEvent.invoke(
-                RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(
+                HistoryEvent.UncommittedChanges.OnRemoveFilesFromStaged(
                     ids = state.selected,
                 )
             )
@@ -119,13 +119,13 @@ private fun StagedFilesPane(
         selected = state.selected,
         vcsProcess = state.vcsProcess,
         onSelected = { files ->
-            currentOnEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected(files))
+            currentOnEvent.invoke(HistoryEvent.UncommittedChanges.OnStatedFilesSelected(files))
         },
         onStageAll = {
-            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged)
+            onEvent.invoke(HistoryEvent.UncommittedChanges.OnRemoveAllFromStaged)
         },
         onStageSelected = {
-            onEvent.invoke(RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged(state.selected))
+            onEvent.invoke(HistoryEvent.UncommittedChanges.OnRemoveFilesFromStaged(state.selected))
         },
     )
 }

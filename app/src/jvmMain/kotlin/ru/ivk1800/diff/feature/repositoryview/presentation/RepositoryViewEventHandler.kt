@@ -51,56 +51,56 @@ class RepositoryViewEventHandler internal constructor(
         Dispatchers.Main,
     )
 
-    fun onEvent(value: RepositoryViewEvent) {
+    fun onHistoryEvent(value: HistoryEvent) {
         when (value) {
-            RepositoryViewEvent.OnReload -> {
+            HistoryEvent.OnReload -> {
                 commitInfoInteractor.selectCommit(null)
                 diffInfoInteractor.unselect()
                 commitsTableInteractor.reload()
                 uncommittedChangesInteractor.check()
             }
 
-            RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
-            RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
-            is RepositoryViewEvent.OnCommitsSelected -> {
+            HistoryEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
+            HistoryEvent.OpenFinder -> router.toFinder(repositoryDirectory)
+            is HistoryEvent.OnCommitsSelected -> {
                 selectionCoordinator.selectCommits(value.items)
             }
 
-            RepositoryViewEvent.OnCommitsUnselected -> commitInfoInteractor.selectCommit(null)
-            is RepositoryViewEvent.OnFilesSelected ->
+            HistoryEvent.OnCommitsUnselected -> commitInfoInteractor.selectCommit(null)
+            is HistoryEvent.OnFilesSelected ->
                 selectionCoordinator.selectCommitFiles(value.items)
 
-            RepositoryViewEvent.OnLoadMoreCommits -> commitsTableInteractor.loadMore()
-            RepositoryViewEvent.OnUncommittedChangesSelected -> selectionCoordinator.selectUncommittedChanges()
+            HistoryEvent.OnLoadMoreCommits -> commitsTableInteractor.loadMore()
+            HistoryEvent.OnUncommittedChangesSelected -> selectionCoordinator.selectUncommittedChanges()
 
-            is RepositoryViewEvent.UncommittedChanges ->
+            is HistoryEvent.UncommittedChanges ->
                 when (value) {
-                    RepositoryViewEvent.UncommittedChanges.OnAddAllToStaged ->
+                    HistoryEvent.UncommittedChanges.OnAddAllToStaged ->
                         uncommittedChangesInteractor.addAllToStaged()
 
-                    RepositoryViewEvent.UncommittedChanges.OnRemoveAllFromStaged ->
+                    HistoryEvent.UncommittedChanges.OnRemoveAllFromStaged ->
                         uncommittedChangesInteractor.removeAllFromStaged()
 
-                    is RepositoryViewEvent.UncommittedChanges.OnAddFilesToStaged ->
+                    is HistoryEvent.UncommittedChanges.OnAddFilesToStaged ->
                         uncommittedChangesInteractor.addFilesToStaged(value.ids)
 
-                    is RepositoryViewEvent.UncommittedChanges.OnRemoveFilesFromStaged ->
+                    is HistoryEvent.UncommittedChanges.OnRemoveFilesFromStaged ->
                         uncommittedChangesInteractor.removeFilesFromStaged(value.ids)
 
-                    is RepositoryViewEvent.UncommittedChanges.OnStatedFilesSelected ->
+                    is HistoryEvent.UncommittedChanges.OnStatedFilesSelected ->
                         selectionCoordinator.selectStatedFiles(value.items)
 
-                    is RepositoryViewEvent.UncommittedChanges.OnUnstatedFilesSelected ->
+                    is HistoryEvent.UncommittedChanges.OnUnstatedFilesSelected ->
                         selectionCoordinator.selectUnstatedFiles(value.items)
                 }
 
-            is RepositoryViewEvent.Diff -> {
+            is HistoryEvent.Diff -> {
                 when (value) {
-                    is RepositoryViewEvent.Diff.OnLinesSelected ->
+                    is HistoryEvent.Diff.OnLinesSelected ->
                         selectionCoordinator.selectDiffLines(value.ids)
 
-                    is RepositoryViewEvent.Diff.OnUnstageHunk -> onUnstageHunk(value)
-                    is RepositoryViewEvent.Diff.OnDiscardHunk -> onDiscardHunk(value)
+                    is HistoryEvent.Diff.OnUnstageHunk -> onUnstageHunk(value)
+                    is HistoryEvent.Diff.OnDiscardHunk -> onDiscardHunk(value)
                 }
             }
         }
@@ -110,7 +110,7 @@ class RepositoryViewEventHandler internal constructor(
         scope.cancel()
     }
 
-    private fun onUnstageHunk(event: RepositoryViewEvent.Diff.OnUnstageHunk) {
+    private fun onUnstageHunk(event: HistoryEvent.Diff.OnUnstageHunk) {
         scope.launch {
             val result = diffOperationsInteractor.unstageHunk(event.hunkId)
             val error = result.exceptionOrNull()
@@ -128,7 +128,7 @@ class RepositoryViewEventHandler internal constructor(
         }
     }
 
-    private fun onDiscardHunk(event: RepositoryViewEvent.Diff.OnDiscardHunk) {
+    private fun onDiscardHunk(event: HistoryEvent.Diff.OnDiscardHunk) {
         dialogRouter.show(
             DialogRouter.Dialog.Confirmation(
                 title = "Confirm discard changes?",

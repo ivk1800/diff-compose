@@ -30,7 +30,7 @@ import ru.ivk1800.diff.MR
 import ru.ivk1800.diff.application.ApplicationTheme
 import ru.ivk1800.diff.compose.DiffTheme
 import ru.ivk1800.diff.compose.LocalDiffTheme
-import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
@@ -40,7 +40,7 @@ import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedL
 fun DiffInfoView(
     modifier: Modifier = Modifier,
     state: DiffInfoState,
-    onEvent: (value: RepositoryViewEvent.Diff) -> Unit,
+    onEvent: (value: HistoryEvent.Diff) -> Unit,
 ) = Box(modifier = modifier) {
     when (state) {
         is DiffInfoState.Content -> DiffListView(
@@ -59,7 +59,7 @@ fun DiffListView(
     modifier: Modifier = Modifier,
     items: ImmutableList<DiffInfoItem>,
     selected: ImmutableSet<DiffInfoItem.Id.Line>,
-    onEvent: (value: RepositoryViewEvent.Diff) -> Unit,
+    onEvent: (value: HistoryEvent.Diff) -> Unit,
 ) {
     val currentSelected by rememberUpdatedState(selected)
     val currentItems by rememberUpdatedState(items)
@@ -67,7 +67,7 @@ fun DiffListView(
     val selectableListState = rememberSelectedListState(
         onSelect = { selectedItems ->
             currentOnEvent.invoke(
-                RepositoryViewEvent.Diff.OnLinesSelected(
+                HistoryEvent.Diff.OnLinesSelected(
                     selectedItems.filterIsInstance<DiffInfoItem.Id.Line>().toImmutableSet()
                 )
             )
@@ -99,14 +99,14 @@ fun DiffListView(
                             DiffInfoItem.HunkHeader.Action.StageHunk -> Unit
                             DiffInfoItem.HunkHeader.Action.UnstageHunk ->
                                 onEvent.invoke(
-                                    RepositoryViewEvent.Diff.OnUnstageHunk(
+                                    HistoryEvent.Diff.OnUnstageHunk(
                                         hunkId = item.id,
                                     ),
                                 )
 
                             DiffInfoItem.HunkHeader.Action.DiscardHunk ->
                                 onEvent.invoke(
-                                    RepositoryViewEvent.Diff.OnDiscardHunk(
+                                    HistoryEvent.Diff.OnDiscardHunk(
                                         hunkId = item.id,
                                     ),
                                 )

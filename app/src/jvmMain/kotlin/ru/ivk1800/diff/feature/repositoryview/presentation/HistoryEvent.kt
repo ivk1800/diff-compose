@@ -5,24 +5,24 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 
-sealed interface RepositoryViewEvent {
-    object OnReload : RepositoryViewEvent
+sealed interface HistoryEvent {
+    object OnReload : HistoryEvent
 
-    object OpenTerminal : RepositoryViewEvent
+    object OpenTerminal : HistoryEvent
 
-    object OpenFinder : RepositoryViewEvent
+    object OpenFinder : HistoryEvent
 
-    data class OnCommitsSelected(val items: ImmutableSet<CommitTableItem.Id.Commit>) : RepositoryViewEvent
+    data class OnCommitsSelected(val items: ImmutableSet<CommitTableItem.Id.Commit>) : HistoryEvent
 
-    object OnCommitsUnselected : RepositoryViewEvent
+    object OnCommitsUnselected : HistoryEvent
 
-    data class OnFilesSelected(val items: ImmutableSet<CommitFileId>) : RepositoryViewEvent
+    data class OnFilesSelected(val items: ImmutableSet<CommitFileId>) : HistoryEvent
 
-    object OnLoadMoreCommits : RepositoryViewEvent
+    object OnLoadMoreCommits : HistoryEvent
 
-    object OnUncommittedChangesSelected : RepositoryViewEvent
+    object OnUncommittedChangesSelected : HistoryEvent
 
-    sealed interface UncommittedChanges : RepositoryViewEvent {
+    sealed interface UncommittedChanges : HistoryEvent {
         object OnRemoveAllFromStaged : UncommittedChanges
 
         object OnAddAllToStaged : UncommittedChanges
@@ -36,7 +36,7 @@ sealed interface RepositoryViewEvent {
         data class OnUnstatedFilesSelected(val items: ImmutableSet<CommitFileId>) : UncommittedChanges
     }
 
-    sealed interface Diff: RepositoryViewEvent {
+    sealed interface Diff: HistoryEvent {
         data class OnLinesSelected(val ids: ImmutableSet<DiffInfoItem.Id.Line>): Diff
 
         data class OnUnstageHunk(val hunkId: DiffInfoItem.Id.Hunk): Diff
