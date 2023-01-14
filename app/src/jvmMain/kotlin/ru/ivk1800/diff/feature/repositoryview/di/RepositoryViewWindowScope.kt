@@ -19,6 +19,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.DiffOperationsInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEventHandler
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
@@ -160,12 +161,11 @@ class RepositoryViewWindowScope(
         ErrorTransformer()
     }
 
-    val repositoryViewViewModel: RepositoryViewViewModel by lazy {
-        RepositoryViewViewModel(
+    private val repositoryViewEventHandler by lazy {
+        RepositoryViewEventHandler(
             repositoryDirectory = repoPath,
             commitInfoInteractor = commitInfoInteractor,
             diffInfoInteractor = diffInfoInteractor,
-            filesInfoInteractor = filesInfoInteractor,
             uncommittedChangesInteractor = uncommittedChangesInteractor,
             selectionCoordinator = selectionCoordinator,
             commitsTableInteractor = commitsTableInteractor,
@@ -180,7 +180,24 @@ class RepositoryViewWindowScope(
         )
     }
 
+    val repositoryViewViewModel: RepositoryViewViewModel by lazy {
+        RepositoryViewViewModel(
+            diffInfoInteractor = diffInfoInteractor,
+            filesInfoInteractor = filesInfoInteractor,
+            uncommittedChangesInteractor = uncommittedChangesInteractor,
+            commitsTableInteractor = commitsTableInteractor,
+            errorTransformer = errorTransformer,
+            dialogRouter = object : DialogRouter {
+                override fun show(dialog: DialogRouter.Dialog) {
+                    dialogManager.show(dialog)
+                }
+            },
+            repositoryViewEventHandler = repositoryViewEventHandler,
+        )
+    }
+
     fun dispose() {
+        repositoryViewEventHandler.dispose()
         diffOperationsInteractor.dispose()
         commitsInteractor.dispose()
         uncommittedChangesInteractor.dispose()
