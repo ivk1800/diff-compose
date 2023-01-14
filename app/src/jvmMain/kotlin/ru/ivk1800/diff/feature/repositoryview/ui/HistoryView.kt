@@ -28,35 +28,33 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
 
 @Composable
 fun HistoryView(
+    modifier: Modifier = Modifier,
     state: HistoryState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
 ) =
-    Scaffold(
-        topBar = { AppBar(onEvent) }
-    ) {
-        Column {
-            TopSections()
-            DraggableTwoPanes(
-                orientation = Orientation.Vertical,
-                percent = 50F,
-            ) {
-                CommitsTableView(
-                    modifier = Modifier.fillMaxSize(),
-                    state = state.commitsTableState,
-                    onItemsSelected = { items ->
-                        if (items.size == 1 && items.first() is CommitTableItem.Id.UncommittedChanges) {
-                            onEvent.invoke(RepositoryViewEvent.OnUncommittedChangesSelected)
-                        } else {
-                            val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().toImmutableSet()
-                            onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
-                        }
-                    },
-                    onLoadMore = { onEvent.invoke(RepositoryViewEvent.OnLoadMoreCommits) }
-                )
-                BottomHorizontalPanes(state, onEvent)
-            }
+    Column(modifier = modifier) {
+        TopSections()
+        DraggableTwoPanes(
+            orientation = Orientation.Vertical,
+            percent = 50F,
+        ) {
+            CommitsTableView(
+                modifier = Modifier.fillMaxSize(),
+                state = state.commitsTableState,
+                onItemsSelected = { items ->
+                    if (items.size == 1 && items.first() is CommitTableItem.Id.UncommittedChanges) {
+                        onEvent.invoke(RepositoryViewEvent.OnUncommittedChangesSelected)
+                    } else {
+                        val ids = items.filterIsInstance<CommitTableItem.Id.Commit>().toImmutableSet()
+                        onEvent.invoke(RepositoryViewEvent.OnCommitsSelected(ids))
+                    }
+                },
+                onLoadMore = { onEvent.invoke(RepositoryViewEvent.OnLoadMoreCommits) }
+            )
+            BottomHorizontalPanes(state, onEvent)
         }
     }
+
 
 @Composable
 private fun BottomHorizontalPanes(
@@ -105,23 +103,6 @@ private fun CommitInfoPage(
         onFilesSelected = { event ->
             onEvent.invoke(RepositoryViewEvent.OnFilesSelected(event))
         }
-    )
-
-@Composable
-private fun AppBar(onEvent: (value: RepositoryViewEvent) -> Unit) =
-    TopAppBar(
-        title = { },
-        actions = {
-            Button(
-                onClick = { onEvent.invoke(RepositoryViewEvent.OpenFinder) }
-            ) { Text("Show in Finder") }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = { onEvent.invoke(RepositoryViewEvent.OpenTerminal) }
-            ) { Text("Terminal") }
-            Spacer(modifier = Modifier.width(4.dp))
-        },
-        backgroundColor = MaterialTheme.colors.surface
     )
 
 @Composable
