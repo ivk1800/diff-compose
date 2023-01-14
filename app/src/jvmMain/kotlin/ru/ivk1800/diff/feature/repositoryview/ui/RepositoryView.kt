@@ -41,9 +41,10 @@ private fun Body(
             state.sidePanelState,
             onSidePanelEvent,
         )
-        HistoryView(
+        MainContainer(
             modifier = Modifier.fillMaxSize(),
-            state.historyState,
+            state = state.historyState,
+            workspaceState = state.sidePanelState.workspaceState,
             onEvent,
         )
     }
