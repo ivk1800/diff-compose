@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentSetOf
 import ru.ivk1800.diff.MR
+import ru.ivk1800.diff.feature.repositoryview.presentation.event.SidePanelEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.SidePanelState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.WorkspaceState
 import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.SelectedList
@@ -22,12 +23,14 @@ import ru.ivk1800.diff.feature.repositoryview.ui.list.selected.rememberSelectedL
 fun SidePanel(
     modifier: Modifier = Modifier,
     state: SidePanelState,
+    onEvent: (value: SidePanelEvent) -> Unit,
 ) =
     Column(
         modifier = modifier.fillMaxSize(),
     ) {
         Workspace(
             state.workspaceState,
+            onEvent,
         )
         Divider()
     }
@@ -35,11 +38,14 @@ fun SidePanel(
 @Composable
 private fun Workspace(
     state: WorkspaceState,
+    onEvent: (value: SidePanelEvent) -> Unit,
 ) =
     Column {
         val selectableListState = rememberSelectedListState(
             onSelect = { selectedItems ->
-//                check(selectedItems.size == 1)
+                if (selectedItems.size == 1) {
+                    onEvent.invoke(SidePanelEvent.OnSectionUnselected(selectedItems.first()))
+                }
                 false
             },
             calculateIndex = { itemId ->

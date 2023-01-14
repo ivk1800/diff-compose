@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.RepositoryViewEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.event.SidePanelEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.RepositoryViewState
 
 @Composable
@@ -15,18 +16,20 @@ fun RepositoryView(
     state: RepositoryViewState,
     onEvent: (value: RepositoryViewEvent) -> Unit,
     onHistoryEvent: (value: HistoryEvent) -> Unit,
+    onSidePanelEvent: (value: SidePanelEvent) -> Unit,
 ) =
     Scaffold(
         modifier = modifier,
         topBar = { AppBar(onEvent) }
     ) {
-        Body(state, onHistoryEvent)
+        Body(state, onHistoryEvent, onSidePanelEvent)
     }
 
 @Composable
 private fun Body(
     state: RepositoryViewState,
     onEvent: (value: HistoryEvent) -> Unit,
+    onSidePanelEvent: (value: SidePanelEvent) -> Unit,
 ) =
     DraggableTwoPanes(
         modifier = Modifier,
@@ -36,6 +39,7 @@ private fun Body(
         SidePanel(
             modifier = Modifier.fillMaxSize(),
             state.sidePanelState,
+            onSidePanelEvent,
         )
         HistoryView(
             modifier = Modifier.fillMaxSize(),

@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import org.junit.Before
+import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
@@ -40,6 +41,9 @@ class RepositoryViewEventHandlerTest {
     @RelaxedMockK
     lateinit var mockDiffInfoInteractor: DiffInfoInteractor
 
+    @RelaxedMockK
+    lateinit var mockWorkspaceInteractor: WorkspaceInteractor
+
     @Before
     fun before() {
         MockKAnnotations.init(this)
@@ -65,6 +69,7 @@ class RepositoryViewEventHandlerTest {
                 router = mockRepositoryViewRouter,
                 uncommittedChangesInteractor = mockUncommittedChangesInteractor,
                 diffInfoInteractor = mockDiffInfoInteractor,
+                workspaceInteractor = mockWorkspaceInteractor,
                 context = requireNotNull(context),
             )
         }

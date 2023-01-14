@@ -7,7 +7,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.RepositoryViewEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.event.SidePanelEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
@@ -24,6 +26,7 @@ class RepositoryViewEventHandler internal constructor(
     private val router: RepositoryViewRouter,
     private val uncommittedChangesInteractor: UncommittedChangesInteractor,
     private val diffInfoInteractor: DiffInfoInteractor,
+    private val workspaceInteractor: WorkspaceInteractor,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
@@ -39,6 +42,7 @@ class RepositoryViewEventHandler internal constructor(
         router: RepositoryViewRouter,
         uncommittedChangesInteractor: UncommittedChangesInteractor,
         diffInfoInteractor: DiffInfoInteractor,
+        workspaceInteractor: WorkspaceInteractor
     ) : this(
         repositoryDirectory,
         dialogRouter,
@@ -50,6 +54,7 @@ class RepositoryViewEventHandler internal constructor(
         router,
         uncommittedChangesInteractor,
         diffInfoInteractor,
+        workspaceInteractor,
         Dispatchers.Main,
     )
 
@@ -64,6 +69,12 @@ class RepositoryViewEventHandler internal constructor(
 
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
             RepositoryViewEvent.OpenFinder -> router.toFinder(repositoryDirectory)
+        }
+    }
+
+    fun onSidePanelEvent(value: SidePanelEvent) {
+        when (value) {
+            is SidePanelEvent.OnSectionUnselected -> workspaceInteractor.selectSection(value.value)
         }
     }
 

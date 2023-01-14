@@ -26,6 +26,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.HistoryStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.RepositoryViewStateComposer
+import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import ru.ivk1800.diff.window.DialogManager
@@ -164,6 +165,10 @@ class RepositoryViewWindowScope(
         ErrorTransformer()
     }
 
+    private val workspaceInteractor by lazy {
+        WorkspaceInteractor()
+    }
+
     private val historyStateComposer by lazy {
         HistoryStateComposer(
             filesInfoInteractor,
@@ -175,6 +180,7 @@ class RepositoryViewWindowScope(
     private val repositoryViewStateComposer by lazy {
         RepositoryViewStateComposer(
             historyStateComposer,
+            workspaceInteractor,
         )
     }
 
@@ -194,6 +200,7 @@ class RepositoryViewWindowScope(
                     dialogManager.show(dialog)
                 }
             },
+            workspaceInteractor = workspaceInteractor,
         )
     }
 
