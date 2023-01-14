@@ -4,24 +4,25 @@ import ru.ivk1800.vcs.api.Vcs
 import java.io.File
 
 class UncommittedRepository(
+    private val repoDirectory: File,
     private val vcs: Vcs,
 ) {
-    suspend fun getUntrackedFiles(directory: File): List<String> =
-        vcs.getUntrackedFilesCommand(directory.toPath()).run()
+    suspend fun getUntrackedFiles(): List<String> =
+        vcs.getUntrackedFilesCommand(repoDirectory.toPath()).run()
 
-    suspend fun removeAllFromStaged(directory: File) = vcs.removeAllFromStaged(directory)
+    suspend fun removeAllFromStaged() = vcs.removeAllFromStaged(repoDirectory)
 
-    suspend fun addAllToStaged(directory: File) = vcs.addAllToStaged(directory)
+    suspend fun addAllToStaged() = vcs.addAllToStaged(repoDirectory)
 
-    suspend fun removeFilesFromStaged(directory: File, filePaths: List<String>) {
+    suspend fun removeFilesFromStaged(filePaths: List<String>) {
         check(filePaths.isNotEmpty())
-        vcs.removeFilesFromStaged(directory, filePaths)
+        vcs.removeFilesFromStaged(repoDirectory, filePaths)
     }
 
-    suspend fun addFilesToStaged(directory: File, filePaths: List<String>) {
+    suspend fun addFilesToStaged(filePaths: List<String>) {
         check(filePaths.isNotEmpty()) {
             "It makes no sense to add anything to the stage"
         }
-        vcs.addFilesToStaged(directory, filePaths)
+        vcs.addFilesToStaged(repoDirectory, filePaths)
     }
 }

@@ -45,12 +45,14 @@ class RepositoryViewWindowScope(
 
     private val commitsRepository by lazy {
         CommitsRepository(
+            repoDirectory = repoPath,
             vcs = dependencies.vcs,
         )
     }
 
     private val diffRepository by lazy {
         DiffRepository(
+            repoDirectory = repoPath,
             vcs = dependencies.vcs,
         )
     }
@@ -63,19 +65,20 @@ class RepositoryViewWindowScope(
 
     private val fileRepository by lazy {
         FileRepository(
+            repoDirectory = repoPath,
             vcs = dependencies.vcs,
         )
     }
 
     private val changesRepository by lazy {
         ChangesRepository(
+            repoDirectory = repoPath,
             vcs = dependencies.vcs,
         )
     }
 
     private val diffInfoInteractor by lazy {
         DiffInfoInteractor(
-            repoDirectory = repoPath,
             diffRepository = diffRepository,
             commitsRepository = commitsRepository,
             diffInfoItemMapper = DiffInfoItemMapper(),
@@ -97,7 +100,6 @@ class RepositoryViewWindowScope(
 
     private val commitInfoInteractor by lazy {
         CommitInfoInteractor(
-            repoDirectory = repoPath,
             commitsRepository = commitsRepository,
             commitInfoMapper = commitInfoMapper,
             errorTransformer = errorTransformer,
@@ -106,7 +108,6 @@ class RepositoryViewWindowScope(
 
     private val commitsInteractor by lazy {
         CommitsInteractor(
-            repoDirectory = repoPath,
             commitsRepository = commitsRepository,
             commitItemMapper = CommitItemMapper(),
         )
@@ -114,7 +115,6 @@ class RepositoryViewWindowScope(
 
     private val changesInteractor by lazy {
         ChangesInteractor(
-            repoDirectory = repoPath,
             fileRepository = fileRepository,
             diffRepository = diffRepository,
             changesRepository = changesRepository,
@@ -123,19 +123,20 @@ class RepositoryViewWindowScope(
 
     private val uncommittedRepository by lazy {
         UncommittedRepository(
+            repoDirectory = repoPath,
             vcs = dependencies.vcs,
         )
     }
 
     private val statusRepository by lazy {
         StatusRepository(
+            repoDirectory = repoPath,
             vcs = dependencies.vcs,
         )
     }
 
     private val uncommittedChangesInteractor by lazy {
         UncommittedChangesInteractor(
-            repoDirectory = repoPath,
             statusRepository = statusRepository,
             uncommittedRepository = uncommittedRepository,
         )

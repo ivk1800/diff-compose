@@ -7,16 +7,17 @@ import java.io.File
 import java.time.Instant
 
 class CommitsRepository(
+    private val repoDirectory: File,
     private val vcs: Vcs,
 ) {
-    suspend fun getCommit(directory: File, hash: String): Commit? =
-        vcs.getCommit(directory, hash)?.toCommit()
+    suspend fun getCommit(hash: String): Commit? =
+        vcs.getCommit(repoDirectory, hash)?.toCommit()
 
-    suspend fun getCommits(directory: File, branchName: String, limit: Int, offset: Int): List<Commit> =
-        vcs.getCommits(directory, branchName = branchName, limit = limit, offset = offset).map { it.toCommit() }
+    suspend fun getCommits(branchName: String, limit: Int, offset: Int): List<Commit> =
+        vcs.getCommits(repoDirectory, branchName = branchName, limit = limit, offset = offset).map { it.toCommit() }
 
-    suspend fun getCommitFiles(directory: File, commitHash: String): List<CommitFile> =
-        vcs.getCommitFiles(directory, commitHash).map { file ->
+    suspend fun getCommitFiles(commitHash: String): List<CommitFile> =
+        vcs.getCommitFiles(repoDirectory, commitHash).map { file ->
             CommitFile(
                 name = file.name,
                 changeType = file.changeType.toChangeType(),

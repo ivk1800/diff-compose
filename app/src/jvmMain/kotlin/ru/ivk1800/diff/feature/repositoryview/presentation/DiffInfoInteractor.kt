@@ -26,12 +26,10 @@ import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
-import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiffInfoInteractor internal constructor(
-    private val repoDirectory: File,
     private val diffRepository: DiffRepository,
     private val commitsRepository: CommitsRepository,
     private val diffInfoItemMapper: DiffInfoItemMapper,
@@ -50,13 +48,11 @@ class DiffInfoInteractor internal constructor(
         get() = _state
 
     constructor(
-        repoDirectory: File,
         diffRepository: DiffRepository,
         commitsRepository: CommitsRepository,
         diffInfoItemMapper: DiffInfoItemMapper,
         errorTransformer: ErrorTransformer,
     ) : this(
-        repoDirectory,
         diffRepository,
         commitsRepository,
         diffInfoItemMapper,
@@ -128,11 +124,10 @@ class DiffInfoInteractor internal constructor(
         combine(
             flow {
                 val commit = requireNotNull(
-                    commitsRepository.getCommit(repoDirectory, event.commitHash)
+                    commitsRepository.getCommit(event.commitHash)
                 )
 
                 val diff = diffRepository.getDiff(
-                    repoDirectory,
                     oldCommitHash = requireNotNull(commit.parents.firstOrNull()),
                     newCommitHash = event.commitHash,
                     filePath = event.path,
@@ -154,8 +149,8 @@ class DiffInfoInteractor internal constructor(
         combine(
             flow {
                 val diff = when (event.type) {
-                    UncommittedChangesType.Staged -> diffRepository.getStagedFileDiff(repoDirectory, event.fileName)
-                    UncommittedChangesType.Unstaged -> diffRepository.getUnstagedFileDiff(repoDirectory, event.fileName)
+                    UncommittedChangesType.Staged -> diffRepository.getStagedFileDiff(event.fileName)
+                    UncommittedChangesType.Unstaged -> diffRepository.getUnstagedFileDiff(event.fileName)
                 }
                 emit(diff)
             },

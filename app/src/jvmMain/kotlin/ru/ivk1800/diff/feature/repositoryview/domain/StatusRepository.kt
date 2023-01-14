@@ -7,11 +7,12 @@ import ru.ivk1800.vcs.api.VcsStatus
 import java.io.File
 
 class StatusRepository(
+    private val repoDirectory: File,
     private val vcs: Vcs,
 ) {
-    suspend fun getStatus(directory: File): Status {
+    suspend fun getStatus(): Status {
         val status = vcs.getStatusCommand(
-            directory.toPath(),
+            repoDirectory.toPath(),
         ).run()
         return toStatus(status)
     }

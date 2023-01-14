@@ -19,7 +19,6 @@ import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.helper.UncommittedChangesNextSelectionHelper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
-import java.io.File
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -294,7 +293,7 @@ class UncommittedChangesInteractorTest {
         var context: CoroutineContext? = null
 
         fun build(): UncommittedChangesInteractor {
-            coEvery { mockStatusRepository.getStatus(any()) } returns Status(
+            coEvery { mockStatusRepository.getStatus() } returns Status(
                 staged = staged,
                 unstaged = unstaged,
                 untracked = untracked,
@@ -306,7 +305,6 @@ class UncommittedChangesInteractorTest {
             )
 
             return UncommittedChangesInteractor(
-                repoDirectory = File(""),
                 statusRepository = mockStatusRepository,
                 uncommittedRepository = mockUncommittedRepository,
                 selectionHelper = mockUncommittedChangesNextSelectionHelper,

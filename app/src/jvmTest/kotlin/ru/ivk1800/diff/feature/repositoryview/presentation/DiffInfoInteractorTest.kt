@@ -19,7 +19,6 @@ import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.presentation.ErrorTransformer
-import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,7 +61,7 @@ class DiffInfoInteractorTest {
             sut.refresh()
             awaitItem()
         }
-        coVerify(exactly = 2) { mockDiffRepository.getStagedFileDiff(any(), any()) }
+        coVerify(exactly = 2) { mockDiffRepository.getStagedFileDiff(any()) }
     }
 
     @Test
@@ -85,7 +84,7 @@ class DiffInfoInteractorTest {
             sut.refresh()
             awaitItem()
         }
-        coVerify(exactly = 2) { mockDiffRepository.getStagedFileDiff(any(), any()) }
+        coVerify(exactly = 2) { mockDiffRepository.getStagedFileDiff(any()) }
     }
 
     private fun TestScope.sut(init: Sut.() -> Unit = { }): DiffInfoInteractor = Sut()
@@ -100,10 +99,10 @@ class DiffInfoInteractorTest {
         var mappedLines: ImmutableList<DiffInfoItem> = persistentListOf()
 
         fun build(): DiffInfoInteractor {
-            coEvery { mockDiffRepository.getUnstagedFileDiff(any(), any()) } answers {
+            coEvery { mockDiffRepository.getUnstagedFileDiff(any()) } answers {
                 unstagedFileDiff ?: error("not implemented")
             }
-            coEvery { mockDiffRepository.getStagedFileDiff(any(), any()) } answers {
+            coEvery { mockDiffRepository.getStagedFileDiff(any()) } answers {
                 stagedFileDiff ?: error("not implemented")
             }
             every { mockDiffInfoItemMapper.mapToItems(any(), any(), any()) } returns mappedLines
@@ -113,7 +112,6 @@ class DiffInfoInteractorTest {
                 commitsRepository = mockCommitsRepository,
                 diffInfoItemMapper = mockDiffInfoItemMapper,
                 errorTransformer = mockErrorTransformer,
-                repoDirectory = File(""),
                 context = requireNotNull(context)
             )
         }

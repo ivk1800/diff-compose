@@ -5,11 +5,9 @@ import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.vcs.git.VcsException
-import java.io.File
 
 // TODO: move from presentation folder
 class ChangesInteractor(
-    private val repoDirectory: File,
     private val fileRepository: FileRepository,
     private val diffRepository: DiffRepository,
     private val changesRepository: ChangesRepository,
@@ -42,21 +40,21 @@ class ChangesInteractor(
         }
 
     private suspend fun discardInternal(fileName: String, hunk: Diff.Hunk) {
-        val diff: Diff = diffRepository.getUnstagedFileDiff(repoDirectory, fileName)
+        val diff: Diff = diffRepository.getUnstagedFileDiff(fileName)
         val fileContent: List<Diff.Hunk.Line> = getFileLines(fileName)
 
         val actualContent = removeHunk(fileContent, diff, hunk)
             .joinToString(separator = System.lineSeparator()) { it.text }
-        changesRepository.discard(repoDirectory, fileName = fileName, content = actualContent)
+        changesRepository.discard(fileName = fileName, content = actualContent)
     }
 
     private suspend fun removeFromIndexInternal(fileName: String, hunk: Diff.Hunk) {
-        val diff: Diff = diffRepository.getStagedFileDiff(repoDirectory, fileName)
+        val diff: Diff = diffRepository.getStagedFileDiff(fileName)
         val fileContent: List<Diff.Hunk.Line> = getFileLines(fileName)
 
         val contentForUnstage = removeHunk(fileContent, diff, hunk)
             .joinToString(separator = System.lineSeparator()) { it.text }
-        changesRepository.updateIndex(repoDirectory, fileName = fileName, content = contentForUnstage)
+        changesRepository.updateIndex(fileName = fileName, content = contentForUnstage)
     }
 
     private fun removeHunk(
@@ -83,7 +81,7 @@ class ChangesInteractor(
         lines.filter { line -> line.type == Diff.Hunk.Line.Type.NotChanged || line.type == Diff.Hunk.Line.Type.Added }
 
     private suspend fun getFileLines(fileName: String): List<Diff.Hunk.Line> =
-        fileRepository.getFileLines(directory = repoDirectory, fileName = fileName)
+        fileRepository.getFileLines(fileName = fileName)
             .map { line ->
                 Diff.Hunk.Line(
                     text = line,

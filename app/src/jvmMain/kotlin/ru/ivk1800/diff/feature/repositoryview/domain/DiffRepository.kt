@@ -7,35 +7,36 @@ import ru.ivk1800.vcs.api.command.DiffCommand
 import java.io.File
 
 class DiffRepository(
+    private val repoDirectory: File,
     private val vcs: Vcs,
 ) {
-    suspend fun getDiff(directory: File, oldCommitHash: String, newCommitHash: String, filePath: String): Diff {
+    suspend fun getDiff(oldCommitHash: String, newCommitHash: String, filePath: String): Diff {
         val diff = vcs.getDiffCommand(
-            directory.toPath(),
+            repoDirectory.toPath(),
             DiffCommand.Options.FileInCommit(oldCommitHash, newCommitHash, filePath),
         ).run()
         return toDiff(diff)
     }
 
-    suspend fun getStagedFileDiff(directory: File, fileName: String): Diff {
-        val diff = vcs.getDiffCommand(directory.toPath(), DiffCommand.Options.StagedFile(fileName)).run()
+    suspend fun getStagedFileDiff(fileName: String): Diff {
+        val diff = vcs.getDiffCommand(repoDirectory.toPath(), DiffCommand.Options.StagedFile(fileName)).run()
         return toDiff(diff)
     }
 
-    suspend fun getUnstagedFileDiff(directory: File, fileName: String): Diff {
-        val diff = vcs.getDiffCommand(directory.toPath(), DiffCommand.Options.UnstagedFile(fileName)).run()
+    suspend fun getUnstagedFileDiff(fileName: String): Diff {
+        val diff = vcs.getDiffCommand(repoDirectory.toPath(), DiffCommand.Options.UnstagedFile(fileName)).run()
         return toDiff(diff)
     }
 
-    suspend fun getDiff(directory: File, oldBlobId: String, newBlobId: String): Diff {
-        val diff = vcs.getDiff(directory, oldBlobId, newBlobId)
+    suspend fun getDiff(oldBlobId: String, newBlobId: String): Diff {
+        val diff = vcs.getDiff(repoDirectory, oldBlobId, newBlobId)
         return toDiff(diff)
     }
 
-    suspend fun getUnstagedDiff(directory: File): List<Diff> =
-        vcs.getUnStagedDiff(directory).map(::toDiff)
+    suspend fun getUnstagedDiff(): List<Diff> =
+        vcs.getUnStagedDiff(repoDirectory).map(::toDiff)
 
-    suspend fun getStagedDiff(directory: File): List<Diff> = vcs.getStagedDiff(directory).map(::toDiff)
+    suspend fun getStagedDiff(): List<Diff> = vcs.getStagedDiff(repoDirectory).map(::toDiff)
 
     private fun toDiff(diff: VcsDiff): Diff {
         return Diff(

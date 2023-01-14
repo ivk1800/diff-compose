@@ -30,12 +30,10 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.helper.UncommittedCha
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
-import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UncommittedChangesInteractor internal constructor(
-    private val repoDirectory: File,
     private val statusRepository: StatusRepository,
     private val uncommittedRepository: UncommittedRepository,
     private val selectionHelper: UncommittedChangesNextSelectionHelper,
@@ -64,11 +62,9 @@ class UncommittedChangesInteractor internal constructor(
         get() = errorsFlow
 
     constructor(
-        repoDirectory: File,
         statusRepository: StatusRepository,
         uncommittedRepository: UncommittedRepository
     ) : this(
-        repoDirectory,
         statusRepository,
         uncommittedRepository,
         UncommittedChangesNextSelectionHelper(),
@@ -87,7 +83,7 @@ class UncommittedChangesInteractor internal constructor(
                             unstagedVcsProcess = true,
                         )
 
-                        uncommittedRepository.addAllToStaged(repoDirectory)
+                        uncommittedRepository.addAllToStaged()
                         emit(Unit)
                     }
                         .flatMapLatest {
@@ -103,7 +99,7 @@ class UncommittedChangesInteractor internal constructor(
                             unstagedVcsProcess = false,
                         )
 
-                        uncommittedRepository.removeAllFromStaged(repoDirectory)
+                        uncommittedRepository.removeAllFromStaged()
                         emit(Unit)
                     }
                         .flatMapLatest {
@@ -212,7 +208,7 @@ class UncommittedChangesInteractor internal constructor(
 
     private suspend fun checkInternalFlow(): Flow<UncommittedChangesState> =
         flow {
-            emit(statusRepository.getStatus(repoDirectory))
+            emit(statusRepository.getStatus())
         }
             .onEach { (staged, unstaged, untracked) ->
                 rawStagedFiles = staged
@@ -242,7 +238,7 @@ class UncommittedChangesInteractor internal constructor(
 
     private fun handleAddFilesToStagedFlow(event: Event.AddFilesToStaged) =
         flow {
-            uncommittedRepository.addFilesToStaged(repoDirectory, event.ids.map { it.path })
+            uncommittedRepository.addFilesToStaged(event.ids.map { it.path })
             if (event.ids.size == 1) {
                 emit(
                     selectionHelper.calculateIndex(
@@ -269,7 +265,7 @@ class UncommittedChangesInteractor internal constructor(
 
     private fun handleRemoveFilesFromStagedFlow(event: Event.RemoveFilesFromStaged) =
         flow {
-            uncommittedRepository.removeFilesFromStaged(repoDirectory, event.ids.map { it.path })
+            uncommittedRepository.removeFilesFromStaged(event.ids.map { it.path })
             if (event.ids.size == 1) {
                 emit(
                     selectionHelper.calculateIndex(

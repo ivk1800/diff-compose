@@ -14,7 +14,6 @@ import ru.ivk1800.diff.feature.repositoryview.domain.ChangesRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
-import java.io.File
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -103,7 +102,6 @@ class ChangesInteractorTest {
         coVerify {
             mockChangesRepository.updateIndex(
                 any(),
-                any(),
                 content = """
                     A
                     B
@@ -184,7 +182,6 @@ class ChangesInteractorTest {
         coVerify {
             mockChangesRepository.discard(
                 any(),
-                any(),
                 content = """
                     A
                     B
@@ -207,14 +204,13 @@ class ChangesInteractorTest {
         var fileDiff: Diff? = null
 
         fun build(): ChangesInteractor {
-            coEvery { mockChangesRepository.updateIndex(any(), any(), any()) } returns Unit
-            coEvery { mockFileRepository.getFileLines(any(), any()) } returns fileLines
-            coEvery { mockDiffRepository.getStagedFileDiff(any(), any()) } answers {
+            coEvery { mockChangesRepository.updateIndex(any(), any()) } returns Unit
+            coEvery { mockFileRepository.getFileLines(any()) } returns fileLines
+            coEvery { mockDiffRepository.getStagedFileDiff(any()) } answers {
                 fileDiff ?: error("not implemented")
             }
 
             return ChangesInteractor(
-                repoDirectory = File(""),
                 fileRepository = mockFileRepository,
                 diffRepository = mockDiffRepository,
                 changesRepository = mockChangesRepository,

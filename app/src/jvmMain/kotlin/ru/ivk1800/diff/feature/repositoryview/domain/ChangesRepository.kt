@@ -6,20 +6,21 @@ import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import java.io.File
 
 class ChangesRepository(
+    private val repoDirectory: File,
     private val vcs: Vcs,
 ) {
-    suspend fun updateIndex(directory: File, fileName: String, content: String) =
+    suspend fun updateIndex(fileName: String, content: String) =
         vcs.getUpdateIndexCommand(
-            directory.toPath(),
+            repoDirectory.toPath(),
             UpdateIndexCommand.Options(
                 fileName = fileName,
                 content = content,
             ),
         ).run()
 
-    suspend fun discard(directory: File, fileName: String, content: String) =
+    suspend fun discard(fileName: String, content: String) =
         vcs.getDiscardCommand(
-            directory.toPath(),
+            repoDirectory.toPath(),
             DiscardCommand.Options(
                 fileName = fileName,
                 content = content,

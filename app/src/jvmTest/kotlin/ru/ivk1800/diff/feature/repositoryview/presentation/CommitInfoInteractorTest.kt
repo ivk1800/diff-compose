@@ -13,7 +13,6 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
-import java.io.File
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -56,7 +55,6 @@ class CommitInfoInteractorTest {
 
     private inner class Sut {
         fun build() = CommitInfoInteractor(
-            repoDirectory = File(""),
             commitsRepository = mockCommitsRepository,
             commitInfoMapper = mockCommitInfoMapper,
             errorTransformer = mockErrorTransformer,

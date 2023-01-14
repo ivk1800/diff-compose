@@ -26,11 +26,9 @@ import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommitsInteractor(
-    private val repoDirectory: File,
     private val commitsRepository: CommitsRepository,
     private val commitItemMapper: CommitItemMapper,
 ) {
@@ -98,7 +96,7 @@ class CommitsInteractor(
     private fun getInitialCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
             val newCommits = commitsRepository
-                .getCommits(repoDirectory, branchName = "master", limit = 20, offset = 0)
+                .getCommits(branchName = "master", limit = 20, offset = 0)
             commits = newCommits
             val items = newCommits.map(commitItemMapper::mapToItem)
             commitItems = items.toPersistentList()
@@ -108,7 +106,7 @@ class CommitsInteractor(
     private fun getNextCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
             val newCommits = commitsRepository
-                .getCommits(repoDirectory, branchName = "master", limit = 10, offset = commits.size)
+                .getCommits(branchName = "master", limit = 10, offset = commits.size)
 
             isAllLoaded = newCommits.isEmpty()
 

@@ -25,11 +25,9 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommitInfoInteractor(
-    private val repoDirectory: File,
     private val commitsRepository: CommitsRepository,
     private val commitInfoMapper: CommitInfoMapper,
     private val errorTransformer: ErrorTransformer,
@@ -64,10 +62,10 @@ class CommitInfoInteractor(
                     emit(CommitInfoState.None)
                     if (hash != null) {
                         val newFiles = commitsRepository
-                            .getCommitFiles(repoDirectory, commitHash = hash)
+                            .getCommitFiles(commitHash = hash)
                         files = newFiles
 
-                        val newCommit = requireNotNull(commitsRepository.getCommit(repoDirectory, hash))
+                        val newCommit = requireNotNull(commitsRepository.getCommit(hash))
                         commit = newCommit
 
                         emit(
