@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalMinimumTouchTargetEnforcement
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +42,10 @@ fun DiffInfoView(
     modifier: Modifier = Modifier,
     state: DiffInfoState,
     onEvent: (value: HistoryEvent.Diff) -> Unit,
-) = Box(modifier = modifier) {
+) = Box(
+    modifier = modifier
+        .background(MaterialTheme.colors.surface),
+) {
     when (state) {
         is DiffInfoState.Content -> DiffListView(
             onEvent = onEvent,

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalMinimumTouchTargetEnforcement
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -48,21 +49,43 @@ fun UncommittedChangesInfoView(
     state: UncommittedChangesState,
     onEvent: (value: HistoryEvent.UncommittedChanges) -> Unit,
 ) =
+    when (state) {
+        is UncommittedChangesState.Content -> Content(
+            modifier = modifier
+                .focusable(),
+            state,
+            onEvent,
+        )
+
+        UncommittedChangesState.None -> Empty(modifier)
+    }
+
+@Composable
+private fun Content(
+    modifier: Modifier = Modifier,
+    state: UncommittedChangesState.Content,
+    onEvent: (value: HistoryEvent.UncommittedChanges) -> Unit,
+) =
     DraggableTwoPanes(
         modifier = modifier
+            .background(MaterialTheme.colors.surface)
             .focusable(),
         orientation = Orientation.Vertical,
         percent = 50F,
     ) {
-        when (state) {
-            is UncommittedChangesState.Content -> {
-                StagedFilesPane(onEvent, state.staged)
-                UnstagedFilesPane(onEvent, state.unstaged)
-            }
-
-            UncommittedChangesState.None -> Box(modifier)
-        }
+        StagedFilesPane(onEvent, state.staged)
+        UnstagedFilesPane(onEvent, state.unstaged)
     }
+
+@Composable
+private fun Empty(
+    modifier: Modifier = Modifier,
+) =
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.surface),
+    )
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

@@ -43,7 +43,8 @@ private fun Body(
         )
         MainContainer(
             modifier = Modifier.fillMaxSize(),
-            state = state.historyState,
+            historyState = state.historyState,
+            fileStatusState = state.fileStatusState,
             workspaceState = state.sidePanelState.workspaceState,
             onEvent,
         )

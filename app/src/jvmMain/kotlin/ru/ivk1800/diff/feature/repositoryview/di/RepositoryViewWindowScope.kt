@@ -24,6 +24,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
 import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.FileStatusStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.HistoryStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.RepositoryViewStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
@@ -177,9 +178,17 @@ class RepositoryViewWindowScope(
         )
     }
 
+    private val fileStatusStateComposer by lazy {
+        FileStatusStateComposer(
+            uncommittedChangesInteractor,
+            diffInfoInteractor,
+        )
+    }
+
     private val repositoryViewStateComposer by lazy {
         RepositoryViewStateComposer(
             historyStateComposer,
+            fileStatusStateComposer,
             workspaceInteractor,
         )
     }

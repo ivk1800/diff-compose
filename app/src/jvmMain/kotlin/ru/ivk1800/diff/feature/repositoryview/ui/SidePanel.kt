@@ -67,11 +67,8 @@ private fun Workspace(
             selectableListState.select(persistentSetOf(state.activeSection))
         }
 
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.caption,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        ListTextView(
+            modifier = Modifier.padding(8.dp),
             text = MR.strings.workspace_title.localized(),
         )
         SelectedList(
