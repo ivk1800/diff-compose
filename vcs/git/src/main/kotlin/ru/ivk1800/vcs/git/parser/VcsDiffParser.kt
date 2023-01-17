@@ -45,6 +45,8 @@ internal class VcsDiffParser {
     }
 
     private fun parseInternal(raw: String): VcsDiff {
+        check(raw.isNotBlank()) { "Empty diff cannot be parsed" }
+
         val lines: List<String> = raw.lines()
 
         val result = RawResult()
@@ -97,9 +99,9 @@ internal class VcsDiffParser {
             )
         } else {
             return VcsDiff.Modified(
-                fileName = requireNotNull(result.bFileName),
-                oldId = requireNotNull(result.oldId),
-                newId = requireNotNull(result.newId),
+                fileName = requireNotNull(result.bFileName) { "fileName is null" },
+                oldId = requireNotNull(result.oldId) { "oldId is null" },
+                newId = requireNotNull(result.newId) { "newId is null" },
                 hunks = hunks,
             )
         }

@@ -100,7 +100,12 @@ fun DiffListView(
                     item,
                     onActionClick = { action ->
                         when (action) {
-                            DiffInfoItem.HunkHeader.Action.StageHunk -> Unit
+                            DiffInfoItem.HunkHeader.Action.StageHunk ->
+                                onEvent.invoke(
+                                    HistoryEvent.Diff.OnStageHunk(
+                                        hunkId = item.id,
+                                    ),
+                                )
                             DiffInfoItem.HunkHeader.Action.UnstageHunk ->
                                 onEvent.invoke(
                                     HistoryEvent.Diff.OnUnstageHunk(

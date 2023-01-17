@@ -36,6 +36,8 @@ class DiffOperationsManager internal constructor(
 
     suspend fun unstageHunk(hunkId: DiffInfoItem.Id.Hunk): Result<Unit> = runCatching { unstageHunkInternal(hunkId) }
 
+    suspend fun stageHunk(hunkId: DiffInfoItem.Id.Hunk): Result<Unit> = runCatching { stageHunkInternal(hunkId) }
+
     suspend fun discardHunk(hunkId: DiffInfoItem.Id.Hunk): Result<Unit> = runCatching { discardHunkInternal(hunkId) }
 
     fun dispose() {
@@ -49,6 +51,19 @@ class DiffOperationsManager internal constructor(
         }
 
         val result = changesManager.removeFromIndex(fileId.path, hunk)
+        val error = result.exceptionOrNull()
+        if (error != null) {
+            throw error
+        }
+    }
+
+    private suspend fun stageHunkInternal(hunkId: DiffInfoItem.Id.Hunk) = withContext(scope.coroutineContext) {
+        val (fileId, hunk) = runCatching { getHunk(hunkId) }.getOrElse { error ->
+            // TODO
+            throw IllegalStateException("Unable to stage hunk", error)
+        }
+
+        val result = changesManager.addToIndex(fileId.path, hunk)
         val error = result.exceptionOrNull()
         if (error != null) {
             throw error
@@ -77,7 +92,35 @@ class DiffOperationsManager internal constructor(
             }
 
             FilesInfoState.None -> error("File not selected")
-            is FilesInfoState.UncommittedChanges -> filesState.state.unstaged.files.first()
+            is FilesInfoState.UncommittedChanges -> {
+                check(filesState.state.unstaged.selected.size <= 1) {
+                    "Only one unstaged file must be selected"
+                }
+                check(filesState.state.staged.selected.size <= 1) {
+                    "Only one staged file must be selected"
+                }
+                val unstagedSelected = filesState.state.unstaged.selected.firstOrNull()
+
+                if (unstagedSelected != null) {
+                    requireNotNull(
+                        filesState.state.unstaged.files.firstOrNull { it.id == unstagedSelected },
+                    ) {
+                        "Could not find unstaged file with path: ${unstagedSelected.path}"
+                    }
+                } else {
+                    val stagedSelected = filesState.state.staged.selected.firstOrNull()
+
+                    if (stagedSelected != null) {
+                        requireNotNull(
+                            filesState.state.staged.files.firstOrNull { it.id == stagedSelected },
+                        ) {
+                            "Could not find staged file with path: ${stagedSelected.path}"
+                        }
+                    } else {
+                        error("Unable find file")
+                    }
+                }
+            }
         }
 
         check(diffInfoManager.state.value is DiffInfoState.Content) { "Diff is not selected" }

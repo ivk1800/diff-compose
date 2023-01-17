@@ -35,6 +35,8 @@ sealed interface HistoryEvent {
 
         data class OnUnstageHunk(val hunkId: DiffInfoItem.Id.Hunk): Diff
 
+        data class OnStageHunk(val hunkId: DiffInfoItem.Id.Hunk): Diff
+
         data class OnDiscardHunk(val hunkId: DiffInfoItem.Id.Hunk): Diff
     }
 }

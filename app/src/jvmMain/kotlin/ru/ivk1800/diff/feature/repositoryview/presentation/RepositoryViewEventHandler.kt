@@ -125,6 +125,7 @@ class RepositoryViewEventHandler internal constructor(
 
                     is HistoryEvent.Diff.OnUnstageHunk -> onUnstageHunk(value)
                     is HistoryEvent.Diff.OnDiscardHunk -> onDiscardHunk(value)
+                    is HistoryEvent.Diff.OnStageHunk -> onStageHunk(value)
                 }
             }
         }
@@ -139,6 +140,25 @@ class RepositoryViewEventHandler internal constructor(
             val result = diffOperationsManager.unstageHunk(event.hunkId)
             val error = result.exceptionOrNull()
             if (error != null) {
+                dialogRouter.show(
+                    DialogRouter.Dialog.Error(
+                        title = "Error",
+                        text = errorTransformer.transformForDisplay(error),
+                    )
+                )
+            } else {
+                uncommittedChangesManager.check()
+                diffInfoManager.refresh()
+            }
+        }
+    }
+
+    private fun onStageHunk(event: HistoryEvent.Diff.OnStageHunk) {
+        scope.launch {
+            val result = diffOperationsManager.stageHunk(event.hunkId)
+            val error = result.exceptionOrNull()
+            if (error != null) {
+                error.printStackTrace();
                 dialogRouter.show(
                     DialogRouter.Dialog.Error(
                         title = "Error",

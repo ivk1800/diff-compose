@@ -193,6 +193,85 @@ class ChangesManagerTest {
         }
     }
 
+    @Test
+    fun `should add single hunk to stage with one removed line`() = runTest {
+        sut {
+            fileLines = listOf(
+                "A",
+                "B",
+                "C",
+                "D",
+                "",
+            )
+            fileDiff = Diff(
+                filePath = "",
+                oldId = "",
+                newId = "",
+                hunks = listOf(
+                    Diff.Hunk(
+                        firstRange = IntRange(1, 4),
+                        secondRange = IntRange(1, 3),
+                        lines = listOf(
+                            Diff.Hunk.Line(
+                                text = "A",
+                                type = Diff.Hunk.Line.Type.NotChanged,
+                            ),
+                            Diff.Hunk.Line(
+                                text = "B",
+                                type = Diff.Hunk.Line.Type.Removed,
+                            ),
+                            Diff.Hunk.Line(
+                                text = "C",
+                                type = Diff.Hunk.Line.Type.NotChanged,
+                            ),
+                            Diff.Hunk.Line(
+                                text = "D",
+                                type = Diff.Hunk.Line.Type.NotChanged,
+                            ),
+                        ),
+                    )
+                ),
+                changeType = ChangeType.Modify,
+            )
+        }.addToIndex(
+            fileName = "Test.txt",
+            hunk = Diff.Hunk(
+                firstRange = IntRange(1, 4),
+                secondRange = IntRange(1, 3),
+                lines = listOf(
+                    Diff.Hunk.Line(
+                        text = "A",
+                        type = Diff.Hunk.Line.Type.NotChanged,
+                    ),
+                    Diff.Hunk.Line(
+                        text = "B",
+                        type = Diff.Hunk.Line.Type.Removed,
+                    ),
+                    Diff.Hunk.Line(
+                        text = "C",
+                        type = Diff.Hunk.Line.Type.NotChanged,
+                    ),
+                    Diff.Hunk.Line(
+                        text = "D",
+                        type = Diff.Hunk.Line.Type.NotChanged,
+                    ),
+                ),
+            ),
+        )
+
+        coVerify {
+            mockChangesRepository.updateIndex(
+                any(),
+                content = """
+                    A
+                    C
+                    D
+                    
+            """.trimIndent(),
+            )
+        }
+    }
+
     private fun TestScope.sut(init: Sut.() -> Unit = { }): ChangesManager = Sut()
         .apply(init)
         .apply { context = testScheduler }
@@ -206,6 +285,9 @@ class ChangesManagerTest {
         fun build(): ChangesManager {
             coEvery { mockChangesRepository.updateIndex(any(), any()) } returns Unit
             coEvery { mockFileRepository.getFileLines(any()) } returns fileLines
+            coEvery { mockDiffRepository.getUnstagedFileDiff(any()) } answers {
+                fileDiff ?: error("not implemented")
+            }
             coEvery { mockDiffRepository.getStagedFileDiff(any()) } answers {
                 fileDiff ?: error("not implemented")
             }

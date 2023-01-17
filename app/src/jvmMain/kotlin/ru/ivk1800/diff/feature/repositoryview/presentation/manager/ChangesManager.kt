@@ -26,6 +26,19 @@ class ChangesManager(
             )
         }
 
+    suspend fun addToIndex(fileName: String, hunk: Diff.Hunk): Result<Unit> =
+        try {
+            Result.success(addToIndexInternal(fileName, hunk))
+        } catch (error: Throwable) {
+            Result.failure(
+                // TODO
+                VcsException.ParseException(
+                    message = "An error occurred while add hunk to index",
+                    cause = error,
+                )
+            )
+        }
+
     suspend fun discard(fileName: String, hunk: Diff.Hunk): Result<Unit> =
         try {
             Result.success(discardInternal(fileName, hunk))
@@ -57,6 +70,15 @@ class ChangesManager(
         changesRepository.updateIndex(fileName = fileName, content = contentForUnstage)
     }
 
+    private suspend fun addToIndexInternal(fileName: String, hunk: Diff.Hunk) {
+        val diff: Diff = diffRepository.getUnstagedFileDiff(fileName)
+        val fileContent: List<Diff.Hunk.Line> = getFileLines(fileName)
+
+        val contentForStage = addHunk(fileContent, diff, hunk)
+            .joinToString(separator = System.lineSeparator()) { it.text }
+        changesRepository.updateIndex(fileName = fileName, content = contentForStage)
+    }
+
     private fun removeHunk(
         fileContent: List<Diff.Hunk.Line>,
         diff: Diff,
@@ -65,6 +87,26 @@ class ChangesManager(
         var fileLines: MutableList<Diff.Hunk.Line> = fileContent.toMutableList()
         diff.hunks.reversed()
             .filter { hunk -> hunkForRemove != hunk }
+            .forEach { hunk ->
+                val start = hunk.firstRange.first
+                val end = hunk.firstRange.last
+                val before = fileLines.subList(0, start - 1)
+                val after = fileLines.subList(end, fileLines.size)
+
+                fileLines = (before + hunk.reset() + after).toMutableList()
+            }
+
+        return fileLines
+    }
+
+    private fun addHunk(
+        fileContent: List<Diff.Hunk.Line>,
+        diff: Diff,
+        hunkForRemove: Diff.Hunk,
+    ): List<Diff.Hunk.Line> {
+        var fileLines: MutableList<Diff.Hunk.Line> = fileContent.toMutableList()
+        diff.hunks.reversed()
+            .filter { hunk -> hunkForRemove == hunk }
             .forEach { hunk ->
                 val start = hunk.firstRange.first
                 val end = hunk.firstRange.last
