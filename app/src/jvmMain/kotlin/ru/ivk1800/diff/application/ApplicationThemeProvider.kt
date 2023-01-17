@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class ApplicationThemeProvider {
-    private val _theme = MutableStateFlow(ApplicationTheme.Dark)
+    private val _theme = MutableStateFlow(ApplicationTheme.Light)
     val theme: StateFlow<ApplicationTheme>
         get() = _theme
 

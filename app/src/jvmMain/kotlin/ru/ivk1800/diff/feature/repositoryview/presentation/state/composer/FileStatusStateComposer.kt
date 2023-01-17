@@ -5,19 +5,19 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.FileStatusState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 
 class FileStatusStateComposer(
-    private val uncommittedChangesInteractor: UncommittedChangesInteractor,
-    private val diffInfoInteractor: DiffInfoInteractor,
+    private val uncommittedChangesManager: UncommittedChangesManager,
+    private val diffInfoManager: DiffInfoManager,
 ) {
     fun getState(scope: CoroutineScope): StateFlow<FileStatusState> =
         combine(
-            uncommittedChangesInteractor.state,
-            diffInfoInteractor.state,
+            uncommittedChangesManager.state,
+            diffInfoManager.state,
         ) {  uncommittedChangesState, diffInfoState ->
             when (uncommittedChangesState) {
                 is UncommittedChangesState.Content -> FileStatusState.Content(

@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
@@ -8,23 +8,23 @@ import org.junit.Before
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DiffOperationsInteractorTest {
+class DiffOperationsManagerTest {
 
     @RelaxedMockK
-    lateinit var mockFilesInfoInteractor: FilesInfoInteractor
+    lateinit var mockFilesInfoManager: FilesInfoManager
 
     @RelaxedMockK
-    lateinit var mockDiffInfoInteractor: DiffInfoInteractor
+    lateinit var mockDiffInfoManager: DiffInfoManager
 
     @RelaxedMockK
-    lateinit var mockChangesInteractor: ChangesInteractor
+    lateinit var mockChangesManager: ChangesManager
 
     @Before
     fun before() {
         MockKAnnotations.init(this)
     }
 
-    private fun TestScope.sut(init: Sut.() -> Unit = { }): DiffOperationsInteractor = Sut()
+    private fun TestScope.sut(init: Sut.() -> Unit = { }): DiffOperationsManager = Sut()
         .apply(init)
         .apply { context = testScheduler }
         .build()
@@ -32,11 +32,11 @@ class DiffOperationsInteractorTest {
     private inner class Sut {
         var context: CoroutineContext? = null
 
-        fun build(): DiffOperationsInteractor {
-            return DiffOperationsInteractor(
-                filesInfoInteractor = mockFilesInfoInteractor,
-                diffInfoInteractor = mockDiffInfoInteractor,
-                changesInteractor = mockChangesInteractor,
+        fun build(): DiffOperationsManager {
+            return DiffOperationsManager(
+                filesInfoManager = mockFilesInfoManager,
+                diffInfoManager = mockDiffInfoManager,
+                changesManager = mockChangesManager,
                 context = requireNotNull(context),
             )
         }

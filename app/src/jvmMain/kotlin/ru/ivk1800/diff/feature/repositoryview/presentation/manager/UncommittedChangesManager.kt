@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -33,7 +33,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChan
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class UncommittedChangesInteractor internal constructor(
+class UncommittedChangesManager internal constructor(
     private val statusRepository: StatusRepository,
     private val uncommittedRepository: UncommittedRepository,
     private val selectionHelper: UncommittedChangesNextSelectionHelper,

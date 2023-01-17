@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -17,7 +17,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChangesInteractorTest {
+class ChangesManagerTest {
 
     @RelaxedMockK
     lateinit var mockFileRepository: FileRepository
@@ -193,7 +193,7 @@ class ChangesInteractorTest {
         }
     }
 
-    private fun TestScope.sut(init: Sut.() -> Unit = { }): ChangesInteractor = Sut()
+    private fun TestScope.sut(init: Sut.() -> Unit = { }): ChangesManager = Sut()
         .apply(init)
         .apply { context = testScheduler }
         .build()
@@ -203,14 +203,14 @@ class ChangesInteractorTest {
         var fileLines = emptyList<String>()
         var fileDiff: Diff? = null
 
-        fun build(): ChangesInteractor {
+        fun build(): ChangesManager {
             coEvery { mockChangesRepository.updateIndex(any(), any()) } returns Unit
             coEvery { mockFileRepository.getFileLines(any()) } returns fileLines
             coEvery { mockDiffRepository.getStagedFileDiff(any()) } answers {
                 fileDiff ?: error("not implemented")
             }
 
-            return ChangesInteractor(
+            return ChangesManager(
                 fileRepository = mockFileRepository,
                 diffRepository = mockDiffRepository,
                 changesRepository = mockChangesRepository,

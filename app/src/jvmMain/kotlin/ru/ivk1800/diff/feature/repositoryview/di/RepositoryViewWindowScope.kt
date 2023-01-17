@@ -9,25 +9,25 @@ import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
-import ru.ivk1800.diff.feature.repositoryview.presentation.ChangesInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitInfoMapper
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitItemMapper
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoItemMapper
-import ru.ivk1800.diff.feature.repositoryview.presentation.DiffOperationsInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEventHandler
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
 import ru.ivk1800.diff.feature.repositoryview.presentation.SelectionCoordinator
-import ru.ivk1800.diff.feature.repositoryview.presentation.UncommittedChangesInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.ChangesManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsTableManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffOperationsManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.FilesInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.WorkspaceManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitInfoMapper
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitItemMapper
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.FileStatusStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.HistoryStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.RepositoryViewStateComposer
-import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import ru.ivk1800.diff.window.DialogManager
@@ -80,8 +80,8 @@ class RepositoryViewWindowScope(
         )
     }
 
-    private val diffInfoInteractor by lazy {
-        DiffInfoInteractor(
+    private val diffInfoManager by lazy {
+        DiffInfoManager(
             diffRepository = diffRepository,
             commitsRepository = commitsRepository,
             diffInfoItemMapper = DiffInfoItemMapper(),
@@ -89,11 +89,11 @@ class RepositoryViewWindowScope(
         )
     }
 
-    private val diffOperationsInteractor by lazy {
-        DiffOperationsInteractor(
-            filesInfoInteractor,
-            diffInfoInteractor,
-            changesInteractor,
+    private val diffOperationsManager by lazy {
+        DiffOperationsManager(
+            filesInfoManager,
+            diffInfoManager,
+            changesManager,
         )
     }
 
@@ -101,23 +101,23 @@ class RepositoryViewWindowScope(
         CommitInfoMapper()
     }
 
-    private val commitInfoInteractor by lazy {
-        CommitInfoInteractor(
+    private val commitInfoManager by lazy {
+        CommitInfoManager(
             commitsRepository = commitsRepository,
             commitInfoMapper = commitInfoMapper,
             errorTransformer = errorTransformer,
         )
     }
 
-    private val commitsInteractor by lazy {
-        CommitsInteractor(
+    private val commitsManager by lazy {
+        CommitsManager(
             commitsRepository = commitsRepository,
             commitItemMapper = CommitItemMapper(),
         )
     }
 
-    private val changesInteractor by lazy {
-        ChangesInteractor(
+    private val changesManager by lazy {
+        ChangesManager(
             fileRepository = fileRepository,
             diffRepository = diffRepository,
             changesRepository = changesRepository,
@@ -138,27 +138,27 @@ class RepositoryViewWindowScope(
         )
     }
 
-    private val uncommittedChangesInteractor by lazy {
-        UncommittedChangesInteractor(
+    private val uncommittedChangesManager by lazy {
+        UncommittedChangesManager(
             statusRepository = statusRepository,
             uncommittedRepository = uncommittedRepository,
         )
     }
 
-    private val commitsTableInteractor by lazy {
-        CommitsTableInteractor(commitsInteractor, uncommittedChangesInteractor, diffInfoInteractor)
+    private val commitsTableManager by lazy {
+        CommitsTableManager(commitsManager, uncommittedChangesManager, diffInfoManager)
     }
 
-    private val filesInfoInteractor by lazy {
-        FilesInfoInteractor(commitInfoInteractor, uncommittedChangesInteractor, commitsTableInteractor)
+    private val filesInfoManager by lazy {
+        FilesInfoManager(commitInfoManager, uncommittedChangesManager, commitsTableManager)
     }
 
     private val selectionCoordinator by lazy {
         SelectionCoordinator(
-            commitsTableInteractor,
-            commitInfoInteractor,
-            diffInfoInteractor,
-            uncommittedChangesInteractor,
+            commitsTableManager,
+            commitInfoManager,
+            diffInfoManager,
+            uncommittedChangesManager,
         )
     }
 
@@ -166,22 +166,22 @@ class RepositoryViewWindowScope(
         ErrorTransformer()
     }
 
-    private val workspaceInteractor by lazy {
-        WorkspaceInteractor()
+    private val workspaceManager by lazy {
+        WorkspaceManager()
     }
 
     private val historyStateComposer by lazy {
         HistoryStateComposer(
-            filesInfoInteractor,
-            commitsTableInteractor,
-            diffInfoInteractor,
+            filesInfoManager,
+            commitsTableManager,
+            diffInfoManager,
         )
     }
 
     private val fileStatusStateComposer by lazy {
         FileStatusStateComposer(
-            uncommittedChangesInteractor,
-            diffInfoInteractor,
+            uncommittedChangesManager,
+            diffInfoManager,
         )
     }
 
@@ -189,19 +189,19 @@ class RepositoryViewWindowScope(
         RepositoryViewStateComposer(
             historyStateComposer,
             fileStatusStateComposer,
-            workspaceInteractor,
+            workspaceManager,
         )
     }
 
     private val repositoryViewEventHandler by lazy {
         RepositoryViewEventHandler(
             repositoryDirectory = repoPath,
-            commitInfoInteractor = commitInfoInteractor,
-            diffInfoInteractor = diffInfoInteractor,
-            uncommittedChangesInteractor = uncommittedChangesInteractor,
+            commitInfoManager = commitInfoManager,
+            diffInfoManager = diffInfoManager,
+            uncommittedChangesManager = uncommittedChangesManager,
             selectionCoordinator = selectionCoordinator,
-            commitsTableInteractor = commitsTableInteractor,
-            diffOperationsInteractor = diffOperationsInteractor,
+            commitsTableManager = commitsTableManager,
+            diffOperationsManager = diffOperationsManager,
             router = dependencies.router,
             errorTransformer = errorTransformer,
             dialogRouter = object : DialogRouter {
@@ -209,13 +209,13 @@ class RepositoryViewWindowScope(
                     dialogManager.show(dialog)
                 }
             },
-            workspaceInteractor = workspaceInteractor,
+            workspaceManager = workspaceManager,
         )
     }
 
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
-            uncommittedChangesInteractor = uncommittedChangesInteractor,
+            uncommittedChangesManager = uncommittedChangesManager,
             errorTransformer = errorTransformer,
             dialogRouter = object : DialogRouter {
                 override fun show(dialog: DialogRouter.Dialog) {
@@ -229,13 +229,13 @@ class RepositoryViewWindowScope(
 
     fun dispose() {
         repositoryViewEventHandler.dispose()
-        diffOperationsInteractor.dispose()
-        commitsInteractor.dispose()
-        uncommittedChangesInteractor.dispose()
-        commitInfoInteractor.dispose()
-        diffInfoInteractor.dispose()
-        commitsTableInteractor.dispose()
-        filesInfoInteractor.dispose()
+        diffOperationsManager.dispose()
+        commitsManager.dispose()
+        uncommittedChangesManager.dispose()
+        commitInfoManager.dispose()
+        diffInfoManager.dispose()
+        commitsTableManager.dispose()
+        filesInfoManager.dispose()
         selectionCoordinator.dispose()
     }
 }

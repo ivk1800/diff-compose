@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,10 +15,10 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableSta
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 
-class FilesInfoInteractor(
-    private val commitInfoInteractor: CommitInfoInteractor,
-    private val uncommittedChangesInteractor: UncommittedChangesInteractor,
-    private val commitsTableInteractor: CommitsTableInteractor,
+class FilesInfoManager(
+    private val commitInfoManager: CommitInfoManager,
+    private val uncommittedChangesManager: UncommittedChangesManager,
+    private val commitsTableManager: CommitsTableManager,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -31,9 +31,9 @@ class FilesInfoInteractor(
 
     private fun getFilesInfoStateFlow(): Flow<FilesInfoState> =
         combine(
-            commitInfoInteractor.state,
-            uncommittedChangesInteractor.state,
-            commitsTableInteractor.state,
+            commitInfoManager.state,
+            uncommittedChangesManager.state,
+            commitsTableManager.state,
         ) { commitInfo, uncommittedChanges, commitsTable ->
             if (commitInfo !is CommitInfoState.None) {
                 FilesInfoState.Commit(commitInfo)

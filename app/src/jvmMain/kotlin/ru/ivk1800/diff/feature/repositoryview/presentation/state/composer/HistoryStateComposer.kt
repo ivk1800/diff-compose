@@ -5,24 +5,24 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import ru.ivk1800.diff.feature.repositoryview.presentation.CommitsTableInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.DiffInfoInteractor
-import ru.ivk1800.diff.feature.repositoryview.presentation.FilesInfoInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsTableManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.FilesInfoManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.HistoryState
 
 class HistoryStateComposer(
-    private val filesInfoInteractor: FilesInfoInteractor,
-    private val commitsTableInteractor: CommitsTableInteractor,
-    private val diffInfoInteractor: DiffInfoInteractor,
+    private val filesInfoManager: FilesInfoManager,
+    private val commitsTableManager: CommitsTableManager,
+    private val diffInfoManager: DiffInfoManager,
 ) {
     fun getState(scope: CoroutineScope): StateFlow<HistoryState> =
         combine(
-            filesInfoInteractor.state,
-            commitsTableInteractor.state,
-            diffInfoInteractor.state,
+            filesInfoManager.state,
+            commitsTableManager.state,
+            diffInfoManager.state,
         ) { activeState, commitsTableState, diffInfoState ->
             HistoryState(
                 commitsTableState = commitsTableState,

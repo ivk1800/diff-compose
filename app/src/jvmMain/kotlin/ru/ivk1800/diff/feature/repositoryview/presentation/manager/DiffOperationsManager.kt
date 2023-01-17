@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,20 +15,20 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.state.FilesInfoState
 import kotlin.coroutines.CoroutineContext
 
 // TODO: move from presentation folder
-class DiffOperationsInteractor internal constructor(
-    private val filesInfoInteractor: FilesInfoInteractor,
-    private val diffInfoInteractor: DiffInfoInteractor,
-    private val changesInteractor: ChangesInteractor,
+class DiffOperationsManager internal constructor(
+    private val filesInfoManager: FilesInfoManager,
+    private val diffInfoManager: DiffInfoManager,
+    private val changesManager: ChangesManager,
     context: CoroutineContext,
 ) {
     constructor(
-        filesInfoInteractor: FilesInfoInteractor,
-        diffInfoInteractor: DiffInfoInteractor,
-        changesInteractor: ChangesInteractor,
+        filesInfoManager: FilesInfoManager,
+        diffInfoManager: DiffInfoManager,
+        changesManager: ChangesManager,
     ) : this(
-        filesInfoInteractor,
-        diffInfoInteractor,
-        changesInteractor,
+        filesInfoManager,
+        diffInfoManager,
+        changesManager,
         Dispatchers.IO,
     )
 
@@ -48,7 +48,7 @@ class DiffOperationsInteractor internal constructor(
             throw IllegalStateException("Unable to unstage hunk", error)
         }
 
-        val result = changesInteractor.removeFromIndex(fileId.path, hunk)
+        val result = changesManager.removeFromIndex(fileId.path, hunk)
         val error = result.exceptionOrNull()
         if (error != null) {
             throw error
@@ -61,7 +61,7 @@ class DiffOperationsInteractor internal constructor(
             throw IllegalStateException("Unable to discard hunk", error)
         }
 
-        val result = changesInteractor.discard(fileId.path, hunk)
+        val result = changesManager.discard(fileId.path, hunk)
         val error = result.exceptionOrNull()
         if (error != null) {
             throw error
@@ -69,7 +69,7 @@ class DiffOperationsInteractor internal constructor(
     }
 
     private fun getHunk(hunkId: DiffInfoItem.Id.Hunk): Pair<CommitFileId, Diff.Hunk> {
-        val file: CommitFileItem = when (val filesState = filesInfoInteractor.state.value) {
+        val file: CommitFileItem = when (val filesState = filesInfoManager.state.value) {
             is FilesInfoState.Commit -> when (filesState.state) {
                 is CommitInfoState.Content -> filesState.state.files.first()
                 is CommitInfoState.Error,
@@ -80,9 +80,9 @@ class DiffOperationsInteractor internal constructor(
             is FilesInfoState.UncommittedChanges -> filesState.state.unstaged.files.first()
         }
 
-        check(diffInfoInteractor.state.value is DiffInfoState.Content) { "Diff is not selected" }
+        check(diffInfoManager.state.value is DiffInfoState.Content) { "Diff is not selected" }
 
-        val hunk: Diff.Hunk? = diffInfoInteractor.getHunk(hunkId)
+        val hunk: Diff.Hunk? = diffInfoManager.getHunk(hunkId)
         checkNotNull(hunk) { "Hunk not found" }
 
         return file.id to hunk

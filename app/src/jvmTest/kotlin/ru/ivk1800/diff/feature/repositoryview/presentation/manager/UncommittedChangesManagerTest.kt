@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import app.cash.turbine.test
 import io.mockk.MockKAnnotations
@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class UncommittedChangesInteractorTest {
+class UncommittedChangesManagerTest {
 
     @RelaxedMockK
     lateinit var mockStatusRepository: StatusRepository
@@ -280,7 +280,7 @@ class UncommittedChangesInteractorTest {
     private fun UncommittedChangesState.asContent(): UncommittedChangesState.Content =
         this as UncommittedChangesState.Content
 
-    private fun TestScope.sut(init: Sut.() -> Unit = { }): UncommittedChangesInteractor = Sut()
+    private fun TestScope.sut(init: Sut.() -> Unit = { }): UncommittedChangesManager = Sut()
         .apply(init)
         .apply { context = testScheduler }
         .build()
@@ -292,7 +292,7 @@ class UncommittedChangesInteractorTest {
         var nextSelectedUnstagedFile: CommitFileId? = null
         var context: CoroutineContext? = null
 
-        fun build(): UncommittedChangesInteractor {
+        fun build(): UncommittedChangesManager {
             coEvery { mockStatusRepository.getStatus() } returns Status(
                 staged = staged,
                 unstaged = unstaged,
@@ -304,7 +304,7 @@ class UncommittedChangesInteractorTest {
                 } ?: persistentSetOf()
             )
 
-            return UncommittedChangesInteractor(
+            return UncommittedChangesManager(
                 statusRepository = mockStatusRepository,
                 uncommittedRepository = mockUncommittedRepository,
                 selectionHelper = mockUncommittedChangesNextSelectionHelper,

@@ -5,7 +5,12 @@ import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import org.junit.Before
-import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsTableManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffOperationsManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.WorkspaceManager
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
@@ -18,16 +23,16 @@ class RepositoryViewEventHandlerTest {
     lateinit var mockDialogRouter: DialogRouter
 
     @RelaxedMockK
-    lateinit var mockDiffOperationsInteractor: DiffOperationsInteractor
+    lateinit var mockDiffOperationsManager: DiffOperationsManager
 
     @RelaxedMockK
     lateinit var mockErrorTransformer: ErrorTransformer
 
     @RelaxedMockK
-    lateinit var mockCommitInfoInteractor: CommitInfoInteractor
+    lateinit var mockCommitInfoManager: CommitInfoManager
 
     @RelaxedMockK
-    lateinit var mockCommitsTableInteractor: CommitsTableInteractor
+    lateinit var mockCommitsTableManager: CommitsTableManager
 
     @RelaxedMockK
     lateinit var mockSelectionCoordinator: SelectionCoordinator
@@ -36,13 +41,13 @@ class RepositoryViewEventHandlerTest {
     lateinit var mockRepositoryViewRouter: RepositoryViewRouter
 
     @RelaxedMockK
-    lateinit var mockUncommittedChangesInteractor: UncommittedChangesInteractor
+    lateinit var mockUncommittedChangesManager: UncommittedChangesManager
 
     @RelaxedMockK
-    lateinit var mockDiffInfoInteractor: DiffInfoInteractor
+    lateinit var mockDiffInfoManager: DiffInfoManager
 
     @RelaxedMockK
-    lateinit var mockWorkspaceInteractor: WorkspaceInteractor
+    lateinit var mockWorkspaceManager: WorkspaceManager
 
     @Before
     fun before() {
@@ -61,15 +66,15 @@ class RepositoryViewEventHandlerTest {
             return RepositoryViewEventHandler(
                 repositoryDirectory = File(""),
                 dialogRouter = mockDialogRouter,
-                diffOperationsInteractor = mockDiffOperationsInteractor,
+                diffOperationsManager = mockDiffOperationsManager,
                 errorTransformer = mockErrorTransformer,
-                commitInfoInteractor = mockCommitInfoInteractor,
-                commitsTableInteractor = mockCommitsTableInteractor,
+                commitInfoManager = mockCommitInfoManager,
+                commitsTableManager = mockCommitsTableManager,
                 selectionCoordinator = mockSelectionCoordinator,
                 router = mockRepositoryViewRouter,
-                uncommittedChangesInteractor = mockUncommittedChangesInteractor,
-                diffInfoInteractor = mockDiffInfoInteractor,
-                workspaceInteractor = mockWorkspaceInteractor,
+                uncommittedChangesManager = mockUncommittedChangesManager,
+                diffInfoManager = mockDiffInfoManager,
+                workspaceManager = mockWorkspaceManager,
                 context = requireNotNull(context),
             )
         }

@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import app.cash.turbine.test
 import io.mockk.MockKAnnotations
@@ -17,12 +17,13 @@ import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DiffInfoInteractorTest {
+class DiffInfoManagerTest {
 
     @RelaxedMockK
     lateinit var mockDiffRepository: DiffRepository
@@ -55,7 +56,7 @@ class DiffInfoInteractorTest {
         sut.state.test {
             sut.selectUncommittedFiles(
                 fileName = "",
-                type = DiffInfoInteractor.UncommittedChangesType.Staged,
+                type = DiffInfoManager.UncommittedChangesType.Staged,
             )
             awaitItem()
             sut.refresh()
@@ -78,7 +79,7 @@ class DiffInfoInteractorTest {
         sut.state.test {
             sut.selectUncommittedFiles(
                 fileName = "",
-                type = DiffInfoInteractor.UncommittedChangesType.Staged,
+                type = DiffInfoManager.UncommittedChangesType.Staged,
             )
             awaitItem()
             sut.refresh()
@@ -87,7 +88,7 @@ class DiffInfoInteractorTest {
         coVerify(exactly = 2) { mockDiffRepository.getStagedFileDiff(any()) }
     }
 
-    private fun TestScope.sut(init: Sut.() -> Unit = { }): DiffInfoInteractor = Sut()
+    private fun TestScope.sut(init: Sut.() -> Unit = { }): DiffInfoManager = Sut()
         .apply(init)
         .apply { context = testScheduler }
         .build()
@@ -98,7 +99,7 @@ class DiffInfoInteractorTest {
         var stagedFileDiff: Diff? = null
         var mappedLines: ImmutableList<DiffInfoItem> = persistentListOf()
 
-        fun build(): DiffInfoInteractor {
+        fun build(): DiffInfoManager {
             coEvery { mockDiffRepository.getUnstagedFileDiff(any()) } answers {
                 unstagedFileDiff ?: error("not implemented")
             }
@@ -107,7 +108,7 @@ class DiffInfoInteractorTest {
             }
             every { mockDiffInfoItemMapper.mapToItems(any(), any(), any()) } returns mappedLines
 
-            return DiffInfoInteractor(
+            return DiffInfoManager(
                 diffRepository = mockDiffRepository,
                 commitsRepository = mockCommitsRepository,
                 diffInfoItemMapper = mockDiffInfoItemMapper,

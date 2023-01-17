@@ -8,8 +8,13 @@ import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.SidePanelEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsTableManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffOperationsManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.WorkspaceManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
-import ru.ivk1800.diff.feature.repositoryview.presentation.workspace.WorkspaceInteractor
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
@@ -18,15 +23,15 @@ import kotlin.coroutines.CoroutineContext
 class RepositoryViewEventHandler internal constructor(
     private val repositoryDirectory: File,
     private val dialogRouter: DialogRouter,
-    private val diffOperationsInteractor: DiffOperationsInteractor,
+    private val diffOperationsManager: DiffOperationsManager,
     private val errorTransformer: ErrorTransformer,
-    private val commitInfoInteractor: CommitInfoInteractor,
-    private val commitsTableInteractor: CommitsTableInteractor,
+    private val commitInfoManager: CommitInfoManager,
+    private val commitsTableManager: CommitsTableManager,
     private val selectionCoordinator: SelectionCoordinator,
     private val router: RepositoryViewRouter,
-    private val uncommittedChangesInteractor: UncommittedChangesInteractor,
-    private val diffInfoInteractor: DiffInfoInteractor,
-    private val workspaceInteractor: WorkspaceInteractor,
+    private val uncommittedChangesManager: UncommittedChangesManager,
+    private val diffInfoManager: DiffInfoManager,
+    private val workspaceManager: WorkspaceManager,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
@@ -34,37 +39,37 @@ class RepositoryViewEventHandler internal constructor(
     constructor(
         repositoryDirectory: File,
         dialogRouter: DialogRouter,
-        diffOperationsInteractor: DiffOperationsInteractor,
+        diffOperationsManager: DiffOperationsManager,
         errorTransformer: ErrorTransformer,
-        commitInfoInteractor: CommitInfoInteractor,
-        commitsTableInteractor: CommitsTableInteractor,
+        commitInfoManager: CommitInfoManager,
+        commitsTableManager: CommitsTableManager,
         selectionCoordinator: SelectionCoordinator,
         router: RepositoryViewRouter,
-        uncommittedChangesInteractor: UncommittedChangesInteractor,
-        diffInfoInteractor: DiffInfoInteractor,
-        workspaceInteractor: WorkspaceInteractor
+        uncommittedChangesManager: UncommittedChangesManager,
+        diffInfoManager: DiffInfoManager,
+        workspaceManager: WorkspaceManager
     ) : this(
         repositoryDirectory,
         dialogRouter,
-        diffOperationsInteractor,
+        diffOperationsManager,
         errorTransformer,
-        commitInfoInteractor,
-        commitsTableInteractor,
+        commitInfoManager,
+        commitsTableManager,
         selectionCoordinator,
         router,
-        uncommittedChangesInteractor,
-        diffInfoInteractor,
-        workspaceInteractor,
+        uncommittedChangesManager,
+        diffInfoManager,
+        workspaceManager,
         Dispatchers.Main,
     )
 
     fun onEvent(value: RepositoryViewEvent) {
         when (value) {
             RepositoryViewEvent.OnReload -> {
-                commitInfoInteractor.selectCommit(null)
-                diffInfoInteractor.unselect()
-                commitsTableInteractor.reload()
-                uncommittedChangesInteractor.check()
+                commitInfoManager.selectCommit(null)
+                diffInfoManager.unselect()
+                commitsTableManager.reload()
+                uncommittedChangesManager.check()
             }
 
             RepositoryViewEvent.OpenTerminal -> router.toTerminal(repositoryDirectory)
@@ -74,7 +79,7 @@ class RepositoryViewEventHandler internal constructor(
 
     fun onSidePanelEvent(value: SidePanelEvent) {
         when (value) {
-            is SidePanelEvent.OnSectionUnselected -> workspaceInteractor.selectSection(value.value)
+            is SidePanelEvent.OnSectionUnselected -> workspaceManager.selectSection(value.value)
         }
     }
 
@@ -85,26 +90,26 @@ class RepositoryViewEventHandler internal constructor(
                 selectionCoordinator.selectCommits(value.items)
             }
 
-            HistoryEvent.OnCommitsUnselected -> commitInfoInteractor.selectCommit(null)
+            HistoryEvent.OnCommitsUnselected -> commitInfoManager.selectCommit(null)
             is HistoryEvent.OnFilesSelected ->
                 selectionCoordinator.selectCommitFiles(value.items)
 
-            HistoryEvent.OnLoadMoreCommits -> commitsTableInteractor.loadMore()
+            HistoryEvent.OnLoadMoreCommits -> commitsTableManager.loadMore()
             HistoryEvent.OnUncommittedChangesSelected -> selectionCoordinator.selectUncommittedChanges()
 
             is HistoryEvent.UncommittedChanges ->
                 when (value) {
                     HistoryEvent.UncommittedChanges.OnAddAllToStaged ->
-                        uncommittedChangesInteractor.addAllToStaged()
+                        uncommittedChangesManager.addAllToStaged()
 
                     HistoryEvent.UncommittedChanges.OnRemoveAllFromStaged ->
-                        uncommittedChangesInteractor.removeAllFromStaged()
+                        uncommittedChangesManager.removeAllFromStaged()
 
                     is HistoryEvent.UncommittedChanges.OnAddFilesToStaged ->
-                        uncommittedChangesInteractor.addFilesToStaged(value.ids)
+                        uncommittedChangesManager.addFilesToStaged(value.ids)
 
                     is HistoryEvent.UncommittedChanges.OnRemoveFilesFromStaged ->
-                        uncommittedChangesInteractor.removeFilesFromStaged(value.ids)
+                        uncommittedChangesManager.removeFilesFromStaged(value.ids)
 
                     is HistoryEvent.UncommittedChanges.OnStatedFilesSelected ->
                         selectionCoordinator.selectStatedFiles(value.items)
@@ -131,7 +136,7 @@ class RepositoryViewEventHandler internal constructor(
 
     private fun onUnstageHunk(event: HistoryEvent.Diff.OnUnstageHunk) {
         scope.launch {
-            val result = diffOperationsInteractor.unstageHunk(event.hunkId)
+            val result = diffOperationsManager.unstageHunk(event.hunkId)
             val error = result.exceptionOrNull()
             if (error != null) {
                 dialogRouter.show(
@@ -141,8 +146,8 @@ class RepositoryViewEventHandler internal constructor(
                     )
                 )
             } else {
-                uncommittedChangesInteractor.check()
-                diffInfoInteractor.refresh()
+                uncommittedChangesManager.check()
+                diffInfoManager.refresh()
             }
         }
     }
@@ -163,7 +168,7 @@ class RepositoryViewEventHandler internal constructor(
 
     private fun proceedDiscardHunk(hunkId: DiffInfoItem.Id.Hunk) {
         scope.launch {
-            val result = diffOperationsInteractor.discardHunk(hunkId)
+            val result = diffOperationsManager.discardHunk(hunkId)
             val error = result.exceptionOrNull()
             if (error != null) {
                 dialogRouter.show(
@@ -173,8 +178,8 @@ class RepositoryViewEventHandler internal constructor(
                     )
                 )
             } else {
-                uncommittedChangesInteractor.check()
-                diffInfoInteractor.refresh()
+                uncommittedChangesManager.check()
+                diffInfoManager.refresh()
             }
         }
     }

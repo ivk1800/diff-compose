@@ -12,7 +12,7 @@ class WindowsManager {
     private val _state = MutableStateFlow(
         persistentListOf(
             Window.Bookmarks,
-            Window.Repository(RepositoryId("/Users/ivan/repos/compose/diff-compose"))
+            Window.Repository(RepositoryId("/Users/ivan/repos/test-repo"))
         )
     )
     val state: StateFlow<ImmutableList<Window>>

@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import ru.ivk1800.diff.feature.repositoryview.domain.ChangesRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
@@ -7,7 +7,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.vcs.git.VcsException
 
 // TODO: move from presentation folder
-class ChangesInteractor(
+class ChangesManager(
     private val fileRepository: FileRepository,
     private val diffRepository: DiffRepository,
     private val changesRepository: ChangesRepository,

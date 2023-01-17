@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -24,11 +24,12 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CommitsInteractor(
+class CommitsManager(
     private val commitsRepository: CommitsRepository,
     private val commitItemMapper: CommitItemMapper,
 ) {

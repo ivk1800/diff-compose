@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
@@ -23,13 +23,14 @@ import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.DiffInfoItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.DiffInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DiffInfoInteractor internal constructor(
+class DiffInfoManager internal constructor(
     private val diffRepository: DiffRepository,
     private val commitsRepository: CommitsRepository,
     private val diffInfoItemMapper: DiffInfoItemMapper,

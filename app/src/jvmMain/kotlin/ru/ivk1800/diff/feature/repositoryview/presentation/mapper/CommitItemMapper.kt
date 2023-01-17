@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit

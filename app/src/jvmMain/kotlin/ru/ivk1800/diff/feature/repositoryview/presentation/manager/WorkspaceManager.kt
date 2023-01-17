@@ -1,10 +1,10 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation.workspace
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.WorkspaceState
 
-class WorkspaceInteractor {
+class WorkspaceManager {
     private val _state = MutableStateFlow(
         WorkspaceState(
             activeSection = WorkspaceState.Section.History,

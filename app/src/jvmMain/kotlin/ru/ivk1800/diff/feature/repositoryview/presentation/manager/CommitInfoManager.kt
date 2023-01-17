@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
@@ -21,13 +21,14 @@ import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitInfoMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
 import ru.ivk1800.diff.presentation.ErrorTransformer
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CommitInfoInteractor(
+class CommitInfoManager(
     private val commitsRepository: CommitsRepository,
     private val commitInfoMapper: CommitInfoMapper,
     private val errorTransformer: ErrorTransformer,

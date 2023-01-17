@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.stateIn
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.HistoryEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.RepositoryViewEvent
 import ru.ivk1800.diff.feature.repositoryview.presentation.event.SidePanelEvent
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.RepositoryViewState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.RepositoryViewStateComposer
 import ru.ivk1800.diff.presentation.BaseViewModel
@@ -19,7 +20,7 @@ class RepositoryViewViewModel(
     private val errorTransformer: ErrorTransformer,
     private val repositoryViewEventHandler: RepositoryViewEventHandler,
     repositoryViewStateComposer: RepositoryViewStateComposer,
-    uncommittedChangesInteractor: UncommittedChangesInteractor,
+    uncommittedChangesManager: UncommittedChangesManager,
 ) : BaseViewModel() {
 
     private val _state = repositoryViewStateComposer
@@ -34,8 +35,8 @@ class RepositoryViewViewModel(
         get() = _state
 
     init {
-        uncommittedChangesInteractor.check()
-        uncommittedChangesInteractor.errors
+        uncommittedChangesManager.check()
+        uncommittedChangesManager.errors
             .onEach { error ->
                 dialogRouter.show(
                     DialogRouter.Dialog.Error(

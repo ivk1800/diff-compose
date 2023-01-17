@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.mutate
@@ -17,10 +17,10 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChangesState
 
-class CommitsTableInteractor(
-    private val commitsInteractor: CommitsInteractor,
-    private val uncommittedChangesInteractor: UncommittedChangesInteractor,
-    private val diffInfoInteractor: DiffInfoInteractor,
+class CommitsTableManager(
+    private val commitsManager: CommitsManager,
+    private val uncommittedChangesManager: UncommittedChangesManager,
+    private val diffInfoManager: DiffInfoManager,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -28,8 +28,8 @@ class CommitsTableInteractor(
 
     private val _state =
         combine(
-            commitsInteractor.state,
-            uncommittedChangesInteractor.state,
+            commitsManager.state,
+            uncommittedChangesManager.state,
             uncommittedChangesSelected,
         ) { commitsTableState, uncommittedChangesState, isUncommittedChangesSelected ->
             when (uncommittedChangesState) {
@@ -65,19 +65,19 @@ class CommitsTableInteractor(
 
     fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
         uncommittedChangesSelected.value = false
-        commitsInteractor.selectCommits(commits)
-        diffInfoInteractor.unselect()
+        commitsManager.selectCommits(commits)
+        diffInfoManager.unselect()
     }
 
     fun selectUncommittedChanges() {
         uncommittedChangesSelected.value = true
-        commitsInteractor.selectCommits(persistentSetOf())
-        diffInfoInteractor.unselect()
+        commitsManager.selectCommits(persistentSetOf())
+        diffInfoManager.unselect()
     }
 
-    fun reload() = commitsInteractor.reload()
+    fun reload() = commitsManager.reload()
 
-    fun loadMore() = commitsInteractor.loadMore()
+    fun loadMore() = commitsManager.loadMore()
 
     fun dispose() = scope.cancel()
 }

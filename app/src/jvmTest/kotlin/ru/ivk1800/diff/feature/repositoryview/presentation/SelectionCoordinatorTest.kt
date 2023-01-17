@@ -13,6 +13,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsTableManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
@@ -24,16 +28,16 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalCoroutinesApi::class)
 class SelectionCoordinatorTest {
     @RelaxedMockK
-    lateinit var mockCommitsTableInteractor: CommitsTableInteractor
+    lateinit var mockCommitsTableManager: CommitsTableManager
 
     @RelaxedMockK
-    lateinit var mockCommitInfoInteractor: CommitInfoInteractor
+    lateinit var mockCommitInfoManager: CommitInfoManager
 
     @RelaxedMockK
-    lateinit var mockDiffInfoInteractor: DiffInfoInteractor
+    lateinit var mockDiffInfoManager: DiffInfoManager
 
     @RelaxedMockK
-    lateinit var mockUncommittedChangesInteractor: UncommittedChangesInteractor
+    lateinit var mockUncommittedChangesManager: UncommittedChangesManager
 
     @Before
     fun before() {
@@ -43,7 +47,7 @@ class SelectionCoordinatorTest {
     @Test
     fun `should select commits`() = runTest {
         sut().selectCommits(persistentSetOf())
-        verify { mockCommitsTableInteractor.selectCommits(persistentSetOf()) }
+        verify { mockCommitsTableManager.selectCommits(persistentSetOf()) }
     }
 
     @Test
@@ -51,7 +55,7 @@ class SelectionCoordinatorTest {
         sut {
             commitsTableState = CommitsTableState.Loading
         }.selectCommits(persistentSetOf())
-        verify { mockCommitInfoInteractor.selectCommit(null) }
+        verify { mockCommitInfoManager.selectCommit(null) }
     }
 
     @Test
@@ -62,7 +66,7 @@ class SelectionCoordinatorTest {
                 commits = mockk(),
             )
         }.selectCommits(persistentSetOf())
-        verify { mockCommitInfoInteractor.selectCommit(CommitId("")) }
+        verify { mockCommitInfoManager.selectCommit(CommitId("")) }
     }
 
     // region commits selection
@@ -70,7 +74,7 @@ class SelectionCoordinatorTest {
     @Test
     fun `should reset selected files if select nothing`() = runTest {
         sut().selectCommitFiles(persistentSetOf())
-        verify { mockCommitInfoInteractor.selectFiles(persistentSetOf()) }
+        verify { mockCommitInfoManager.selectFiles(persistentSetOf()) }
     }
 
     @Test
@@ -84,7 +88,7 @@ class SelectionCoordinatorTest {
                 description = mockk(),
             )
         }
-        verify { mockDiffInfoInteractor.onFileSelected(any(), any()) }
+        verify { mockDiffInfoManager.onFileSelected(any(), any()) }
     }
 
     @Test
@@ -96,7 +100,7 @@ class SelectionCoordinatorTest {
                 description = mockk(),
             )
         }
-        verify { mockDiffInfoInteractor.unselect() }
+        verify { mockDiffInfoManager.unselect() }
     }
 
     // endregion commits selection
@@ -108,7 +112,7 @@ class SelectionCoordinatorTest {
         sut {
             uncommittedChangesState = UncommittedChangesState.None
         }
-        verify { mockDiffInfoInteractor.unselect() }
+        verify { mockDiffInfoManager.unselect() }
     }
 
     @Test
@@ -130,9 +134,9 @@ class SelectionCoordinatorTest {
             )
         }
         verify {
-            mockDiffInfoInteractor.selectUncommittedFiles(
+            mockDiffInfoManager.selectUncommittedFiles(
                 fileName = "",
-                type = DiffInfoInteractor.UncommittedChangesType.Staged,
+                type = DiffInfoManager.UncommittedChangesType.Staged,
             )
         }
     }
@@ -156,9 +160,9 @@ class SelectionCoordinatorTest {
             )
         }
         verify {
-            mockDiffInfoInteractor.selectUncommittedFiles(
+            mockDiffInfoManager.selectUncommittedFiles(
                 fileName = "",
-                type = DiffInfoInteractor.UncommittedChangesType.Unstaged,
+                type = DiffInfoManager.UncommittedChangesType.Unstaged,
             )
         }
     }
@@ -180,7 +184,7 @@ class SelectionCoordinatorTest {
             )
         }
         verify {
-            mockDiffInfoInteractor.unselect()
+            mockDiffInfoManager.unselect()
         }
     }
 
@@ -200,15 +204,15 @@ class SelectionCoordinatorTest {
         var context: CoroutineContext? = null
 
         fun build(): SelectionCoordinator {
-            every { mockCommitsTableInteractor.state } returns MutableStateFlow(commitsTableState)
-            every { mockCommitInfoInteractor.state } returns MutableStateFlow(commitInfoState)
-            every { mockUncommittedChangesInteractor.state } returns MutableStateFlow(uncommittedChangesState)
+            every { mockCommitsTableManager.state } returns MutableStateFlow(commitsTableState)
+            every { mockCommitInfoManager.state } returns MutableStateFlow(commitInfoState)
+            every { mockUncommittedChangesManager.state } returns MutableStateFlow(uncommittedChangesState)
 
             return SelectionCoordinator(
-                commitsTableInteractor = mockCommitsTableInteractor,
-                commitInfoInteractor = mockCommitInfoInteractor,
-                diffInfoInteractor = mockDiffInfoInteractor,
-                uncommittedChangesInteractor = mockUncommittedChangesInteractor,
+                commitsTableManager = mockCommitsTableManager,
+                commitInfoManager = mockCommitInfoManager,
+                diffInfoManager = mockDiffInfoManager,
+                uncommittedChangesManager = mockUncommittedChangesManager,
                 context = requireNotNull(context)
             )
         }

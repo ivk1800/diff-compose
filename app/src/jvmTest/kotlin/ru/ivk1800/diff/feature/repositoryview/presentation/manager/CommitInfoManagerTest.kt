@@ -1,4 +1,4 @@
-package ru.ivk1800.diff.feature.repositoryview.presentation
+package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
 import app.cash.turbine.test
 import io.mockk.MockKAnnotations
@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitInfoMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitId
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitInfoState
@@ -16,7 +17,7 @@ import ru.ivk1800.diff.presentation.ErrorTransformer
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CommitInfoInteractorTest {
+class CommitInfoManagerTest {
     @RelaxedMockK
     lateinit var mockCommitsRepository: CommitsRepository
 
@@ -51,10 +52,10 @@ class CommitInfoInteractorTest {
 
     private fun CommitInfoState.asContent(): CommitInfoState.Content = this as CommitInfoState.Content
 
-    private fun sut(): CommitInfoInteractor = Sut().build()
+    private fun sut(): CommitInfoManager = Sut().build()
 
     private inner class Sut {
-        fun build() = CommitInfoInteractor(
+        fun build() = CommitInfoManager(
             commitsRepository = mockCommitsRepository,
             commitInfoMapper = mockCommitInfoMapper,
             errorTransformer = mockErrorTransformer,

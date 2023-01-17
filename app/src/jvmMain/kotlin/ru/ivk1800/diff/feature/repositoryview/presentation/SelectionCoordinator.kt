@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.CommitsTableManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManager
+import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitFileId
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
@@ -19,24 +23,24 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.state.UncommittedChan
 import kotlin.coroutines.CoroutineContext
 
 class SelectionCoordinator internal constructor(
-    private val commitsTableInteractor: CommitsTableInteractor,
-    private val commitInfoInteractor: CommitInfoInteractor,
-    private val diffInfoInteractor: DiffInfoInteractor,
-    private val uncommittedChangesInteractor: UncommittedChangesInteractor,
+    private val commitsTableManager: CommitsTableManager,
+    private val commitInfoManager: CommitInfoManager,
+    private val diffInfoManager: DiffInfoManager,
+    private val uncommittedChangesManager: UncommittedChangesManager,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
 
     constructor(
-        commitsTableInteractor: CommitsTableInteractor,
-        commitInfoInteractor: CommitInfoInteractor,
-        diffInfoInteractor: DiffInfoInteractor,
-        uncommittedChangesInteractor: UncommittedChangesInteractor,
+        commitsTableManager: CommitsTableManager,
+        commitInfoManager: CommitInfoManager,
+        diffInfoManager: DiffInfoManager,
+        uncommittedChangesManager: UncommittedChangesManager,
     ) : this(
-        commitsTableInteractor,
-        commitInfoInteractor,
-        diffInfoInteractor,
-        uncommittedChangesInteractor,
+        commitsTableManager,
+        commitInfoManager,
+        diffInfoManager,
+        uncommittedChangesManager,
         Dispatchers.Main,
     )
 
@@ -48,28 +52,28 @@ class SelectionCoordinator internal constructor(
     }
 
     fun selectCommitFiles(items: ImmutableSet<CommitFileId>) {
-        commitInfoInteractor.selectFiles(items)
+        commitInfoManager.selectFiles(items)
     }
 
     fun selectUncommittedChanges() {
-        commitsTableInteractor.selectUncommittedChanges()
-        commitInfoInteractor.selectCommit(null)
+        commitsTableManager.selectUncommittedChanges()
+        commitInfoManager.selectCommit(null)
     }
 
     fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
-        commitsTableInteractor.selectCommits(commits)
+        commitsTableManager.selectCommits(commits)
     }
 
     fun selectStatedFiles(files: ImmutableSet<CommitFileId>) {
-        uncommittedChangesInteractor.selectStatedFiles(files)
+        uncommittedChangesManager.selectStatedFiles(files)
     }
 
     fun selectUnstatedFiles(files: ImmutableSet<CommitFileId>) {
-        uncommittedChangesInteractor.selectUnstatedFiles(files)
+        uncommittedChangesManager.selectUnstatedFiles(files)
     }
 
     fun selectDiffLines(ids: ImmutableSet<DiffInfoItem.Id.Line>) {
-        diffInfoInteractor.selectLines(ids)
+        diffInfoManager.selectLines(ids)
     }
 
     fun dispose() {
@@ -77,7 +81,7 @@ class SelectionCoordinator internal constructor(
     }
 
     private fun listenSelectedCommits() {
-        commitsTableInteractor.state.map { state ->
+        commitsTableManager.state.map { state ->
             when (state) {
                 is CommitsTableState.Content -> state.selected
                 CommitsTableState.Loading -> persistentSetOf()
@@ -85,7 +89,7 @@ class SelectionCoordinator internal constructor(
         }
             .map { it.filterIsInstance<CommitTableItem.Id.Commit>() }
             .onEach { selectedCommits ->
-                commitInfoInteractor.selectCommit(
+                commitInfoManager.selectCommit(
                     if (selectedCommits.size == 1) {
                         selectedCommits.first().id
                     } else {
@@ -97,7 +101,7 @@ class SelectionCoordinator internal constructor(
     }
 
     private fun listenSelectedCommitFiles() {
-        commitInfoInteractor.state.map {
+        commitInfoManager.state.map {
             when (it) {
                 is CommitInfoState.Content -> it.selected
                 is CommitInfoState.Error,
@@ -105,26 +109,26 @@ class SelectionCoordinator internal constructor(
             }
         }.onEach { selected ->
             if (selected.size == 1) {
-                diffInfoInteractor.onFileSelected(
-                    commitHash = requireNotNull(commitInfoInteractor.selectedCommitHash),
+                diffInfoManager.onFileSelected(
+                    commitHash = requireNotNull(commitInfoManager.selectedCommitHash),
                     path = selected.first().path,
                 )
             } else {
-                diffInfoInteractor.unselect()
+                diffInfoManager.unselect()
             }
         }.launchIn(scope)
     }
 
     private fun listenCommitInfo() {
-        commitInfoInteractor.state
+        commitInfoManager.state
             .onEach {
-                diffInfoInteractor.selectLines(persistentSetOf())
+                diffInfoManager.selectLines(persistentSetOf())
             }
             .launchIn(scope)
     }
 
     private fun listenUncommittedChanges() {
-        uncommittedChangesInteractor.state.map { state ->
+        uncommittedChangesManager.state.map { state ->
             when (state) {
                 is UncommittedChangesState.Content -> {
                     check(!(state.staged.selected.isNotEmpty() && state.unstaged.selected.isNotEmpty())) {
@@ -145,28 +149,28 @@ class SelectionCoordinator internal constructor(
             .distinctUntilChanged()
             .onEach { (type, selected) ->
                 when (type) {
-                    UncommittedChangesType.None -> diffInfoInteractor.unselect()
+                    UncommittedChangesType.None -> diffInfoManager.unselect()
                     UncommittedChangesType.Staged -> {
                         if (selected.size == 1) {
                             val selectedFile = selected.first()
-                            diffInfoInteractor.selectUncommittedFiles(
+                            diffInfoManager.selectUncommittedFiles(
                                 selectedFile.path,
-                                DiffInfoInteractor.UncommittedChangesType.Staged,
+                                DiffInfoManager.UncommittedChangesType.Staged,
                             )
                         } else {
-                            diffInfoInteractor.unselect()
+                            diffInfoManager.unselect()
                         }
                     }
 
                     UncommittedChangesType.Unstaged -> {
                         if (selected.size == 1) {
                             val selectedFile = selected.first()
-                            diffInfoInteractor.selectUncommittedFiles(
+                            diffInfoManager.selectUncommittedFiles(
                                 selectedFile.path,
-                                DiffInfoInteractor.UncommittedChangesType.Unstaged,
+                                DiffInfoManager.UncommittedChangesType.Unstaged,
                             )
                         } else {
-                            diffInfoInteractor.unselect()
+                            diffInfoManager.unselect()
                         }
                     }
                 }
