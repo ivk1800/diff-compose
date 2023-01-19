@@ -8,6 +8,7 @@ import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
+import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
@@ -15,6 +16,7 @@ import ru.ivk1800.vcs.api.command.StatusCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.DiscardCommandImpl
+import ru.ivk1800.vcs.git.command.GetCommitsCommandImpl
 import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
 import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
 import ru.ivk1800.vcs.git.command.ShowCommandImpl
@@ -35,6 +37,7 @@ class GitVcs : Vcs {
     private val diffParser = VcsDiffParser()
     private val separatorBuilder = SeparatorBuilder()
     private val gitLogParser = GitLogParser(separatorBuilder)
+    private val commandContext = Dispatchers.IO
 
     override suspend fun isRepository(directory: File): Boolean =
         withContext(Dispatchers.IO) {
@@ -46,38 +49,8 @@ class GitVcs : Vcs {
             }
         }
 
-    override suspend fun getCommits(
-        directory: File,
-        branchName: String,
-        limit: Int,
-        offset: Int,
-    ): List<VcsCommit> = withContext(Dispatchers.IO) {
-        val pretty = buildString {
-            append(separatorBuilder.startRecordSeparator())
-            append("%n")
-            addOption(GitLogOption.Hash)
-            addOption(GitLogOption.Parents)
-            addOption(GitLogOption.AbbreviatedHash)
-            addOption(GitLogOption.RawBody)
-            addOption(GitLogOption.AuthorName)
-            addOption(GitLogOption.AuthorEmail)
-            addOption(GitLogOption.AuthorDate)
-            addOption(GitLogOption.CommiterName)
-            addOption(GitLogOption.CommiterEmail)
-            addOption(GitLogOption.CommiterDate)
-            addOption(GitLogOption.RefName)
-            append(separatorBuilder.endRecordSeparator())
-        }
-
-        val process = createProcess(
-            directory,
-            "git log --pretty=format:$pretty -n $limit, --skip $offset $branchName",
-        )
-
-        val result = process.inputStream.reader().readText()
-        val error = process.errorStream.reader().readText()
-        gitLogParser.parseLog(result)
-    }
+    override suspend fun getCommitsCommand(directory: Path, options: GetCommitsCommand.Options): GetCommitsCommand =
+        GetCommitsCommandImpl(gitLogParser, separatorBuilder, directory, commandContext, options)
 
     override suspend fun getCommit(directory: File, hash: String): VcsCommit? {
         val process = createProcess(
@@ -235,23 +208,11 @@ class GitVcs : Vcs {
 //        }
     }
 
-    // TODO rename
-    private fun createProcess2(directory: File, command: String): Process =
-        ProcessBuilder(*command.split(" ").toTypedArray())
-            .directory(directory)
-            .start()
-
     private fun createProcess(directory: File, command: String): Process =
         ProcessBuilder(*command.split(" ").toTypedArray())
             .directory(directory)
             .start()
             .apply { waitFor(10, TimeUnit.SECONDS) }
-
-    private fun StringBuilder.addOption(option: GitLogOption) {
-        append("${separatorBuilder.buildStartForOption(option)}%n")
-        append("%${option.value}%n")
-        append("${separatorBuilder.buildEndForOption(option)}%n")
-    }
 
     private companion object {
         val FIELDS = listOf(

@@ -2,6 +2,7 @@ package ru.ivk1800.vcs.api
 
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
+import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
@@ -13,7 +14,7 @@ import java.nio.file.Path
 interface Vcs {
     suspend fun isRepository(directory: File): Boolean
 
-    suspend fun getCommits(directory: File, branchName: String, limit: Int, offset: Int): List<VcsCommit>
+    suspend fun getCommitsCommand(directory: Path, options: GetCommitsCommand.Options): GetCommitsCommand
 
     suspend fun getCommit(directory: File, hash: String): VcsCommit?
 

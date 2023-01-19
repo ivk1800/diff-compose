@@ -105,7 +105,7 @@ class CommitsManager(
     private fun getInitialCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
             val newCommits = commitsRepository
-                .getCommits(branchName = "master", limit = 20, offset = 0)
+                .getCommits(branchName = "master", limit = 20, afterCommit = null)
             commits = newCommits
             val items = newCommits.map(commitItemMapper::mapToItem)
             commitItems = items.toPersistentList()
@@ -115,7 +115,11 @@ class CommitsManager(
     private fun getNextCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
             val newCommits = commitsRepository
-                .getCommits(branchName = "master", limit = 10, offset = commits.size)
+                .getCommits(
+                    branchName = "master",
+                    limit = 10,
+                    afterCommit = requireNotNull(commits.lastOrNull()?.hash?.value),
+                )
 
             isAllLoaded = newCommits.isEmpty()
 
