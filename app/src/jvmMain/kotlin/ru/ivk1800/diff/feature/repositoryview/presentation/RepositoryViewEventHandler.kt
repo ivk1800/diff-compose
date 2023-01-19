@@ -16,7 +16,6 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedCh
 import ru.ivk1800.diff.feature.repositoryview.presentation.manager.WorkspaceManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
 import ru.ivk1800.diff.presentation.DialogRouter
-import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
@@ -24,7 +23,6 @@ class RepositoryViewEventHandler internal constructor(
     private val repositoryDirectory: File,
     private val dialogRouter: DialogRouter,
     private val diffOperationsManager: DiffOperationsManager,
-    private val errorTransformer: ErrorTransformer,
     private val commitInfoManager: CommitInfoManager,
     private val commitsTableManager: CommitsTableManager,
     private val selectionCoordinator: SelectionCoordinator,
@@ -32,6 +30,7 @@ class RepositoryViewEventHandler internal constructor(
     private val uncommittedChangesManager: UncommittedChangesManager,
     private val diffInfoManager: DiffInfoManager,
     private val workspaceManager: WorkspaceManager,
+    private val errorHandler: RepositoryViewErrorHandler,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
@@ -40,19 +39,18 @@ class RepositoryViewEventHandler internal constructor(
         repositoryDirectory: File,
         dialogRouter: DialogRouter,
         diffOperationsManager: DiffOperationsManager,
-        errorTransformer: ErrorTransformer,
         commitInfoManager: CommitInfoManager,
         commitsTableManager: CommitsTableManager,
         selectionCoordinator: SelectionCoordinator,
         router: RepositoryViewRouter,
         uncommittedChangesManager: UncommittedChangesManager,
         diffInfoManager: DiffInfoManager,
-        workspaceManager: WorkspaceManager
+        workspaceManager: WorkspaceManager,
+        errorHandler: RepositoryViewErrorHandler,
     ) : this(
         repositoryDirectory,
         dialogRouter,
         diffOperationsManager,
-        errorTransformer,
         commitInfoManager,
         commitsTableManager,
         selectionCoordinator,
@@ -60,6 +58,7 @@ class RepositoryViewEventHandler internal constructor(
         uncommittedChangesManager,
         diffInfoManager,
         workspaceManager,
+        errorHandler,
         Dispatchers.Main,
     )
 
@@ -140,12 +139,7 @@ class RepositoryViewEventHandler internal constructor(
             val result = diffOperationsManager.unstageHunk(event.hunkId)
             val error = result.exceptionOrNull()
             if (error != null) {
-                dialogRouter.show(
-                    DialogRouter.Dialog.Error(
-                        title = "Error",
-                        text = errorTransformer.transformForDisplay(error),
-                    )
-                )
+                errorHandler.processError(error)
             } else {
                 uncommittedChangesManager.check()
                 diffInfoManager.refresh()
@@ -158,13 +152,7 @@ class RepositoryViewEventHandler internal constructor(
             val result = diffOperationsManager.stageHunk(event.hunkId)
             val error = result.exceptionOrNull()
             if (error != null) {
-                error.printStackTrace();
-                dialogRouter.show(
-                    DialogRouter.Dialog.Error(
-                        title = "Error",
-                        text = errorTransformer.transformForDisplay(error),
-                    )
-                )
+                errorHandler.processError(error)
             } else {
                 uncommittedChangesManager.check()
                 diffInfoManager.refresh()
@@ -191,12 +179,7 @@ class RepositoryViewEventHandler internal constructor(
             val result = diffOperationsManager.discardHunk(hunkId)
             val error = result.exceptionOrNull()
             if (error != null) {
-                dialogRouter.show(
-                    DialogRouter.Dialog.Error(
-                        title = "Error",
-                        text = errorTransformer.transformForDisplay(error),
-                    )
-                )
+                errorHandler.processError(error)
             } else {
                 uncommittedChangesManager.check()
                 diffInfoManager.refresh()

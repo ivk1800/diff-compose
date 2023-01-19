@@ -9,6 +9,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.ObjectRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.UncommittedRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewErrorHandler
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEventHandler
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewRouter
 import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewViewModel
@@ -203,12 +204,12 @@ class RepositoryViewWindowScope(
             commitsTableManager = commitsTableManager,
             diffOperationsManager = diffOperationsManager,
             router = dependencies.router,
-            errorTransformer = errorTransformer,
             dialogRouter = object : DialogRouter {
                 override fun show(dialog: DialogRouter.Dialog) {
                     dialogManager.show(dialog)
                 }
             },
+            errorHandler = repositoryViewErrorHandler,
             workspaceManager = workspaceManager,
         )
     }
@@ -216,18 +217,26 @@ class RepositoryViewWindowScope(
     val repositoryViewViewModel: RepositoryViewViewModel by lazy {
         RepositoryViewViewModel(
             uncommittedChangesManager = uncommittedChangesManager,
+            eventHandler = repositoryViewEventHandler,
+            repositoryViewStateComposer = repositoryViewStateComposer,
+        )
+    }
+
+    private val repositoryViewErrorHandler: RepositoryViewErrorHandler by lazy {
+        RepositoryViewErrorHandler(
+            uncommittedChangesManager = uncommittedChangesManager,
             errorTransformer = errorTransformer,
+            commitsManager = commitsManager,
             dialogRouter = object : DialogRouter {
                 override fun show(dialog: DialogRouter.Dialog) {
                     dialogManager.show(dialog)
                 }
             },
-            repositoryViewEventHandler = repositoryViewEventHandler,
-            repositoryViewStateComposer = repositoryViewStateComposer,
         )
     }
 
     fun dispose() {
+        repositoryViewErrorHandler.dispose()
         repositoryViewEventHandler.dispose()
         diffOperationsManager.dispose()
         commitsManager.dispose()

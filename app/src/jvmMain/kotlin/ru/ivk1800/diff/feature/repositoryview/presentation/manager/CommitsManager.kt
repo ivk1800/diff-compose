@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
@@ -47,6 +48,10 @@ class CommitsManager(
     private val _state = MutableStateFlow<CommitsTableState>(CommitsTableState.Loading)
     val state: StateFlow<CommitsTableState>
         get() = _state
+
+    private val _errors = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
+    val errors: Flow<Throwable>
+        get() = _errors
 
     init {
         eventsFlow
@@ -84,6 +89,9 @@ class CommitsManager(
                         if (event == Event.Reload) {
                             emit(CommitsTableState.Loading)
                         }
+                    }
+                    .catch { error ->
+                        _errors.emit(error)
                     }
             }
             .onEach {
