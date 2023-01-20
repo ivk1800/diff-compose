@@ -15,19 +15,22 @@ class RepositoryViewStateComposer(
     private val historyStateComposer: HistoryStateComposer,
     private val fileStatusStateComposer: FileStatusStateComposer,
     private val workspaceManager: WorkspaceManager,
+    private val stashStateComposer: StashStateComposer,
 ) {
     fun getState(scope: CoroutineScope): StateFlow<RepositoryViewState> =
         combine(
             historyStateComposer.getState(scope),
             workspaceManager.state,
             fileStatusStateComposer.getState(scope),
-        ) { historyState, workspaceState, fileInfoState ->
+            stashStateComposer.getState(scope),
+        ) { historyState, workspaceState, fileInfoState, stashState ->
             RepositoryViewState(
                 sidePanelState = SidePanelState(
                     workspaceState = workspaceState,
                 ),
                 historyState = historyState,
                 fileStatusState = fileInfoState,
+                stashState = stashState,
             )
         }
             .stateIn(
@@ -41,9 +44,10 @@ class RepositoryViewStateComposer(
             sidePanelState = SidePanelState(
                 workspaceState = WorkspaceState(
                     activeSection = WorkspaceState.Section.History,
-                )
+                ),
             ),
             historyState = historyStateComposer.getDefaultState(),
             fileStatusState = FileStatusState.None,
+            stashState = stashStateComposer.getDefaultState(),
         )
 }

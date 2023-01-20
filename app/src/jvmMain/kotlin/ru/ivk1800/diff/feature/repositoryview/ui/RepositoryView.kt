@@ -45,6 +45,7 @@ private fun Body(
             modifier = Modifier.fillMaxSize(),
             historyState = state.historyState,
             fileStatusState = state.fileStatusState,
+            stashState = state.stashState,
             workspaceState = state.sidePanelState.workspaceState,
             onEvent,
         )

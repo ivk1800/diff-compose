@@ -29,6 +29,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.DiffInfoItemMa
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.FileStatusStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.HistoryStateComposer
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.RepositoryViewStateComposer
+import ru.ivk1800.diff.feature.repositoryview.presentation.state.composer.StashStateComposer
 import ru.ivk1800.diff.presentation.DialogRouter
 import ru.ivk1800.diff.presentation.ErrorTransformer
 import ru.ivk1800.diff.window.DialogManager
@@ -191,7 +192,12 @@ class RepositoryViewWindowScope(
             historyStateComposer,
             fileStatusStateComposer,
             workspaceManager,
+            stashStateComposer,
         )
+    }
+
+    private val stashStateComposer by lazy {
+        StashStateComposer()
     }
 
     private val repositoryViewEventHandler by lazy {

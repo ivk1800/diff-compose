@@ -52,12 +52,14 @@ private fun Workspace(
                 when (itemId) {
                     WorkspaceState.Section.FileStatus -> 0
                     WorkspaceState.Section.History -> 1
+                    WorkspaceState.Section.Stashes -> 2
                 }
             },
             calculateId = { index ->
                 when (index) {
                     0 -> WorkspaceState.Section.FileStatus
                     1 -> WorkspaceState.Section.History
+                    2 -> WorkspaceState.Section.Stashes
                     else -> error("TODO")
                 }
             },
@@ -73,7 +75,7 @@ private fun Workspace(
         )
         SelectedList(
             state = selectableListState,
-            itemsCount = 2,
+            itemsCount = 3,
             itemContent = { index ->
                 Text(
                     modifier = Modifier.padding(8.dp),
@@ -83,6 +85,7 @@ private fun Workspace(
                     text = when (index) {
                         0 -> MR.strings.workspace_file_status.localized()
                         1 -> MR.strings.workspace_history.localized()
+                        2 -> MR.strings.workspace_stashes.localized()
                         else -> error("TODO")
                     }
                 )

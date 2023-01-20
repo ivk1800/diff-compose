@@ -6,5 +6,6 @@ data class WorkspaceState(val activeSection: Section) {
     enum class Section {
         History,
         FileStatus,
+        Stashes,
     }
 }
