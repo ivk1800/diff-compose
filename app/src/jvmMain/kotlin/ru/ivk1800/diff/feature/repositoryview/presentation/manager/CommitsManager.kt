@@ -109,7 +109,7 @@ class CommitsManager(
             val newCommits = commitsRepository
                 .getCommits(
                     branchName = getCurrentBranch(),
-                    limit = 20,
+                    limit = COMMITS_LIMIT,
                     afterCommit = null,
                 )
             commits = newCommits
@@ -123,7 +123,7 @@ class CommitsManager(
             val newCommits = commitsRepository
                 .getCommits(
                     branchName = getCurrentBranch(),
-                    limit = 10,
+                    limit = COMMITS_LIMIT,
                     afterCommit = requireNotNull(commits.lastOrNull()?.hash?.value),
                 )
 
@@ -158,5 +158,9 @@ class CommitsManager(
     private enum class Event {
         Reload,
         LoadMore,
+    }
+
+    private companion object {
+        private const val COMMITS_LIMIT = 50
     }
 }
