@@ -113,6 +113,7 @@ class RepositoryViewWindowScope(
 
     private val commitsManager by lazy {
         CommitsManager(
+            statusRepository = statusRepository,
             commitsRepository = commitsRepository,
             commitItemMapper = CommitItemMapper(),
         )

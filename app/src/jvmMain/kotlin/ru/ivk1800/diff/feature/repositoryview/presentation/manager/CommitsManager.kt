@@ -25,12 +25,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
+import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommitsManager(
+    private val statusRepository: StatusRepository,
     private val commitsRepository: CommitsRepository,
     private val commitItemMapper: CommitItemMapper,
 ) {
@@ -105,7 +107,11 @@ class CommitsManager(
     private fun getInitialCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
             val newCommits = commitsRepository
-                .getCommits(branchName = "master", limit = 20, afterCommit = null)
+                .getCommits(
+                    branchName = getCurrentBranch(),
+                    limit = 20,
+                    afterCommit = null,
+                )
             commits = newCommits
             val items = newCommits.map(commitItemMapper::mapToItem)
             commitItems = items.toPersistentList()
@@ -116,7 +122,7 @@ class CommitsManager(
         flow {
             val newCommits = commitsRepository
                 .getCommits(
-                    branchName = "master",
+                    branchName = getCurrentBranch(),
                     limit = 10,
                     afterCommit = requireNotNull(commits.lastOrNull()?.hash?.value),
                 )
@@ -146,6 +152,8 @@ class CommitsManager(
     fun dispose() {
         scope.cancel()
     }
+
+    private suspend fun getCurrentBranch() = statusRepository.getStatus().branch
 
     private enum class Event {
         Reload,
