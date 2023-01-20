@@ -19,6 +19,7 @@ class StatusRepository(
 
     private fun toStatus(status: VcsStatus): Status {
         return Status(
+            branch = status.branch,
             staged = status.staged.map(::toFile),
             unstaged = status.unstaged.map(::toFile),
             untracked = status.untracked.map(::toFile),

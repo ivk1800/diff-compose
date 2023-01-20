@@ -210,12 +210,12 @@ class UncommittedChangesManager internal constructor(
         flow {
             emit(statusRepository.getStatus())
         }
-            .onEach { (staged, unstaged, untracked) ->
+            .onEach { (_, staged, unstaged, untracked) ->
                 rawStagedFiles = staged
                 rawAllUnstagedFiles = unstaged + untracked
                 rawUntrackedFiles = untracked
             }
-            .flatMapLatest { (staged, unstaged, untracked) ->
+            .flatMapLatest { (_, staged, unstaged, untracked) ->
                 if (staged.isEmpty() && unstaged.isEmpty() && untracked.isEmpty()) {
                     flowOf(UncommittedChangesState.None)
                 } else {

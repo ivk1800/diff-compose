@@ -294,6 +294,7 @@ class UncommittedChangesManagerTest {
 
         fun build(): UncommittedChangesManager {
             coEvery { mockStatusRepository.getStatus() } returns Status(
+                branch = "",
                 staged = staged,
                 unstaged = unstaged,
                 untracked = untracked,

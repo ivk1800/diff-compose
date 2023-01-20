@@ -17,25 +17,34 @@ internal class GitStatusParser {
 
         val iterator: Iterator<String> = lines.iterator()
 
+        var branch: String? = null
         var stagedFiles = emptyList<VcsFile>()
         var unstagedFiles = emptyList<VcsFile>()
         var untrackedFiles = emptyList<VcsFile>()
 
         while (iterator.hasNext()) {
-            when (iterator.next()) {
-                StagedFilesRegion -> {
+            val next = iterator.next()
+            when {
+                next.startsWith(OnBranch) -> {
+                    branch = next.substringAfter(OnBranch)
+                }
+
+                next == StagedFilesRegion -> {
                     stagedFiles = parseStagedFiles(iterator)
                 }
-                UnstagedFilesRegion -> {
+
+                next == UnstagedFilesRegion -> {
                     unstagedFiles = parseUnstagedFiles(iterator)
                 }
-                UntrackedFilesRegion -> {
+
+                next == UntrackedFilesRegion -> {
                     untrackedFiles = parseUntrackedFiles(iterator)
                 }
             }
         }
 
         return VcsStatus(
+            branch = requireNotNull(branch) { "Unable parse branch" },
             staged = stagedFiles,
             unstaged = unstagedFiles,
             untracked = untrackedFiles,
@@ -97,6 +106,7 @@ internal class GitStatusParser {
                     VcsChangeType.Add,
                     VcsChangeType.Modify,
                     VcsChangeType.Delete -> parts[1]
+
                     VcsChangeType.Rename -> {
                         val renamedParts = parts[1].split(" -> ")
                         check(renamedParts.size == 2) {
@@ -120,7 +130,9 @@ internal class GitStatusParser {
 
     private companion object {
         private const val StagedFilesRegion = "  (use \"git restore --staged <file>...\" to unstage)"
-        private const val UnstagedFilesRegion = "  (use \"git restore <file>...\" to discard changes in working directory)"
+        private const val UnstagedFilesRegion =
+            "  (use \"git restore <file>...\" to discard changes in working directory)"
         private const val UntrackedFilesRegion = "  (use \"git add <file>...\" to include in what will be committed)"
+        private const val OnBranch = "On branch "
     }
 }
