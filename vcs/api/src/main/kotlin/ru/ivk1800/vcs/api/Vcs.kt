@@ -3,6 +3,7 @@ package ru.ivk1800.vcs.api
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
+import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
@@ -49,4 +50,6 @@ interface Vcs {
     suspend fun getUntrackedFilesCommand(directory: Path): GetUntrackedFilesCommand
 
     suspend fun getStatusCommand(directory: Path): StatusCommand
+
+    suspend fun getStashListCommand(directory: Path): GetStashListCommand
 }

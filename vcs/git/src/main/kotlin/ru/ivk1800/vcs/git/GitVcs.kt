@@ -9,6 +9,7 @@ import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
+import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
@@ -17,12 +18,14 @@ import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.DiscardCommandImpl
 import ru.ivk1800.vcs.git.command.GetCommitsCommandImpl
+import ru.ivk1800.vcs.git.command.GetStashListCommandImpl
 import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
 import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
 import ru.ivk1800.vcs.git.command.ShowCommandImpl
 import ru.ivk1800.vcs.git.command.StatusCommandImpl
 import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
 import ru.ivk1800.vcs.git.parser.GitLogParser
+import ru.ivk1800.vcs.git.parser.GitStashListParser
 import ru.ivk1800.vcs.git.parser.GitStatusParser
 import ru.ivk1800.vcs.git.parser.VcsDiffParser
 import java.io.File
@@ -36,6 +39,7 @@ class GitVcs : Vcs {
     private val gitStatusParser = GitStatusParser()
     private val diffParser = VcsDiffParser()
     private val separatorBuilder = SeparatorBuilder()
+    private val stashListParser = GitStashListParser()
     private val gitLogParser = GitLogParser(separatorBuilder)
     private val commandContext = Dispatchers.IO
 
@@ -191,6 +195,9 @@ class GitVcs : Vcs {
 
     override suspend fun getStatusCommand(directory: Path): StatusCommand =
         StatusCommandImpl(directory, gitStatusParser)
+
+    override suspend fun getStashListCommand(directory: Path): GetStashListCommand =
+        GetStashListCommandImpl(stashListParser, directory, commandContext)
 
     private inline fun <T> runProcess(
         process: Process,

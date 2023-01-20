@@ -1,5 +1,8 @@
 package ru.ivk1800.diff.feature.repositoryview.ui
 
+import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
+import androidx.compose.foundation.ContextMenuState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,12 +41,31 @@ fun CommitFilesListView(
         state = state,
         itemContent = { index ->
             val item = items[index]
-            CommitFileItemView(
+            CommitFileItemViewWithMenu(
                 modifier = Modifier,
                 item = item,
             )
         },
     )
+}
+
+@Composable
+private fun CommitFileItemViewWithMenu(
+    modifier: Modifier = Modifier,
+    item: CommitFileItem,
+) {
+    val state = remember { ContextMenuState() }
+
+    ContextMenuArea(
+        state = state,
+        items = {
+            listOf(
+                ContextMenuItem(label = "Delete", onClick = {}),
+            )
+        },
+    ) {
+        CommitFileItemView(modifier, item)
+    }
 }
 
 @Composable
