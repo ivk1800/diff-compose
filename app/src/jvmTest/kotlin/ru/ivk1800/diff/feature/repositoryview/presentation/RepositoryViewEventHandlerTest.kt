@@ -26,7 +26,7 @@ class RepositoryViewEventHandlerTest {
     lateinit var mockDiffOperationsManager: DiffOperationsManager
 
     @RelaxedMockK
-    lateinit var mockErrorTransformer: ErrorTransformer
+    lateinit var mockErrorHandler: RepositoryViewErrorHandler
 
     @RelaxedMockK
     lateinit var mockCommitInfoManager: CommitInfoManager
@@ -67,7 +67,6 @@ class RepositoryViewEventHandlerTest {
                 repositoryDirectory = File(""),
                 dialogRouter = mockDialogRouter,
                 diffOperationsManager = mockDiffOperationsManager,
-                errorTransformer = mockErrorTransformer,
                 commitInfoManager = mockCommitInfoManager,
                 commitsTableManager = mockCommitsTableManager,
                 selectionCoordinator = mockSelectionCoordinator,
@@ -75,6 +74,7 @@ class RepositoryViewEventHandlerTest {
                 uncommittedChangesManager = mockUncommittedChangesManager,
                 diffInfoManager = mockDiffInfoManager,
                 workspaceManager = mockWorkspaceManager,
+                errorHandler = mockErrorHandler,
                 context = requireNotNull(context),
             )
         }
