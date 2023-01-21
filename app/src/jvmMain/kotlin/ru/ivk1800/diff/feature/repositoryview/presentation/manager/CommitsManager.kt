@@ -83,11 +83,14 @@ class CommitsManager(
             }
             .filter {
                 val proceed = !isLoading
-                logger.d(tag = Tag, message = "Proceed event ($it): $proceed")
+                logger.d(tag = Tag, message = "Proceed event ($it), isLoading: $proceed")
                 proceed
             }
             .filter { event ->
                 if (event == Event.LoadMore) {
+                    if (isAllLoaded) {
+                        logger.d(tag = Tag, message = "Skip event (${event}), because all is loaded")
+                    }
                     !isAllLoaded
                 } else {
                     true
@@ -133,6 +136,7 @@ class CommitsManager(
                             message = "An error occurred while loading commits",
                         )
                         _errors.emit(error)
+                        isLoading = false
                     }
             }
             .onEach { state ->
