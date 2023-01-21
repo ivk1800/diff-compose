@@ -23,20 +23,26 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import ru.ivk1800.diff.feature.repositoryview.domain.Commit
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.StatusRepository
+import ru.ivk1800.diff.feature.repositoryview.presentation.RepositoryViewEventHandler
 import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.CommitItemMapper
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitTableItem
 import ru.ivk1800.diff.feature.repositoryview.presentation.state.CommitsTableState
+import ru.ivk1800.diff.logging.Logger
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommitsManager(
     private val statusRepository: StatusRepository,
     private val commitsRepository: CommitsRepository,
     private val commitItemMapper: CommitItemMapper,
+    private val logger: Logger,
+    context: CoroutineContext,
 ) {
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
 
     private val eventsFlow = MutableSharedFlow<Event>(extraBufferCapacity = 1)
     private var isLoading = false
@@ -55,11 +61,31 @@ class CommitsManager(
     val errors: Flow<Throwable>
         get() = _errors
 
+    constructor(
+        statusRepository: StatusRepository,
+        commitsRepository: CommitsRepository,
+        commitItemMapper: CommitItemMapper,
+        logger: Logger,
+    ) : this(
+        statusRepository,
+        commitsRepository,
+        commitItemMapper,
+        logger,
+        Dispatchers.Main,
+    )
+
     init {
         eventsFlow
             // TODO: support throttle
             .onStart { emit(Event.Reload) }
-            .filter { !isLoading }
+            .onEach {
+                logger.d(tag = Tag, message = "Received event: $it")
+            }
+            .filter {
+                val proceed = !isLoading
+                logger.d(tag = Tag, message = "Proceed event ($it): $proceed")
+                proceed
+            }
             .filter { event ->
                 if (event == Event.LoadMore) {
                     !isAllLoaded
@@ -71,6 +97,7 @@ class CommitsManager(
                 if (event == Event.Reload) {
                     isAllLoaded = false
                 }
+                logger.d(tag = Tag, message = "Loading start")
                 isLoading = true
             }
             .flatMapLatest { event ->
@@ -78,9 +105,16 @@ class CommitsManager(
                     Event.Reload -> getInitialCommits()
                     Event.LoadMore -> getNextCommits()
                 }
+                    .onEach {
+                        logger.d(tag = Tag, message = "Loading end")
+                        isLoading = false
+                    }
 
                 commitsFlow.combine<ImmutableList<CommitTableItem>, ImmutableSet<CommitTableItem.Id.Commit>, CommitsTableState>(
                     selectedCommits
+                        .onEach {
+                            logger.d(tag = Tag, message = "Received new selected commits: $it")
+                        }
                 ) { commits, selected ->
                     CommitsTableState.Content(
                         selected = selected,
@@ -93,23 +127,29 @@ class CommitsManager(
                         }
                     }
                     .catch { error ->
+                        logger.e(
+                            tag = Tag,
+                            error = error,
+                            message = "An error occurred while loading commits",
+                        )
                         _errors.emit(error)
                     }
             }
-            .onEach {
-                isLoading = false
-            }
             .onEach { state ->
+                logger.d(tag = Tag, message = "Emit new state: ${state::class.simpleName}")
                 _state.value = state
-            }.launchIn(scope)
+            }
+            .launchIn(scope)
     }
 
     private fun getInitialCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
+            val branchName = getCurrentBranch()
+            logger.d(tag = Tag, message = "Get initial commits: branchName: $branchName")
             val newCommits = commitsRepository
                 .getCommits(
-                    branchName = getCurrentBranch(),
-                    limit = COMMITS_LIMIT,
+                    branchName = branchName,
+                    limit = CommitsLimit,
                     afterCommit = null,
                 )
             commits = newCommits
@@ -120,10 +160,12 @@ class CommitsManager(
 
     private fun getNextCommits(): Flow<ImmutableList<CommitTableItem>> =
         flow {
+            val branchName = getCurrentBranch()
+            logger.d(tag = Tag, message = "Get next commits: branchName: $branchName")
             val newCommits = commitsRepository
                 .getCommits(
-                    branchName = getCurrentBranch(),
-                    limit = COMMITS_LIMIT,
+                    branchName = branchName,
+                    limit = CommitsLimit,
                     afterCommit = requireNotNull(commits.lastOrNull()?.hash?.value),
                 )
 
@@ -135,21 +177,23 @@ class CommitsManager(
             emit(commitItems)
         }
 
-    fun getCommitHashByIndex(value: Int): String? = commits.getOrNull(value)?.hash?.value
-
     fun selectCommits(commits: ImmutableSet<CommitTableItem.Id.Commit>) {
+        logger.d(tag = Tag, message = "Select commits: $commits")
         selectedCommits.value = commits
     }
 
     fun reload() {
-        eventsFlow.tryEmit(Event.Reload)
+        logger.d(tag = Tag, message = "Reload")
+        scope.launch { eventsFlow.emit(Event.Reload) }
     }
 
     fun loadMore() {
-        eventsFlow.tryEmit(Event.LoadMore)
+        logger.d(tag = Tag, message = "Load more")
+        scope.launch { eventsFlow.emit(Event.LoadMore) }
     }
 
     fun dispose() {
+        logger.d(tag = Tag, message = "dispose")
         scope.cancel()
     }
 
@@ -161,6 +205,7 @@ class CommitsManager(
     }
 
     private companion object {
-        private const val COMMITS_LIMIT = 50
+        private const val CommitsLimit = 50
+        private val Tag = RepositoryViewEventHandler::class.simpleName.orEmpty()
     }
 }

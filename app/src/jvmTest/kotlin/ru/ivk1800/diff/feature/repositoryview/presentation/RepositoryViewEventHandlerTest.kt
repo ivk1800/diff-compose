@@ -11,8 +11,8 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffInfoManag
 import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffOperationsManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.manager.WorkspaceManager
+import ru.ivk1800.diff.logging.Logger
 import ru.ivk1800.diff.presentation.DialogRouter
-import ru.ivk1800.diff.presentation.ErrorTransformer
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
@@ -21,6 +21,9 @@ class RepositoryViewEventHandlerTest {
 
     @RelaxedMockK
     lateinit var mockDialogRouter: DialogRouter
+
+    @RelaxedMockK
+    lateinit var mockLogger: Logger
 
     @RelaxedMockK
     lateinit var mockDiffOperationsManager: DiffOperationsManager
@@ -75,6 +78,7 @@ class RepositoryViewEventHandlerTest {
                 diffInfoManager = mockDiffInfoManager,
                 workspaceManager = mockWorkspaceManager,
                 errorHandler = mockErrorHandler,
+                logger = mockLogger,
                 context = requireNotNull(context),
             )
         }

@@ -116,6 +116,7 @@ class RepositoryViewWindowScope(
             statusRepository = statusRepository,
             commitsRepository = commitsRepository,
             commitItemMapper = CommitItemMapper(),
+            logger = dependencies.logger,
         )
     }
 
@@ -218,6 +219,7 @@ class RepositoryViewWindowScope(
             },
             errorHandler = repositoryViewErrorHandler,
             workspaceManager = workspaceManager,
+            logger = dependencies.logger,
         )
     }
 

@@ -15,6 +15,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.manager.DiffOperation
 import ru.ivk1800.diff.feature.repositoryview.presentation.manager.UncommittedChangesManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.manager.WorkspaceManager
 import ru.ivk1800.diff.feature.repositoryview.presentation.model.DiffInfoItem
+import ru.ivk1800.diff.logging.Logger
 import ru.ivk1800.diff.presentation.DialogRouter
 import java.io.File
 import kotlin.coroutines.CoroutineContext
@@ -31,6 +32,7 @@ class RepositoryViewEventHandler internal constructor(
     private val diffInfoManager: DiffInfoManager,
     private val workspaceManager: WorkspaceManager,
     private val errorHandler: RepositoryViewErrorHandler,
+    private val logger: Logger,
     context: CoroutineContext,
 ) {
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + context)
@@ -47,6 +49,7 @@ class RepositoryViewEventHandler internal constructor(
         diffInfoManager: DiffInfoManager,
         workspaceManager: WorkspaceManager,
         errorHandler: RepositoryViewErrorHandler,
+        logger: Logger,
     ) : this(
         repositoryDirectory,
         dialogRouter,
@@ -59,10 +62,12 @@ class RepositoryViewEventHandler internal constructor(
         diffInfoManager,
         workspaceManager,
         errorHandler,
+        logger,
         Dispatchers.Main,
     )
 
     fun onEvent(value: RepositoryViewEvent) {
+        logger.d(tag = Tag, message = "Handle event: $value")
         when (value) {
             RepositoryViewEvent.OnReload -> {
                 commitInfoManager.selectCommit(null)
@@ -77,12 +82,14 @@ class RepositoryViewEventHandler internal constructor(
     }
 
     fun onSidePanelEvent(value: SidePanelEvent) {
+        logger.d(tag = Tag, message = "Handle side panel event: $value")
         when (value) {
             is SidePanelEvent.OnSectionUnselected -> workspaceManager.selectSection(value.value)
         }
     }
 
     fun onHistoryEvent(value: HistoryEvent) {
+        logger.d(tag = Tag, message = "Handle history event: $value")
         when (value) {
 
             is HistoryEvent.OnCommitsSelected -> {
@@ -131,6 +138,7 @@ class RepositoryViewEventHandler internal constructor(
     }
 
     fun dispose() {
+        logger.d(tag = Tag, message = "dispose")
         scope.cancel()
     }
 
@@ -185,5 +193,9 @@ class RepositoryViewEventHandler internal constructor(
                 diffInfoManager.refresh()
             }
         }
+    }
+
+    private companion object {
+        private val Tag = RepositoryViewEventHandler::class.simpleName.orEmpty()
     }
 }
