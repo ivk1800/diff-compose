@@ -2,9 +2,9 @@ package ru.ivk1800.vcs.git.command
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.VcsStatus
 import ru.ivk1800.vcs.api.command.StatusCommand
-import ru.ivk1800.vcs.git.VcsException
 import ru.ivk1800.vcs.git.parser.GitStatusParser
 import ru.ivk1800.vcs.git.util.createProcess
 import ru.ivk1800.vcs.git.util.handleResult

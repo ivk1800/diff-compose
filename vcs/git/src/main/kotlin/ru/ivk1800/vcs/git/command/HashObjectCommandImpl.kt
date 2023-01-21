@@ -2,8 +2,8 @@ package ru.ivk1800.vcs.git.command
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.command.HashObjectCommand
-import ru.ivk1800.vcs.git.VcsException
 import ru.ivk1800.vcs.git.util.createProcess
 import ru.ivk1800.vcs.git.util.handleResult
 import java.io.BufferedWriter

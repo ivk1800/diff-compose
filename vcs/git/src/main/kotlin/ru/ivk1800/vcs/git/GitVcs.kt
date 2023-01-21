@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
+import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand

@@ -2,10 +2,10 @@ package ru.ivk1800.vcs.git.command
 
 import kotlinx.coroutines.withContext
 import ru.ivk1800.vcs.api.VcsCommit
+import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.git.GitLogOption
 import ru.ivk1800.vcs.git.SeparatorBuilder
-import ru.ivk1800.vcs.git.VcsException
 import ru.ivk1800.vcs.git.parser.GitLogParser
 import ru.ivk1800.vcs.git.util.createProcess
 import ru.ivk1800.vcs.git.util.handleResult

@@ -4,7 +4,7 @@ import ru.ivk1800.diff.feature.repositoryview.domain.ChangesRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
-import ru.ivk1800.vcs.git.VcsException
+import ru.ivk1800.vcs.api.VcsException
 
 // TODO: move from presentation folder
 class ChangesManager(

@@ -1,9 +1,9 @@
 package ru.ivk1800.vcs.git.parser
 
 import ru.ivk1800.vcs.api.VcsChangeType
+import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.VcsStatus
-import ru.ivk1800.vcs.git.VcsException
 
 internal class GitStatusParser {
     @Throws(VcsException.ParseException::class)

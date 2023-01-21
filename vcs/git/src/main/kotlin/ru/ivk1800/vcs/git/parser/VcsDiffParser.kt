@@ -1,9 +1,9 @@
 package ru.ivk1800.vcs.git.parser
 
 import ru.ivk1800.vcs.api.VcsDiff
+import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.VcsHunk
 import ru.ivk1800.vcs.api.VcsHunkLine
-import ru.ivk1800.vcs.git.VcsException
 
 internal class VcsDiffParser {
 
