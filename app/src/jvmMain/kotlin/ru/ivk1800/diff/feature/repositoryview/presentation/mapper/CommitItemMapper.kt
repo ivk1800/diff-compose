@@ -18,7 +18,12 @@ class CommitItemMapper {
             id = CommitId(commit.hash.value),
             description = commit.message.trim().lines().first(),
             commit = commit.hash.abbreviated,
-            author = "${commit.authorName} <${commit.authorEmail}>",
+            author = buildString {
+                append(commit.authorName)
+                if (commit.authorEmail.isNotEmpty()) {
+                    append(" <${commit.authorEmail}>")
+                }
+            },
             date = commitDateFormat.format(ZonedDateTime.ofInstant(commit.authorDate, ZoneId.systemDefault())),
             labels = commit.refNames.map { CommitLabel.Branch(it.value) }.toImmutableList(),
         )
