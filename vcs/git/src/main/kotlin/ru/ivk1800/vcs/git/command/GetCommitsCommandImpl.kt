@@ -7,8 +7,6 @@ import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.git.GitLogOption
 import ru.ivk1800.vcs.git.SeparatorBuilder
 import ru.ivk1800.vcs.git.parser.GitLogParser
-import ru.ivk1800.vcs.git.util.createProcess
-import ru.ivk1800.vcs.git.util.handleResult
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 
@@ -17,8 +15,8 @@ internal class GetCommitsCommandImpl(
     private val separatorBuilder: SeparatorBuilder,
     private val directory: Path,
     private val context: CoroutineContext,
-    options: Options,
-) : GetCommitsCommand(options) {
+    private val options: GetCommitsCommand.Options,
+) : BaseCommand(), GetCommitsCommand {
     override suspend fun run(): List<VcsCommit> = withContext(context) {
         val pretty = buildString {
             append(separatorBuilder.startRecordSeparator())

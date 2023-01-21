@@ -4,16 +4,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
-import ru.ivk1800.vcs.git.util.createProcess
-import ru.ivk1800.vcs.git.util.handleResult
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 
 internal class UpdateIndexCommandImpl(
     private val directory: Path,
-    options: Options,
-) : UpdateIndexCommand(options) {
+    private val options: UpdateIndexCommand.Options,
+) : BaseCommand(), UpdateIndexCommand {
     override suspend fun run() = withContext(Dispatchers.IO) {
         val hashObjectProcess = createProcess(directory, "git hash-object -w --stdin")
 

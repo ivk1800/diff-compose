@@ -7,8 +7,8 @@ import kotlin.io.path.writeText
 
 internal class DiscardCommandImpl(
     private val directory: Path,
-    options: Options,
-) : DiscardCommand(options) {
+    private val options: DiscardCommand.Options,
+) : DiscardCommand {
     override suspend fun run() {
         val filePath = Path.of(directory.toString(), options.fileName)
         check(filePath.exists()) { "Unable discard changes, file is not exists: ${options.fileName}" }
