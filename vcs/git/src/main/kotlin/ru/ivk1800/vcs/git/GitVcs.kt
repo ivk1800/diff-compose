@@ -3,12 +3,12 @@ package ru.ivk1800.vcs.git
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.ivk1800.vcs.api.Vcs
-import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsException
 import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
+import ru.ivk1800.vcs.api.command.GetCommitCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
@@ -18,6 +18,7 @@ import ru.ivk1800.vcs.api.command.StatusCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.DiscardCommandImpl
+import ru.ivk1800.vcs.git.command.GetCommitCommandImpl
 import ru.ivk1800.vcs.git.command.GetCommitsCommandImpl
 import ru.ivk1800.vcs.git.command.GetStashListCommandImpl
 import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
@@ -57,16 +58,8 @@ class GitVcs : Vcs {
     override suspend fun getCommitsCommand(directory: Path, options: GetCommitsCommand.Options): GetCommitsCommand =
         GetCommitsCommandImpl(gitLogParser, separatorBuilder, directory, commandContext, options)
 
-    override suspend fun getCommit(directory: File, hash: String): VcsCommit? {
-        val process = createProcess(
-            directory,
-            "git log -1 --format={$FIELDS} $hash",
-        )
-        val result = process.inputStream.reader().readText()
-        val error = process.errorStream.reader().readText()
-
-        return parser.parseCommit(result)
-    }
+    override suspend fun getCommitCommand(directory: Path, options: GetCommitCommand.Options): GetCommitCommand =
+        GetCommitCommandImpl(gitLogParser, separatorBuilder, directory, commandContext, options)
 
     override suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile> {
         val process = createProcess(
@@ -221,19 +214,4 @@ class GitVcs : Vcs {
             .directory(directory)
             .start()
             .apply { waitFor(10, TimeUnit.SECONDS) }
-
-    private companion object {
-        val FIELDS = listOf(
-            """"hash":"%H"""",
-            """"parents":"%P"""",
-            """"abbreviatedHash":"%h"""",
-            """"authorName":"%an"""",
-            """"authorEmail":"%ae"""",
-            """"authorDate":"%at"""",
-            """"commiterName":"%cn"""",
-            """"commiterEmail":"%ce"""",
-            """"commiterDate":"%ct"""",
-            """"message":"%B"""",
-        ).joinToString(",")
-    }
 }

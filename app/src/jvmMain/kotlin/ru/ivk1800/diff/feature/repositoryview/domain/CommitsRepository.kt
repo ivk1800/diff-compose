@@ -3,6 +3,7 @@ package ru.ivk1800.diff.feature.repositoryview.domain
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsChangeType
 import ru.ivk1800.vcs.api.VcsCommit
+import ru.ivk1800.vcs.api.command.GetCommitCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import java.io.File
 import java.time.Instant
@@ -11,8 +12,8 @@ class CommitsRepository(
     private val repoDirectory: File,
     private val vcs: Vcs,
 ) {
-    suspend fun getCommit(hash: String): Commit? =
-        vcs.getCommit(repoDirectory, hash)?.toCommit()
+    suspend fun getCommit(hash: String): Commit =
+        vcs.getCommitCommand(repoDirectory.toPath(), GetCommitCommand.Options(hash)).run().toCommit()
 
     suspend fun getCommits(branchName: String, limit: Int, afterCommit: String?): List<Commit> =
         vcs.getCommitsCommand(

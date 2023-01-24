@@ -4,7 +4,6 @@ kotlinx-coroutines-core = "1.6.4"
 kotlin-test = "1.7.10"
 junit = "4.13.2"
 mockk = "1.13.3"
-gson = "2.10"
 moko = "0.20.1"
 turbine = "0.12.1"
 sqldelight = "1.5.4"
@@ -17,7 +16,6 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 junit = { module = "junit:junit", version.ref = "junit" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-test" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 moko-resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
