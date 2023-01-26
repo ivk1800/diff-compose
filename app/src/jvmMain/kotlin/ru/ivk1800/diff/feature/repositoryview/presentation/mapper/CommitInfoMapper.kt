@@ -38,14 +38,24 @@ class CommitInfoMapper {
     fun mapToDescription(commit: Commit): CommitDescription {
         return CommitDescription(
             message = commit.message,
-            commit = "${commit.hash.value} [${commit.hash.abbreviated}]",
-            parents = commit.parents.joinToString(),
-            author = "${commit.authorName} <${commit.authorEmail}>",
+            commit = buildString {
+                append(commit.hash.value)
+                if (commit.hash.abbreviated.isNotEmpty()) {
+                    append(" [${commit.hash.abbreviated}]")
+                }
+            },
+            parents = commit.parents.joinToString().takeIf(String::isNotEmpty),
+            author = buildString {
+                append(commit.authorName)
+                if (commit.authorEmail.isNotEmpty()) {
+                    append(" <${commit.authorEmail}>")
+                }
+            },
             date = commitDateFormat.format(ZonedDateTime.ofInstant(commit.authorDate, ZoneId.systemDefault())),
         )
     }
 
-    private fun ChangeType.toType():CommitFileItem.Type =
+    private fun ChangeType.toType(): CommitFileItem.Type =
         when (this) {
             ChangeType.Add -> CommitFileItem.Type.Added
             ChangeType.Modify -> CommitFileItem.Type.Modified

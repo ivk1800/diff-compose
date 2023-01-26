@@ -21,7 +21,7 @@ import ru.ivk1800.diff.feature.repositoryview.presentation.model.CommitDescripti
 @Composable
 fun CommitDescriptionView(
     modifier: Modifier = Modifier,
-    description: CommitDescription
+    description: CommitDescription,
 ) = Box(modifier = modifier.padding(12.dp)) {
     Column {
         SelectionContainer {
@@ -33,7 +33,7 @@ fun CommitDescriptionView(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row {
-            KeysColumns()
+            KeysColumns(description)
             Spacer(modifier = Modifier.width(12.dp))
             ValuesColumn(description)
         }
@@ -52,11 +52,13 @@ private fun ValuesColumn(description: CommitDescription) =
                 style = style,
             )
         }
-        SelectionContainer {
-            Text(
-                text = description.parents,
-                style = style,
-            )
+        if (description.parents != null) {
+            SelectionContainer {
+                Text(
+                    text = description.parents,
+                    style = style,
+                )
+            }
         }
         SelectionContainer {
             Text(
@@ -73,7 +75,7 @@ private fun ValuesColumn(description: CommitDescription) =
     }
 
 @Composable
-private fun KeysColumns() =
+private fun KeysColumns(description: CommitDescription) =
     CompositionLocalProvider(LocalContentAlpha provides 0.5F) {
         Column(
             horizontalAlignment = Alignment.End,
@@ -83,10 +85,12 @@ private fun KeysColumns() =
                 text = "Commit:",
                 style = style,
             )
-            Text(
-                text = "Parents:",
-                style = style,
-            )
+            if (description.parents != null) {
+                Text(
+                    text = "Parents:",
+                    style = style,
+                )
+            }
             Text(
                 text = "Author:",
                 style = style,

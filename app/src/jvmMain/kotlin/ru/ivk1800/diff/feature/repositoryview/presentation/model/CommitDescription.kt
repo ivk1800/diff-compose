@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 data class CommitDescription(
     val message: String,
     val commit: String,
-    val parents: String,
+    val parents: String?,
     val author: String,
     val date: String,
 )
