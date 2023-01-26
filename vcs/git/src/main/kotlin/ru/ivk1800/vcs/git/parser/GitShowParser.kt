@@ -1,10 +1,9 @@
-package ru.ivk1800.vcs.git
+package ru.ivk1800.vcs.git.parser
 
 import ru.ivk1800.vcs.api.VcsChangeType
-import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.VcsFile
 
-internal class VcsParser {
+internal class GitShowParser {
     fun parseFiles(raw: String): List<VcsFile> =
         raw
             .lines()
@@ -31,19 +30,4 @@ internal class VcsParser {
             "R" -> VcsChangeType.Rename
             else -> error("Unknown change type: $this")
         }
-
-    private fun RawCommit.toVcsCommit(): VcsCommit =
-        VcsCommit(
-            hash = hash,
-            parents = parents.split(" "),
-            abbreviatedHash = abbreviatedHash,
-            authorName = authorName,
-            authorEmail = authorEmail,
-            authorDate = authorDate.toInt(),
-            commiterName = commiterName,
-            commiterEmail = commiterEmail,
-            commiterDate = commiterDate.toInt(),
-            message = message,
-            refNames = emptyList(),
-        )
 }

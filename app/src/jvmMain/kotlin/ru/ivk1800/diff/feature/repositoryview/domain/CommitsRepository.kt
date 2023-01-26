@@ -4,6 +4,7 @@ import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsChangeType
 import ru.ivk1800.vcs.api.VcsCommit
 import ru.ivk1800.vcs.api.command.GetCommitCommand
+import ru.ivk1800.vcs.api.command.GetCommitFilesCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import java.io.File
 import java.time.Instant
@@ -28,12 +29,17 @@ class CommitsRepository(
             .map { it.toCommit() }
 
     suspend fun getCommitFiles(commitHash: String): List<CommitFile> =
-        vcs.getCommitFiles(repoDirectory, commitHash).map { file ->
-            CommitFile(
-                name = file.name,
-                changeType = file.changeType.toChangeType(),
-            )
-        }
+        vcs.getCommitFilesCommand(
+            repoDirectory.toPath(),
+            GetCommitFilesCommand.Options(commitHash),
+        )
+            .run()
+            .map { file ->
+                CommitFile(
+                    name = file.name,
+                    changeType = file.changeType.toChangeType(),
+                )
+            }
 
     private fun VcsCommit.toCommit(): Commit =
         Commit(

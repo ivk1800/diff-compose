@@ -3,6 +3,7 @@ package ru.ivk1800.vcs.api
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetCommitCommand
+import ru.ivk1800.vcs.api.command.GetCommitFilesCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
@@ -20,7 +21,7 @@ interface Vcs {
 
     suspend fun getCommitCommand(directory: Path, options: GetCommitCommand.Options): GetCommitCommand
 
-    suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile>
+    suspend fun getCommitFilesCommand(directory: Path, options: GetCommitFilesCommand.Options): GetCommitFilesCommand
 
     suspend fun getDiff(directory: File, oldCommitHash: String, newCommitHash: String, filePath: String): VcsDiff
 

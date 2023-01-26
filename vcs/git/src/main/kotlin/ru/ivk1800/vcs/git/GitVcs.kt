@@ -5,10 +5,10 @@ import kotlinx.coroutines.withContext
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsException
-import ru.ivk1800.vcs.api.VcsFile
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetCommitCommand
+import ru.ivk1800.vcs.api.command.GetCommitFilesCommand
 import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
@@ -19,6 +19,7 @@ import ru.ivk1800.vcs.api.command.UpdateIndexCommand
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.DiscardCommandImpl
 import ru.ivk1800.vcs.git.command.GetCommitCommandImpl
+import ru.ivk1800.vcs.git.command.GetCommitFilesCommandImpl
 import ru.ivk1800.vcs.git.command.GetCommitsCommandImpl
 import ru.ivk1800.vcs.git.command.GetStashListCommandImpl
 import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
@@ -27,6 +28,7 @@ import ru.ivk1800.vcs.git.command.ShowCommandImpl
 import ru.ivk1800.vcs.git.command.StatusCommandImpl
 import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
 import ru.ivk1800.vcs.git.parser.GitLogParser
+import ru.ivk1800.vcs.git.parser.GitShowParser
 import ru.ivk1800.vcs.git.parser.GitStashListParser
 import ru.ivk1800.vcs.git.parser.GitStatusParser
 import ru.ivk1800.vcs.git.parser.VcsDiffParser
@@ -37,7 +39,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 class GitVcs : Vcs {
-    private val parser = VcsParser()
+    private val showParser = GitShowParser()
     private val gitStatusParser = GitStatusParser()
     private val diffParser = VcsDiffParser()
     private val separatorBuilder = SeparatorBuilder()
@@ -61,15 +63,10 @@ class GitVcs : Vcs {
     override suspend fun getCommitCommand(directory: Path, options: GetCommitCommand.Options): GetCommitCommand =
         GetCommitCommandImpl(gitLogParser, separatorBuilder, directory, commandContext, options)
 
-    override suspend fun getCommitFiles(directory: File, commitHash: String): List<VcsFile> {
-        val process = createProcess(
-            directory,
-            "git show $commitHash --name-status --oneline",
-        )
-
-        val result = process.inputStream.reader().readText()
-        return parser.parseFiles(result)
-    }
+    override suspend fun getCommitFilesCommand(
+        directory: Path,
+        options: GetCommitFilesCommand.Options,
+    ): GetCommitFilesCommand = GetCommitFilesCommandImpl(showParser, directory, options, commandContext)
 
     override suspend fun getDiff(
         directory: File,
