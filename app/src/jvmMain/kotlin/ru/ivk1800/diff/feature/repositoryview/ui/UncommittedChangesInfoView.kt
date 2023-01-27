@@ -188,7 +188,7 @@ private fun FilesPane(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 DiffTextButton(
-                    enabled = selected.isNotEmpty(),
+                    enabled = selected.isNotEmpty() && !vcsProcess,
                     onClick = onStageSelected,
                     text = processSelectedText,
                 )
