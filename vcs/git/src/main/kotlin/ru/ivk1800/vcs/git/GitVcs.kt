@@ -5,6 +5,8 @@ import kotlinx.coroutines.withContext
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsException
+import ru.ivk1800.vcs.api.command.AddAllToStagedCommand
+import ru.ivk1800.vcs.api.command.AddFilesToStagedCommand
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetCommitCommand
@@ -13,9 +15,13 @@ import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
+import ru.ivk1800.vcs.api.command.RemoveAllFromStagedCommand
+import ru.ivk1800.vcs.api.command.RemoveFilesFromStagedCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
 import ru.ivk1800.vcs.api.command.StatusCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
+import ru.ivk1800.vcs.git.command.AddAllToStagedCommandImpl
+import ru.ivk1800.vcs.git.command.AddFilesToStagedCommandImpl
 import ru.ivk1800.vcs.git.command.DiffCommandImpl
 import ru.ivk1800.vcs.git.command.DiscardCommandImpl
 import ru.ivk1800.vcs.git.command.GetCommitCommandImpl
@@ -24,6 +30,8 @@ import ru.ivk1800.vcs.git.command.GetCommitsCommandImpl
 import ru.ivk1800.vcs.git.command.GetStashListCommandImpl
 import ru.ivk1800.vcs.git.command.GetUntrackedFilesCommandImpl
 import ru.ivk1800.vcs.git.command.HashObjectCommandImpl
+import ru.ivk1800.vcs.git.command.RemoveAllFromStagedCommandImpl
+import ru.ivk1800.vcs.git.command.RemoveFilesFromStagedCommandImpl
 import ru.ivk1800.vcs.git.command.ShowCommandImpl
 import ru.ivk1800.vcs.git.command.StatusCommandImpl
 import ru.ivk1800.vcs.git.command.UpdateIndexCommandImpl
@@ -130,41 +138,22 @@ class GitVcs : Vcs {
             }
         )
 
-    override suspend fun removeAllFromStaged(directory: File) =
-        runProcess(
-            createProcess(directory, "git reset HEAD"),
-            onError = { error ->
-                VcsException.ProcessException(error)
-            },
-            onResult = { },
-        )
+    override suspend fun getRemoveAllFromStagedCommand(directory: Path): RemoveAllFromStagedCommand =
+        RemoveAllFromStagedCommandImpl(directory, commandContext)
 
-    override suspend fun addAllToStaged(directory: File) =
-        runProcess(
-            createProcess(directory, "git add -A"),
-            onError = { error ->
-                VcsException.ProcessException(error)
-            },
-            onResult = { },
-        )
+    override suspend fun getAddAllToStagedCommand(directory: Path): AddAllToStagedCommand =
+        AddAllToStagedCommandImpl(directory, commandContext)
 
-    override suspend fun removeFilesFromStaged(directory: File, filePaths: List<String>) =
-        runProcess(
-            createProcess(directory, "git reset HEAD ${filePaths.joinToString(" ")}"),
-            onError = { error ->
-                VcsException.ProcessException(error)
-            },
-            onResult = { },
-        )
+    override suspend fun getRemoveFilesFromStagedCommand(
+        directory: Path,
+        options: RemoveFilesFromStagedCommand.Options,
+    ): RemoveFilesFromStagedCommand =
+        RemoveFilesFromStagedCommandImpl(directory, options, commandContext)
 
-    override suspend fun addFilesToStaged(directory: File, filePaths: List<String>) =
-        runProcess(
-            createProcess(directory, "git add ${filePaths.joinToString(" ")}"),
-            onError = { error ->
-                VcsException.ProcessException(error)
-            },
-            onResult = { },
-        )
+    override suspend fun getAddFilesToStagedCommand(
+        directory: Path,
+        options: AddFilesToStagedCommand.Options,
+    ): AddFilesToStagedCommand = AddFilesToStagedCommandImpl(directory, options, commandContext)
 
     override suspend fun getHashObjectCommand(directory: Path, options: HashObjectCommand.Options): String =
         HashObjectCommandImpl(directory, options).run()

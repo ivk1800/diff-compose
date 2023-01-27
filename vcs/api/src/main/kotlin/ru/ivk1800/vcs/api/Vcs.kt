@@ -1,5 +1,7 @@
 package ru.ivk1800.vcs.api
 
+import ru.ivk1800.vcs.api.command.AddAllToStagedCommand
+import ru.ivk1800.vcs.api.command.AddFilesToStagedCommand
 import ru.ivk1800.vcs.api.command.DiffCommand
 import ru.ivk1800.vcs.api.command.DiscardCommand
 import ru.ivk1800.vcs.api.command.GetCommitCommand
@@ -8,6 +10,8 @@ import ru.ivk1800.vcs.api.command.GetCommitsCommand
 import ru.ivk1800.vcs.api.command.GetStashListCommand
 import ru.ivk1800.vcs.api.command.GetUntrackedFilesCommand
 import ru.ivk1800.vcs.api.command.HashObjectCommand
+import ru.ivk1800.vcs.api.command.RemoveAllFromStagedCommand
+import ru.ivk1800.vcs.api.command.RemoveFilesFromStagedCommand
 import ru.ivk1800.vcs.api.command.ShowCommand
 import ru.ivk1800.vcs.api.command.StatusCommand
 import ru.ivk1800.vcs.api.command.UpdateIndexCommand
@@ -33,13 +37,19 @@ interface Vcs {
 
     suspend fun getStagedDiff(directory: File): List<VcsDiff>
 
-    suspend fun removeAllFromStaged(directory: File)
+    suspend fun getRemoveAllFromStagedCommand(directory: Path): RemoveAllFromStagedCommand
 
-    suspend fun addAllToStaged(directory: File)
+    suspend fun getAddAllToStagedCommand(directory: Path): AddAllToStagedCommand
 
-    suspend fun removeFilesFromStaged(directory: File, filePaths: List<String>)
+    suspend fun getRemoveFilesFromStagedCommand(
+        directory: Path,
+        options: RemoveFilesFromStagedCommand.Options,
+    ): RemoveFilesFromStagedCommand
 
-    suspend fun addFilesToStaged(directory: File, filePaths: List<String>)
+    suspend fun getAddFilesToStagedCommand(
+        directory: Path,
+        options: AddFilesToStagedCommand.Options,
+    ): AddFilesToStagedCommand
 
     suspend fun getHashObjectCommand(directory: Path, options: HashObjectCommand.Options): String
 
