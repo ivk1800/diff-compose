@@ -20,4 +20,5 @@ include("vcs:api")
 include("vcs:git")
 include("selected-list")
 include("database")
+include("logger:api")
 

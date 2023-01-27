@@ -34,6 +34,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.coroutines.swing)
                 implementation(compose.desktop.currentOs)
+                implementation(project(":logger:api"))
                 implementation(project(":database"))
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))

@@ -2,6 +2,7 @@ package ru.ivk1800.vcs.git
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ru.ivk1800.diff.logging.Logger
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.api.VcsDiff
 import ru.ivk1800.vcs.api.VcsException
@@ -46,7 +47,9 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
-class GitVcs : Vcs {
+class GitVcs(
+    private val logger: Logger,
+) : Vcs {
     private val showParser = GitShowParser()
     private val gitStatusParser = GitStatusParser()
     private val diffParser = VcsDiffParser()

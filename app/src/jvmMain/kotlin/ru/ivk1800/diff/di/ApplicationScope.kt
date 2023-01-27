@@ -17,7 +17,17 @@ class ApplicationScope {
         WindowsManager()
     }
 
-    private val vcs: Vcs by lazy { GitVcs() }
+    private val vcsLogger: Logger by lazy {
+        object : Logger {
+            override fun e(error: Throwable, tag: String, message: String?) {
+            }
+
+            override fun d(tag: String, message: String) {
+            }
+        }
+    }
+
+    private val vcs: Vcs by lazy { GitVcs(vcsLogger) }
 
     val bookmarksWindowFactory: BookmarksWindowFactory by lazy {
         BookmarksWindowFactory(
