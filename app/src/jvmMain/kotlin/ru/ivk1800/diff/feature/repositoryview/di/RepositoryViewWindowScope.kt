@@ -85,7 +85,6 @@ class RepositoryViewWindowScope(
     private val diffInfoManager by lazy {
         DiffInfoManager(
             diffRepository = diffRepository,
-            commitsRepository = commitsRepository,
             diffInfoItemMapper = DiffInfoItemMapper(),
             errorTransformer = errorTransformer,
         )

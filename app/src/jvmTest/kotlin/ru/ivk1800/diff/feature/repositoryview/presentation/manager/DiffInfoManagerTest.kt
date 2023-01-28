@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
-import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.DiffInfoItemMapper
@@ -27,9 +26,6 @@ class DiffInfoManagerTest {
 
     @RelaxedMockK
     lateinit var mockDiffRepository: DiffRepository
-
-    @RelaxedMockK
-    lateinit var mockCommitsRepository: CommitsRepository
 
     @RelaxedMockK
     lateinit var mockDiffInfoItemMapper: DiffInfoItemMapper
@@ -110,7 +106,6 @@ class DiffInfoManagerTest {
 
             return DiffInfoManager(
                 diffRepository = mockDiffRepository,
-                commitsRepository = mockCommitsRepository,
                 diffInfoItemMapper = mockDiffInfoItemMapper,
                 errorTransformer = mockErrorTransformer,
                 context = requireNotNull(context)

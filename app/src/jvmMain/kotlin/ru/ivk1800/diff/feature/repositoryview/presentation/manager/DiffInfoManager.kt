@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import ru.ivk1800.diff.feature.repositoryview.domain.CommitsRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.presentation.mapper.DiffInfoItemMapper
@@ -32,7 +31,6 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiffInfoManager internal constructor(
     private val diffRepository: DiffRepository,
-    private val commitsRepository: CommitsRepository,
     private val diffInfoItemMapper: DiffInfoItemMapper,
     private val errorTransformer: ErrorTransformer,
     context: CoroutineContext,
@@ -50,12 +48,10 @@ class DiffInfoManager internal constructor(
 
     constructor(
         diffRepository: DiffRepository,
-        commitsRepository: CommitsRepository,
         diffInfoItemMapper: DiffInfoItemMapper,
         errorTransformer: ErrorTransformer,
     ) : this(
         diffRepository,
-        commitsRepository,
         diffInfoItemMapper,
         errorTransformer,
         Dispatchers.Main,
@@ -124,12 +120,8 @@ class DiffInfoManager internal constructor(
     private fun handleFileSelectedEvent(event: Event.FileSelected): Flow<DiffInfoState> =
         combine(
             flow {
-                val commit = requireNotNull(
-                    commitsRepository.getCommit(event.commitHash)
-                )
-
                 val diff = diffRepository.getDiff(
-                    oldCommitHash = requireNotNull(commit.parents.firstOrNull()),
+                    oldCommitHash = "${event.commitHash}^",
                     newCommitHash = event.commitHash,
                     filePath = event.path,
                 )
