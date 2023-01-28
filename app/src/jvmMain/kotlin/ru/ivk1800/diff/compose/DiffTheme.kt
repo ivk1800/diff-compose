@@ -39,6 +39,7 @@ class CommitFileThemeData(
     modifiedColor: Color,
     addedColor: Color,
     renamedColor: Color,
+    copiedColor: Color,
     deletedColor: Color,
     textColor: Color,
 ) {
@@ -51,6 +52,9 @@ class CommitFileThemeData(
     var renamedColor by mutableStateOf(renamedColor)
         internal set
 
+    var copiedColor by mutableStateOf(copiedColor)
+        internal set
+
     var deletedColor by mutableStateOf(deletedColor)
         internal set
 
@@ -61,12 +65,14 @@ class CommitFileThemeData(
         modifiedColor: Color = this.modifiedColor,
         addedColor: Color = this.addedColor,
         renamedColor: Color = this.renamedColor,
+        copiedColor: Color = this.copiedColor,
         deletedColor: Color = this.deletedColor,
         textColor: Color = this.textColor,
     ) = CommitFileThemeData(
         modifiedColor,
         addedColor,
         renamedColor,
+        copiedColor,
         deletedColor,
         textColor,
     )
@@ -109,6 +115,7 @@ fun lightCommitFileTheme() =
         modifiedColor = Color(0xFFf1940b),
         addedColor = Color(0xFF4fad08),
         renamedColor = Color(0xFF418df6),
+        copiedColor = Color(0xFF418df6),
         deletedColor = Color(0xFFeb594e),
         textColor = Color.White,
     )
@@ -118,6 +125,7 @@ fun darkCommitFileTheme() =
         modifiedColor = Color(0xFFf1940b),
         addedColor = Color(0xFF4fad08),
         renamedColor = Color(0xFF418df6),
+        copiedColor = Color(0xFF418df6),
         deletedColor = Color(0xFFeb594e),
         textColor = Color.Black,
     )

@@ -11,7 +11,6 @@
     <string name="unstage_lines">Unstage lines</string>
     <string name="uncommitted_changes">Uncommitted changes</string>
     <string name="staged_files">Staged files</string>
-    <string name="staged_files">Staged files</string>
     <string name="unstaged_files">Unstaged files</string>
     <string name="unstage_all">Unstage all</string>
     <string name="unstage_selected">Unstage selected</string>

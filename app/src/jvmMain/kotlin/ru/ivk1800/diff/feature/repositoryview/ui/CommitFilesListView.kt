@@ -86,7 +86,7 @@ private fun CommitFileItemView(
                     CommitFileItem.Type.Added -> commitFileTheme.addedColor
                     CommitFileItem.Type.Renamed -> commitFileTheme.renamedColor
                     CommitFileItem.Type.Deleted -> commitFileTheme.deletedColor
-                    CommitFileItem.Type.Copied -> Color.Unspecified // TODO
+                    CommitFileItem.Type.Copied -> commitFileTheme.copiedColor
                 }
             ),
         contentAlignment = Alignment.Center,
