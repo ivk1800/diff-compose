@@ -107,8 +107,6 @@ class DiffInfoManager internal constructor(
         selectedLines.value = lines
     }
 
-    fun getDiffId(): String? = rawDiff?.newId
-
     fun getHunk(id: DiffInfoItem.Id.Hunk): Diff.Hunk? {
         return rawDiff?.hunks?.get(id.number - 1)
     }

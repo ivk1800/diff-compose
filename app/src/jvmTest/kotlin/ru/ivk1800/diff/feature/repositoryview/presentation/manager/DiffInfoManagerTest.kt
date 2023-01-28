@@ -43,8 +43,6 @@ class DiffInfoManagerTest {
         val sut = sut {
             stagedFileDiff = Diff(
                 filePath = "",
-                oldId = "",
-                newId = "",
                 hunks = persistentListOf(),
                 changeType = ChangeType.Modify,
             )
@@ -66,8 +64,6 @@ class DiffInfoManagerTest {
         val sut = sut {
             stagedFileDiff = Diff(
                 filePath = "",
-                oldId = "",
-                newId = "",
                 hunks = persistentListOf(),
                 changeType = ChangeType.Modify,
             )

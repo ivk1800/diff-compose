@@ -46,18 +46,6 @@ class DiffRepository(
                 is VcsDiff.Modified -> diff.fileName
                 is VcsDiff.Moved -> diff.renameTo
             },
-            oldId = when (diff) {
-                is VcsDiff.Added -> diff.oldId
-                is VcsDiff.Deleted -> diff.oldId
-                is VcsDiff.Modified -> diff.oldId
-                is VcsDiff.Moved -> diff.oldId
-            },
-            newId = when (diff) {
-                is VcsDiff.Added -> diff.newId
-                is VcsDiff.Deleted -> diff.newId
-                is VcsDiff.Modified -> diff.newId
-                is VcsDiff.Moved -> diff.newId
-            },
             hunks = diff.hunks.map { hunk ->
                 Diff.Hunk(
                     firstRange = hunk.firstRange,

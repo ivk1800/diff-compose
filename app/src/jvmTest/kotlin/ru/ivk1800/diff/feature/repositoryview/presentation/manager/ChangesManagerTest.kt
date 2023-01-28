@@ -45,8 +45,6 @@ class ChangesManagerTest {
             )
             fileDiff = Diff(
                 filePath = "",
-                oldId = "",
-                newId = "",
                 hunks = listOf(
                     Diff.Hunk(
                         firstRange = IntRange(1, 4),
@@ -125,8 +123,6 @@ class ChangesManagerTest {
             )
             fileDiff = Diff(
                 filePath = "",
-                oldId = "",
-                newId = "",
                 hunks = listOf(
                     Diff.Hunk(
                         firstRange = IntRange(1, 4),
@@ -205,8 +201,6 @@ class ChangesManagerTest {
             )
             fileDiff = Diff(
                 filePath = "",
-                oldId = "",
-                newId = "",
                 hunks = listOf(
                     Diff.Hunk(
                         firstRange = IntRange(1, 4),

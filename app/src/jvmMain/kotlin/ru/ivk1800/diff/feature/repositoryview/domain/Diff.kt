@@ -2,8 +2,6 @@ package ru.ivk1800.diff.feature.repositoryview.domain
 
 data class Diff(
     val filePath: String,
-    val oldId: String,
-    val newId: String,
     val hunks: List<Hunk>,
     val changeType: ChangeType,
 ) {
