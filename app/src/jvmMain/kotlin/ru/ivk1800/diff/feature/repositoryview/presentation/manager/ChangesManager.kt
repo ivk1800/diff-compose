@@ -1,10 +1,10 @@
 package ru.ivk1800.diff.feature.repositoryview.presentation.manager
 
+import ru.ivk1800.diff.exception.PerformActionException
 import ru.ivk1800.diff.feature.repositoryview.domain.ChangesRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.Diff
 import ru.ivk1800.diff.feature.repositoryview.domain.DiffRepository
 import ru.ivk1800.diff.feature.repositoryview.domain.FileRepository
-import ru.ivk1800.vcs.api.VcsException
 
 // TODO: move from presentation folder
 class ChangesManager(
@@ -18,10 +18,9 @@ class ChangesManager(
             Result.success(removeFromIndexInternal(fileName, hunk))
         } catch (error: Throwable) {
             Result.failure(
-                // TODO
-                VcsException.ParseException(
+                PerformActionException(
                     message = "An error occurred while remove hunk from index",
-                    cause = error
+                    cause = error,
                 )
             )
         }
@@ -31,8 +30,7 @@ class ChangesManager(
             Result.success(addToIndexInternal(fileName, hunk))
         } catch (error: Throwable) {
             Result.failure(
-                // TODO
-                VcsException.ParseException(
+                PerformActionException(
                     message = "An error occurred while add hunk to index",
                     cause = error,
                 )
@@ -44,8 +42,7 @@ class ChangesManager(
             Result.success(discardInternal(fileName, hunk))
         } catch (error: Throwable) {
             Result.failure(
-                // TODO
-                VcsException.ParseException(
+                PerformActionException(
                     message = "An error occurred while discard hunk",
                     cause = error,
                 )
