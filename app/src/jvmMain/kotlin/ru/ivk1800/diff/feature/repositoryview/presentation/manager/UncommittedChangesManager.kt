@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import ru.ivk1800.diff.ext.catchContinue
 import ru.ivk1800.diff.ext.onFirst
@@ -249,6 +250,12 @@ class UncommittedChangesManager internal constructor(
                 emit(null)
             }
         }
+            .onStart {
+                _state.value = _state.value.tryCopyWithVcsProcess(
+                    stagedVcsProcess = false,
+                    unstagedVcsProcess = true,
+                )
+            }
             .flatMapLatest { indexForSelection ->
                 checkInternalFlow()
                     .onFirst {
@@ -276,6 +283,12 @@ class UncommittedChangesManager internal constructor(
                 emit(null)
             }
         }
+            .onStart {
+                _state.value = _state.value.tryCopyWithVcsProcess(
+                    stagedVcsProcess = true,
+                    unstagedVcsProcess = false,
+                )
+            }
             .flatMapLatest { indexForSelection ->
                 checkInternalFlow()
                     .onFirst {
