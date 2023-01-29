@@ -13,15 +13,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ru.ivk1800.diff.ext.catchContinue
 import ru.ivk1800.diff.ext.onFirst
 import ru.ivk1800.diff.feature.repositoryview.domain.ChangeType
 import ru.ivk1800.diff.feature.repositoryview.domain.CommitFile
@@ -64,7 +63,7 @@ class UncommittedChangesManager internal constructor(
 
     constructor(
         statusRepository: StatusRepository,
-        uncommittedRepository: UncommittedRepository
+        uncommittedRepository: UncommittedRepository,
     ) : this(
         statusRepository,
         uncommittedRepository,
@@ -114,10 +113,9 @@ class UncommittedChangesManager internal constructor(
 
                     is Event.RemoveFilesFromStaged -> handleRemoveFilesFromStagedFlow(event)
                 }
-                    .catch {
-                        emit(UncommittedChangesState.None)
-                        it.printStackTrace()
+                    .catchContinue {
                         errorsFlow.emit(it)
+                        checkInternalFlow()
                     }
             }
             .onEach { newState ->
