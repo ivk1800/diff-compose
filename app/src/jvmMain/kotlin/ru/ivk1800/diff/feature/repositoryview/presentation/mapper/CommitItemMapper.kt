@@ -17,7 +17,7 @@ class CommitItemMapper {
         return CommitTableItem.Commit(
             id = CommitId(commit.hash.value),
             description = commit.message.trim().lines().first(),
-            commit = commit.hash.abbreviated,
+            commit = commit.hash.abbreviated.takeIf { it.isNotBlank() } ?: commit.hash.value,
             author = buildString {
                 append(commit.authorName)
                 if (commit.authorEmail.isNotEmpty()) {
