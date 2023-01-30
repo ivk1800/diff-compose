@@ -9,4 +9,6 @@ interface RepositoryViewRouter {
     fun toFinder(directory: File)
 
     fun close(id: RepositoryId)
+
+    fun toPreferences()
 }

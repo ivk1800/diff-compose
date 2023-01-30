@@ -3,6 +3,9 @@ package ru.ivk1800.diff.di
 import ru.ivk1800.diff.application.ApplicationThemeProvider
 import ru.ivk1800.diff.feature.bookmarks.BookmarksWindowDependencies
 import ru.ivk1800.diff.feature.bookmarks.BookmarksWindowFactory
+import ru.ivk1800.diff.feature.preferences.PreferencesDependencies
+import ru.ivk1800.diff.feature.preferences.PreferencesWindowFactory
+import ru.ivk1800.diff.feature.preferences.presentation.PreferencesRouter
 import ru.ivk1800.diff.feature.repositoryview.RepositoryViewDependencies
 import ru.ivk1800.diff.feature.repositoryview.RepositoryViewWindowFactory
 import ru.ivk1800.diff.logging.Logger
@@ -35,6 +38,16 @@ class ApplicationScope {
                 router = BookmarksRouterImpl(windowsManager),
                 vcs = vcs,
             ),
+        )
+    }
+
+    val preferencesWindowFactory: PreferencesWindowFactory by lazy {
+        PreferencesWindowFactory(
+            dependencies = PreferencesDependencies(
+                router = object : PreferencesRouter {
+                    override fun close() = windowsManager.closePreferencesWindow()
+                }
+            )
         )
     }
 

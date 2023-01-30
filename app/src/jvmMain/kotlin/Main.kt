@@ -33,6 +33,7 @@ private fun runDiffApplication() {
             when (window) {
                 WindowsManager.Window.Bookmarks -> applicationScope.bookmarksWindowFactory.create()
                 is WindowsManager.Window.Repository -> applicationScope.repositoryViewWindowFactory.create(window.id)
+                WindowsManager.Window.Preferences -> applicationScope.preferencesWindowFactory.create()
             }
         }
     }

@@ -10,6 +10,7 @@ import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
@@ -38,6 +39,15 @@ fun RepositoryViewWindow() {
         onCloseRequest = { scope.router.close(scope.id) },
         onKeyEvent = keyEventDelegate::onKeyEvent,
     ) {
+
+        MenuBar {
+            Menu("Preferences") {
+                Item(
+                    "Preferences",
+                    onClick = scope.router::toPreferences,
+                )
+            }
+        }
 
         val state by viewModel.state.collectAsState()
         RepositoryView(

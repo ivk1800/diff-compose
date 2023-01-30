@@ -24,4 +24,6 @@ class RepositoryViewRouterImpl(
     override fun close(id: RepositoryId) {
         windowsManager.closeRepositoryWindow(id)
     }
+
+    override fun toPreferences() = windowsManager.openPreferencesWindowIfAbsent()
 }
