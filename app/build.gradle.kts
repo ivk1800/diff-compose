@@ -62,6 +62,10 @@ compose.desktop {
             packageName = "diff"
             packageVersion = "1.0.0"
         }
+        buildTypes.release.proguard {
+            obfuscate.set(true)
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
     }
 }
 
