@@ -51,6 +51,7 @@ class ApplicationScope {
     val preferencesWindowFactory: PreferencesWindowFactory by lazy {
         PreferencesWindowFactory(
             dependencies = PreferencesDependencies(
+                themeProvider = applicationThemeProvider,
                 router = object : PreferencesRouter {
                     override fun close() = windowsManager.closePreferencesWindow()
                 }

@@ -11,7 +11,9 @@ class PreferencesWindowScope(
         get() = dependencies.router
 
     val preferencesViewModel: PreferencesViewModel by lazy {
-        PreferencesViewModel()
+        PreferencesViewModel(
+            themeProvider = dependencies.themeProvider,
+        )
     }
 
     fun dispose() {
