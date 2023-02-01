@@ -14,6 +14,7 @@ import ru.ivk1800.diff.navigation.RepositoryViewRouterImpl
 import ru.ivk1800.diff.window.WindowsManager
 import ru.ivk1800.vcs.api.Vcs
 import ru.ivk1800.vcs.git.GitVcs
+import ru.ivk1800.vcs.logged.LoggedVcs
 
 class ApplicationScope {
     val windowsManager: WindowsManager by lazy {
@@ -30,7 +31,13 @@ class ApplicationScope {
         }
     }
 
-    private val vcs: Vcs by lazy { GitVcs(vcsLogger) }
+    private val loggedVcs: LoggedVcs by lazy {
+        LoggedVcs(
+            target = GitVcs(vcsLogger),
+        )
+    }
+
+    private val vcs: Vcs by lazy { loggedVcs }
 
     val bookmarksWindowFactory: BookmarksWindowFactory by lazy {
         BookmarksWindowFactory(
@@ -55,7 +62,7 @@ class ApplicationScope {
         RepositoryViewWindowFactory(
             dependencies = RepositoryViewDependencies(
                 router = RepositoryViewRouterImpl(windowsManager),
-                vcs = vcs,
+                vcs = loggedVcs,
                 logger = object : Logger {
                     override fun e(error: Throwable, tag: String, message: String?) {
                         println(

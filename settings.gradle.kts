@@ -18,6 +18,7 @@ rootProject.name = "diff"
 include("app")
 include("vcs:api")
 include("vcs:git")
+include("vcs:logged-vcs")
 include("selected-list")
 include("database")
 include("logger:api")

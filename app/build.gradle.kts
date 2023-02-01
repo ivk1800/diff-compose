@@ -38,6 +38,7 @@ kotlin {
                 implementation(project(":database"))
                 implementation(project(":vcs:api"))
                 implementation(project(":vcs:git"))
+                implementation(project(":vcs:logged-vcs"))
                 implementation(project(":selected-list"))
                 implementation(compose.material)
             }
